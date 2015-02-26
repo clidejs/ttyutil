@@ -1,0 +1,29 @@
+{
+  "name": "ttyutil",
+  "version": "1.0.0",
+  "description": "cross-platform terminal utilities",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/clidejs/ttyutil"
+  },
+  "keywords": [
+    "syntax",
+    "highlight",
+    "clide"
+  ],
+  "gyp-file": true,
+  "author": "Bernhard Bücherl <bernhard.buecherl@gmail.com>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/clidejs/ttyutil/issues"
+  },
+  "homepage": "https://github.com/clidejs/ttyutil",
+  "dependencies": {
+    "keypress": "^0.2.1",
+    "nan": "^1.6.1"
+  }
+}

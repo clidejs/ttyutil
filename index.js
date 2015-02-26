@@ -1,7 +1,7 @@
 var TTYUtil;
 
 if(process.platform === "win32") {
-    TTYUtil = require("./build/Release/tty");
+    TTYUtil = require("./lib/wintty");
 } else {
     // TODO implement this in c++ to improve performance? gpm or ncurses?
     TTYUtil = require("./lib/xterm-vt102");
@@ -21,5 +21,4 @@ if(process.platform === "win32") {
     // TODO check for VT102
     TTYUtil.mode = TTYUtil.MODE.VT100;
 }
-
 module.exports = TTYUtil;

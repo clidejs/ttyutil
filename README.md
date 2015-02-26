@@ -18,7 +18,7 @@ TODO:
  - add configuration options
  - add listeners for resize and other events
 
-### Event ###
+### Events ###
 Description of the event object properties which the callback is called with:
 
  - `type`: {String} "key" when a key event has occured, "mouse" when a mouse event has occured (see TTYUtil.TYPE)
@@ -27,7 +27,8 @@ Mouse events:
  - `action`: {int} mouse event action id (see TTYUtil.MOUSE)
  - `x`: {int} x-coordinate of the terminal stream, where the mouse event occured
  - `y`: {int} y-coordinate of the terminal stream, where the mouse event occured
- - `scroll`: {int} scroll amount of the mouse event
+ - `scrollx`: {int} scroll amount of the mouse event in x-axis
+ - `scrolly`: {int} scroll amount of the mouse event in y-axis
  - `button`: {int} button id (see TTYUtil.BUTTON)
  - `state`: {int} control keys that where active when the event occured (see TTYUtil.STATE)
 

@@ -85,18 +85,6 @@ void TTYInputWorker::HandleProgressCallback(const char *data, size_t size) {
     strncpy(out, data, size);
     out[size] = '\0';
 
-    Local<String> type;
-
-    if(out[0] == 'k') {
-        type = NanNew<String>("key");
-    } else {
-        type = NanNew<String>("mouse");
-
-        // only listen for mouse-press
-        if(out[3] == '0') {
-
-        }
-    }
     Local<Value> argv[] = {
         NanNew<String>(out)
     };

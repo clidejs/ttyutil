@@ -8,14 +8,13 @@ currently under development
 Implemented:
  - Mousepress support (VT102 Terminals (e.g. iTerm2), Windows cmd.exe)
  - Keypress support (VT100 Terminals (e.g. xterm, iTerm2, Terminal.app,..), Windows cmd.exe)
+ - output functions, cursor movement functions and coloring
 
 TODO:
  - Mousepress support for VT100 Terminals (via ncurses or gpm?)
  - Replace keypress module with c++ binding to improve performance (posix systems)
- - add output functions, cursor movement functions and coloring
  - add documentation
  - support other tty-streams than process.stdin and process.stdout ?
- - add configuration options
  - add listeners for resize and other events
 
 ### Events ###

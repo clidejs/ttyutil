@@ -22,3 +22,6 @@ if(process.platform === "win32") {
     TTYUtil.mode = TTYUtil.MODE.VT100;
 }
 module.exports = TTYUtil;
+
+// add output modifiers
+require("./lib/output")(TTYUtil);

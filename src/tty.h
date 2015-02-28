@@ -4,7 +4,8 @@
 #include <node.h>
 #include <nan.h>
 
-#include "input/ttyinputworker.h"
+#include "headers/ttyinputworker.h"
+#include "headers/ttyoutpututil.h"
 
 using namespace v8;
 

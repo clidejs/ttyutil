@@ -14,11 +14,11 @@
                         "PLATFORM_WINDOWS"
                     ],
                     "sources": [
-                        "src/input/ttyinputworker-win.cc"
+                        "src/impl/win.cc"
                     ]
                 }, { # "OS!='win"
                     "sources": [
-                        "src/input/ttyinputworker-unix.cc"
+                        "src/impl/unix.cc"
                     ]
                 }]
             ]

@@ -77,4 +77,14 @@ void TTYInputWorker::Execute(const NanAsyncProgressWorker::ExecutionProgress& pr
     return;
 };
 
+int GetMouseType(DWORD flags, DWORD button) {
+
+    return 0;
+};
+
+int GetCtrlCodes(DWORD state) {
+
+    return 0;
+};
+
 #endif // PLATFORM_WINDOWS

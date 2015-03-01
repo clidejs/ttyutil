@@ -17,9 +17,17 @@
                         "src/impl/win.cc"
                     ]
                 }, { # "OS!='win"
+                    "libraries": [
+                        "-lcurses" # add ncurses compiler flag
+                    ],
                     "sources": [
                         "src/impl/unix.cc"
                     ]
+                }],
+                ["OS=='mac'", {
+                    "xcode_settings": {
+                        "GCC_ENABLE_CPP_RTTI": "YES"
+                    }
                 }]
             ]
         }

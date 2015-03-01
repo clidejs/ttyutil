@@ -21,15 +21,10 @@ NAN_METHOD(TTYUtil::New) {
     NanScope();
 
     if(!args[0]->IsFunction()) {
-        NanThrowTypeError("first argument must be an error callback function");
+        NanThrowTypeError("first argument must be an event callback function");
     }
-    if(!args[1]->IsFunction()) {
-        NanThrowTypeError("second argument must be an event callback function");
-    }
-    // TODO args[2] and args[3] are input stream and output stream
 
-
-    TTYUtil* obj = new TTYUtil(new NanCallback(args[0].As<Function>()), new NanCallback(args[1].As<Function>()));
+    TTYUtil* obj = new TTYUtil(new NanCallback(args[0].As<Function>()));
     obj->Wrap(args.This());
     NanReturnThis();
 }
@@ -39,8 +34,7 @@ NAN_METHOD(TTYUtil::Start) {
     TTYUtil* obj = ObjectWrap::Unwrap<TTYUtil>(args.This());
     if(!obj->running_) {
         obj->running_ = true;
-        TTYInputWorker *w = new TTYInputWorker(obj->error_,
-            obj->event_);
+        TTYInputWorker *w = new TTYInputWorker(obj->event_);
         NanAsyncQueueWorker(w);
         obj->worker_ = w;
     }

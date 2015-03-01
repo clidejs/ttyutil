@@ -13,7 +13,7 @@ class TTYUtil : public node::ObjectWrap {
 public:
     static void Init(Handle<Object> target);
 private:
-    explicit TTYUtil(NanCallback *error, NanCallback *event) : error_(error), event_(event), running_(false) {};
+    explicit TTYUtil(NanCallback *event) : event_(event), running_(false) {};
     ~TTYUtil() {
         delete event_;
         delete worker_;
@@ -24,7 +24,6 @@ private:
     static NAN_METHOD(Stop);
     static NAN_GETTER(IsRunning);
 
-    NanCallback *error_;
     NanCallback *event_;
     bool running_;
     TTYInputWorker *worker_;

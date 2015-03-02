@@ -28,7 +28,6 @@ public:
         ExecutionProgress(ExecutionProgress&&) = delete;
         void operator=(ExecutionProgress&&) = delete;
 #endif
-
         TTYInputWorker* const that_;
     };
 
@@ -127,7 +126,7 @@ private:
         worker->WorkProgress();
     };
 
-     NAN_INLINE static void AsyncClose_(uv_handle_t* handle) {
+    NAN_INLINE static void AsyncClose_(uv_handle_t* handle) {
         TTYInputWorker *worker = static_cast<TTYInputWorker*>(handle->data);
         delete reinterpret_cast<uv_async_t*>(handle);
         delete worker;

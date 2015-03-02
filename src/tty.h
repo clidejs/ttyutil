@@ -5,7 +5,6 @@
 #include <nan.h>
 
 #include "headers/ttyinputworker.h"
-#include "headers/ttyoutpututil.h"
 
 using namespace v8;
 

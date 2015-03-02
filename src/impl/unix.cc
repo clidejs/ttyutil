@@ -13,6 +13,7 @@ void TTYInputWorker::Execute(const ExecutionProgress& progress) {
     int ctrl = CTRL_NULL;
     MEVENT event;
     ttyutil_mouse *ev;
+    char ch;
 
     initscr();
     noecho();
@@ -24,7 +25,7 @@ void TTYInputWorker::Execute(const ExecutionProgress& progress) {
         c = getch();
 
         if(c == ERR) {
-            // no event occured
+            goto end;
         } else if(c == KEY_MOUSE) {
             if(getmouse(&event) == OK) {
                 // mouse event
@@ -77,18 +78,19 @@ void TTYInputWorker::Execute(const ExecutionProgress& progress) {
                 progress.Send(const_cast<const ttyutil_event*>(ttyutil_event_create(EVENT_MOUSE, ev)));
             } else { /* bad one */ }
         } else if(c == KEY_RESIZE) {
-            // TODO handle resize events
+            progress.Send(const_cast<const ttyutil_event*>(ttyutil_event_create(EVENT_RESIZE, NULL)));
         } else {
             // key event
+            ch = *const_cast<char *>(keyname(c));
 
             // TODO save ctrl character codes
             // ctrl =
 
-            progress.Send(const_cast<const ttyutil_event*>(ttyutil_event_create(EVENT_KEY, ttyutil_key_create(ctrl, (char) c, c))));
+            progress.Send(const_cast<const ttyutil_event*>(ttyutil_event_create(EVENT_KEY, ttyutil_key_create(ctrl, ch, c))));
         }
-
         goto read;
-    return;
-};
 
+    end:
+        return;
+};
 #endif // !PLATFORM_WINDOWS

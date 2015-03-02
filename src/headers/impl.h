@@ -59,6 +59,9 @@ ttyutil_event* ttyutil_event_create(int type, void *ptr) {
         case EVENT_KEY:
             event->key = (struct ttyutil_key *) ptr;
             break;
+        case EVENT_RESIZE:
+            // everything is already initialized correctly
+            break;
         default:
             event->type = EVENT_UNDEF;
             break;

@@ -7,6 +7,8 @@
 #include "../headers/key.h"
 #include "../headers/ctrl.h"
 
+#define INPUT_BUFFER_SIZE 128
+
 int GetMouseAction(DWORD flags, DWORD button);
 int GetCtrlCodes(DWORD state);
 
@@ -16,8 +18,9 @@ void TTYInputWorker::Execute(const ExecutionProgress& progress) {
     DWORD old_mode;
     DWORD new_mode;
     DWORD readed;
-    INPUT_RECORD ir[1];
+    INPUT_RECORD ir[INPUT_BUFFER_SIZE];
     CONSOLE_SCREEN_BUFFER_INFO conInfo;
+    DWORD i;
 
     // get stdio handles
     hIn = GetStdHandle(STD_INPUT_HANDLE);
@@ -29,33 +32,34 @@ void TTYInputWorker::Execute(const ExecutionProgress& progress) {
 
     // set necessary console mode
     GetConsoleMode(hIn, &old_mode);
-    new_mode =
-        ((old_mode | ENABLE_MOUSE_INPUT | ENABLE_EXTENDED_FLAGS | ENABLE_PROCESSED_INPUT) &
-        ~(ENABLE_QUICK_EDIT_MODE));
+    new_mode = ((old_mode | ENABLE_MOUSE_INPUT | ENABLE_EXTENDED_FLAGS | ENABLE_PROCESSED_INPUT | ENABLE_WINDOW_INPUT) & ~(ENABLE_QUICK_EDIT_MODE));
     SetConsoleMode(hIn, new_mode);
 
     // read loop
     read:
-        ReadConsoleInput(hIn, ir, 1, &readed);
-        if(MOUSE_EVENT == ir[0].EventType) {
+        ReadConsoleInput(hIn, ir, INPUT_BUFFER_SIZE, &readed);
+
+        for(i = 0; i < readed; ++i) {
             if(!GetConsoleScreenBufferInfo(hOut, &conInfo)) {
                 SetErrorMessage("could not read screen buffer info");
                 return;
             }
 
-            progress.Send(const_cast<const ttyutil_event*>(ttyutil_event_create(EVENT_MOUSE, ttyutil_mouse_create(
-                (int)ir[0].Event.MouseEvent.dwButtonState,
-                (int)ir[0].Event.MouseEvent.dwMousePosition.X,
-                (int)ir[0].Event.MouseEvent.dwMousePosition.Y - (int)conInfo.srWindow.Top,
-                GetMouseAction(ir[0].Event.MouseEvent.dwEventFlags, ir[0].Event.MouseEvent.dwButtonState),
-                GetCtrlCodes(ir[0].Event.MouseEvent.dwControlKeyState)
-            ))));
-        } else if(KEY_EVENT == ir[0].EventType) {
-            progress.Send(const_cast<const ttyutil_event*>(ttyutil_event_create(EVENT_KEY, ttyutil_key_create(
-                GetCtrlCodes(ir[0].Event.KeyEvent.dwControlKeyState),
-                (char)ir[0].Event.KeyEvent.uChar.UnicodeChar,
-                (int)ir[0].Event.KeyEvent.wVirtualKeyCode
-            ))));
+            if(MOUSE_EVENT == ir[i].EventType) {
+                progress.Send(const_cast<const ttyutil_event*>(ttyutil_event_create(EVENT_MOUSE, ttyutil_mouse_create(
+                    (int)ir[i].Event.MouseEvent.dwButtonState,
+                    (int)ir[i].Event.MouseEvent.dwMousePosition.X,
+                    (int)ir[i].Event.MouseEvent.dwMousePosition.Y - (int)conInfo.srWindow.Top,
+                    GetMouseAction(ir[i].Event.MouseEvent.dwEventFlags, ir[i].Event.MouseEvent.dwButtonState),
+                    GetCtrlCodes(ir[i].Event.MouseEvent.dwControlKeyState)))));
+            } else if(KEY_EVENT == ir[i].EventType) {
+                progress.Send(const_cast<const ttyutil_event*>(ttyutil_event_create(EVENT_KEY, ttyutil_key_create(
+                    GetCtrlCodes(ir[i].Event.KeyEvent.dwControlKeyState),
+                    (char)ir[i].Event.KeyEvent.uChar.UnicodeChar,
+                    (int)ir[i].Event.KeyEvent.wVirtualKeyCode))));
+            } else if(WINDOW_BUFFER_SIZE_EVENT == ir[i].EventType) {
+                progress.Send(const_cast<const ttyutil_event*>(ttyutil_event_create(EVENT_RESIZE, NULL)));
+            }
         }
         goto read;
 

@@ -65,31 +65,38 @@ public:
         NanScope();
 
         if(event->type == EVENT_MOUSE) {
-                Local<Value> argv[] = {
-                    NanNull(),
-                    NanNew<Integer>(event->type),
-                    NanNew<Integer>(event->mouse->button),
-                    NanNew<Integer>(event->mouse->x),
-                    NanNew<Integer>(event->mouse->y),
-                    NanNew<Integer>(event->mouse->action),
-                    NanNew<Integer>(event->mouse->ctrl)
-                };
+            Local<Value> argv[] = {
+                NanNull(),
+                NanNew<Integer>(event->type),
+                NanNew<Integer>(event->mouse->button),
+                NanNew<Integer>(event->mouse->x),
+                NanNew<Integer>(event->mouse->y),
+                NanNew<Integer>(event->mouse->action),
+                NanNew<Integer>(event->mouse->ctrl)
+            };
 
-                callback->Call(7, argv);
+            callback->Call(7, argv);
         } else if(event->type == EVENT_KEY) {
-                Local<Value> argv[] = {
-                    NanNull(),
-                    NanNew<Integer>(event->type),
-                    NanNew<Integer>(event->key->ctrl),
-                    NanNew<Integer>(event->key->code)
-                };
+            Local<Value> argv[] = {
+                NanNull(),
+                NanNew<Integer>(event->type),
+                NanNew<Integer>(event->key->ctrl),
+                NanNew<Integer>(event->key->code)
+            };
 
-                callback->Call(4, argv);
+            callback->Call(4, argv);
+        } else if(event->type == EVENT_RESIZE) {
+            Local<Value> argv[] = {
+                NanNull(),
+                NanNew<Integer>(event->type)
+            };
+
+            callback->Call(2, argv);
         } else {
-                Local<Value> argv[] = {
-                    NanNew<String>("unhandled event occured")
-                };
-                callback->Call(1, argv);
+            Local<Value> argv[] = {
+                NanNew<String>("unhandled event occured")
+            };
+            callback->Call(1, argv);
         }
     };
 

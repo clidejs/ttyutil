@@ -4,6 +4,7 @@
 #define EVENT_UNDEF     0x00
 #define EVENT_MOUSE     0x01
 #define EVENT_KEY       0x02
+#define EVENT_RESIZE    0x03
 
 struct ttyutil_key;
 struct ttyutil_mouse;

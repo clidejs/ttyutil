@@ -8,14 +8,17 @@ currently under development
 Implemented:
  - Mousepress support (VT102 Terminals (e.g. iTerm2), Windows cmd.exe)
  - Keypress support (VT100 Terminals (e.g. xterm, iTerm2, Terminal.app,..), Windows cmd.exe)
- - output functions, cursor movement functions and coloring
+ - Resize events (VT102 Terminals (e.g. iTerm2), Windows cmd.exe (width only))
 
 TODO:
- - Mousepress support for VT100 Terminals (via ncurses or gpm?)
- - Replace keypress module with c++ binding to improve performance (posix systems)
  - add documentation
- - support other tty-streams than process.stdin and process.stdout ?
- - add listeners for resize and other events
+ - add output functions and expose properties to the js module
+
+Future Features:
+ - Mousepress support for VT100 Terminals
+ - support other tty-streams than process.stdin and process.stdout
+
+Note: Support for mouseevents in Terminal.app could be added with SIMBL and [MouseTerm](https://github.com/brodie/mouseterm) (untested).
 
 ### Events ###
 Description of the event object properties which the callback is called with:

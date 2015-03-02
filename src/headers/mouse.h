@@ -29,4 +29,7 @@ struct ttyutil_mouse {
 #define MOUSE_ACTION_WHEELED (0x0020)
 #define MOUSE_ACTION_HWHEELED (0x0040)
 
+ttyutil_mouse* ttyutil_mouse_destroy(ttyutil_mouse *ptr);
+ttyutil_mouse* ttyutil_mouse_create(int button, int x, int y, int action, int ctrl);
+
 #endif // TTYUTIL_MOUSE_H_

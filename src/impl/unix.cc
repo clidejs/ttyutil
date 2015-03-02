@@ -1,13 +1,12 @@
 #ifndef PLATFORM_WINDOWS // so we are on unix
 
-#include "../headers/ttyinputworker.h"
+#include "../headers/impl.h"
 
 #include <stdio.h>
 #include <curses.h>
 #include <stdlib.h>
 
-#include "../headers/mouse.h"
-#include "../headers/key.h"
+#include "../headers/ttyinputworker.h"
 #include "../headers/ctrl.h"
 
 using namespace v8;
@@ -17,6 +16,7 @@ void TTYInputWorker::Execute(const ExecutionProgress& progress) {
     int c;
     int ctrl = CTRL_NULL;
     MEVENT event;
+    ttyutil_mouse *ev;
 
     initscr();
     noecho();
@@ -32,12 +32,7 @@ void TTYInputWorker::Execute(const ExecutionProgress& progress) {
         } else if(c == KEY_MOUSE) {
             if(getmouse(&event) == OK) {
                 // mouse event
-                ttyutil_mouse *ev = new ttyutil_mouse;
-                ev->button = 0;
-                ev->x = event.x;
-                ev->y = event.y;
-                ev->action = 0;
-                ev->ctrl = ctrl;
+                ev = ttyutil_mouse_create(0, event.x, event.y, 0, ctrl);
 
                 // add button control key sequences if possible
                 if(event.bstate & BUTTON_SHIFT) { ev->ctrl |= CTRL_SHIFT; }
@@ -83,34 +78,17 @@ void TTYInputWorker::Execute(const ExecutionProgress& progress) {
                 else if(event.bstate & BUTTON4_TRIPLE_CLICKED) { ev->button = MOUSE_BUTTON_RIGHT; ev->action = MOUSE_ACTION_TRICLICKED; }
 #endif
 
-                ttyutil_event *evt = new ttyutil_event;
-                evt->type = EVENT_MOUSE;
-                evt->key = NULL;
-                evt->mouse = ev;
-
-                progress.Send(const_cast<const ttyutil_event*>(evt));
+                progress.Send(const_cast<const ttyutil_event*>(ttyutil_event_create(EVENT_MOUSE, ev)));
             } else { /* bad one */ }
         } else if(c == KEY_RESIZE) {
             // TODO handle resize events
         } else {
             // key event
 
-            // save ctrl character codes
-            if(c == KEY_COMMAND) { ctrl ^= CTRL_CMD; }
-            if(c == KEY_SCOMMAND) { ctrl ^= CTRL_CMD ^ CTRL_SHIFT; }
-            // TODO there must be more about this
+            // TODO save ctrl character codes
+            // ctrl =
 
-            ttyutil_key *ev = new ttyutil_key;
-            ev->ctrl = ctrl;
-            ev->c = (char) c;
-            ev->code = c;
-
-            ttyutil_event *evt = new ttyutil_event;
-            evt->type = EVENT_KEY;
-            evt->key = ev;
-            evt->mouse = NULL;
-
-            progress.Send(const_cast<const ttyutil_event*>(evt));
+            progress.Send(const_cast<const ttyutil_event*>(ttyutil_event_create(EVENT_KEY, ttyutil_key_create(ctrl, (char) c, c))));
         }
 
         goto read;

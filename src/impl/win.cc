@@ -1,21 +1,21 @@
 #ifdef PLATFORM_WINDOWS
 
-#include "../headers/ttyinputworker.h"
+#include "../headers/impl.h"
 
-#include <windows.h>
 #include <stdio.h>
 #include <stdlib.h>
 
+#include "../headers/ttyinputworker.h"
 #include "../headers/mouse.h"
 #include "../headers/key.h"
 #include "../headers/ctrl.h"
 
 using namespace v8;
 
-int GetMouseType(DWORD flags, DWORD button);
+int GetMouseAction(DWORD flags, DWORD button);
 int GetCtrlCodes(DWORD state);
 
-void TTYInputWorker::Execute(const NanAsyncProgressWorker::ExecutionProgress& progress) {
+void TTYInputWorker::Execute(const ExecutionProgress& progress) {
     HANDLE hIn;
     HANDLE hOut;
     DWORD old_mode;
@@ -53,38 +53,34 @@ void TTYInputWorker::Execute(const NanAsyncProgressWorker::ExecutionProgress& pr
             }
             windowSize = conInfo.srWindow;
 
-            ttyutil_mouse ev = {
+            progress.Send(const_cast<const ttyutil_event*>(ttyutil_event_create(EVENT_MOUSE, ttyutil_mouse_create(
                 (int)ir[0].Event.MouseEvent.dwButtonState,
                 (int)ir[0].Event.MouseEvent.dwMousePosition.X,
                 (int)ir[0].Event.MouseEvent.dwMousePosition.Y - (int)windowSize.Top,
-                GetMouseType(ir[0].Event.MouseEvent.dwEventFlags, ir[0].Event.MouseEvent.dwButtonState),
+                GetMouseAction(ir[0].Event.MouseEvent.dwEventFlags, ir[0].Event.MouseEvent.dwButtonState),
                 GetCtrlCodes(ir[0].Event.MouseEvent.dwControlKeyState)
-            };
-
-             // TODO do something with ev
+            ))));
         } else if(KEY_EVENT == ir[0].EventType) {
-
-            ttyutil_key ev = {
+            progress.Send(const_cast<const ttyutil_event*>(ttyutil_event_create(EVENT_KEY, ttyutil_key_create(
                 GetCtrlCodes(ir[0].Event.KeyEvent.dwControlKeyState),
                 (char)ir[0].Event.KeyEvent.uChar.UnicodeChar,
                 (int)ir[0].Event.KeyEvent.wVirtualKeyCode
-            };
-
-             // TODO do something with ev
+            ))));
         }
         goto read;
 
     return;
 };
 
-int GetMouseType(DWORD flags, DWORD button) {
-
+int GetMouseAction(DWORD flags, DWORD button) {
+    // TODO
     return 0;
 };
 
 int GetCtrlCodes(DWORD state) {
-
-    return 0;
+    int ctrl = 0;
+    // TODO
+    return ctrl;
 };
 
 #endif // PLATFORM_WINDOWS

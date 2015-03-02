@@ -6,8 +6,6 @@
 #include <nan.h>
 #include <typeinfo>
 
-#include <iostream>
-
 #include "event.h"
 #include "mouse.h"
 #include "key.h"
@@ -45,25 +43,21 @@ public:
         };
     virtual ~TTYInputWorker() {
         uv_mutex_destroy(&async_lock);
-
-        if(asyncdata_) {
-            delete asyncdata_;
-        }
+        asyncdata_ = ttyutil_event_destroy(asyncdata_);
     };
 
     void WorkProgress() {
         // get the current event
         uv_mutex_lock(&async_lock);
         ttyutil_event *event = asyncdata_;
-        if(asyncdata_) {
-            delete asyncdata_;
-        }
+        asyncdata_ = NULL;
         uv_mutex_unlock(&async_lock);
 
-        if(callback) {
+        if(callback && event) {
             HandleProgressCallback(event);
         }
-        delete event;
+
+        ttyutil_event_destroy(event);
     };
 
     void Execute(const ExecutionProgress& progress);
@@ -110,7 +104,7 @@ private:
     };
 
     void SendProgress_(const ttyutil_event *event) {
-        ttyutil_event *new_event = new ttyutil_event;
+        ttyutil_event *new_event = (struct ttyutil_event *) malloc(sizeof(struct ttyutil_event));
         memcpy(&new_event, &event, sizeof(event));
 
         uv_mutex_lock(&async_lock);
@@ -118,9 +112,7 @@ private:
         asyncdata_ = new_event;
         uv_mutex_unlock(&async_lock);
 
-        if(old_event) {
-            delete old_event;
-        }
+        old_event = ttyutil_event_destroy(old_event);
         uv_async_send(async);
     };
 

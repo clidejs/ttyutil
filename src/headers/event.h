@@ -9,9 +9,12 @@ struct ttyutil_key;
 struct ttyutil_mouse;
 
 struct ttyutil_event {
-    int type = EVENT_UNDEF;
+    int type;
     ttyutil_key *key;
     ttyutil_mouse *mouse;
 };
+
+ttyutil_event* ttyutil_event_destroy(ttyutil_event *ptr);
+ttyutil_event* ttyutil_event_create(int type, void *ptr);
 
 #endif // TTYUTIL_EVENT_H_

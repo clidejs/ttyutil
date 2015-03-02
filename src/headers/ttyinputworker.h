@@ -4,7 +4,6 @@
 #include <uv.h>
 #include <node.h>
 #include <nan.h>
-#include <typeinfo>
 
 #include "event.h"
 #include "mouse.h"

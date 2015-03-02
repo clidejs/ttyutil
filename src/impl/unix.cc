@@ -2,14 +2,10 @@
 
 #include "../headers/impl.h"
 
-#include <stdio.h>
 #include <curses.h>
-#include <stdlib.h>
 
 #include "../headers/ttyinputworker.h"
 #include "../headers/ctrl.h"
-
-using namespace v8;
 
 /* TODO any way to implement mouse tracking for VT100 Terminals (at least for Mac Terminal.app)? */
 void TTYInputWorker::Execute(const ExecutionProgress& progress) {

@@ -2,6 +2,8 @@
 #define TTYUTIL_IMPL_H_
 
 #include <node.h>
+#include <stdlib.h>
+#include <stdio.h>
 
 #include "event.h"
 #include "mouse.h"

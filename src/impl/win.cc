@@ -2,15 +2,10 @@
 
 #include "../headers/impl.h"
 
-#include <stdio.h>
-#include <stdlib.h>
-
 #include "../headers/ttyinputworker.h"
 #include "../headers/mouse.h"
 #include "../headers/key.h"
 #include "../headers/ctrl.h"
-
-using namespace v8;
 
 int GetMouseAction(DWORD flags, DWORD button);
 int GetCtrlCodes(DWORD state);
@@ -23,10 +18,6 @@ void TTYInputWorker::Execute(const ExecutionProgress& progress) {
     DWORD readed;
     INPUT_RECORD ir[1];
     CONSOLE_SCREEN_BUFFER_INFO conInfo;
-    SMALL_RECT windowSize;
-    std::string buf;
-
-    SetErrorMessage("unknown error!");
 
     // get stdio handles
     hIn = GetStdHandle(STD_INPUT_HANDLE);
@@ -51,12 +42,11 @@ void TTYInputWorker::Execute(const ExecutionProgress& progress) {
                 SetErrorMessage("could not read screen buffer info");
                 return;
             }
-            windowSize = conInfo.srWindow;
 
             progress.Send(const_cast<const ttyutil_event*>(ttyutil_event_create(EVENT_MOUSE, ttyutil_mouse_create(
                 (int)ir[0].Event.MouseEvent.dwButtonState,
                 (int)ir[0].Event.MouseEvent.dwMousePosition.X,
-                (int)ir[0].Event.MouseEvent.dwMousePosition.Y - (int)windowSize.Top,
+                (int)ir[0].Event.MouseEvent.dwMousePosition.Y - (int)conInfo.srWindow.Top,
                 GetMouseAction(ir[0].Event.MouseEvent.dwEventFlags, ir[0].Event.MouseEvent.dwButtonState),
                 GetCtrlCodes(ir[0].Event.MouseEvent.dwControlKeyState)
             ))));
@@ -73,13 +63,25 @@ void TTYInputWorker::Execute(const ExecutionProgress& progress) {
 };
 
 int GetMouseAction(DWORD flags, DWORD button) {
-    // TODO
+    int action = 0;
+    if(button == 0 && flags == 0) { action = MOUSE_ACTION_RELEASED; }
+    else if(flags == 0) { action = MOUSE_ACTION_PRESSED; }
+    else if(flags == 2) { action = MOUSE_ACTION_DBLCLICKED; }
+    else if(flags == 1) { action = MOUSE_ACTION_MOVED; }
+    else if(flags == 4) { action = MOUSE_ACTION_WHEELED; }
+    else if(flags == 8) { action = MOUSE_ACTION_HWHEELED; }
     return 0;
 };
 
 int GetCtrlCodes(DWORD state) {
-    int ctrl = 0;
-    // TODO
+    int ctrl = CTRL_NULL;
+    if(state | RIGHT_ALT_PRESSED || state | LEFT_ALT_PRESSED) { ctrl |= CTRL_ALT; }
+    if(state | RIGHT_CTRL_PRESSED || state | RIGHT_CTRL_PRESSED) { ctrl |= CTRL_CTRL; }
+    if(state | SHIFT_PRESSED) { ctrl |= CTRL_SHIFT; }
+    if(state | ENHANCED_KEY) { ctrl |= CTRL_ENHANCED; }
+    if(state | NUMLOCK_ON) { ctrl |= CTRL_NUMLOCK; }
+    if(state | SCROLLLOCK_ON) { ctrl |= CTRL_SCROLLLOCK; }
+    if(state | CAPSLOCK_ON) { ctrl |= CTRL_CAPSLOCK; }
     return ctrl;
 };
 

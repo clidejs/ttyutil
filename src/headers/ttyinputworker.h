@@ -80,10 +80,11 @@ public:
                 NanNull(),
                 NanNew<Integer>(event->type),
                 NanNew<Integer>(event->key->ctrl),
+                NanNew<String>(&event->key->c),
                 NanNew<Integer>(event->key->code)
             };
 
-            callback->Call(4, argv);
+            callback->Call(5, argv);
         } else if(event->type == EVENT_RESIZE) {
             Local<Value> argv[] = {
                 NanNull(),

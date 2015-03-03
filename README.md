@@ -14,8 +14,9 @@ TODO:
  - add documentation
  - add output functions and expose properties to the js module
 
-Future Features:
+Features under consideration:
  - Mousepress support for VT100 Terminals
+ - add better color support for cmd.exe
  - support other tty-streams than process.stdin and process.stdout
 
 Note: Support for mouseevents in Terminal.app could be added with SIMBL and [MouseTerm](https://github.com/brodie/mouseterm) (untested).
@@ -23,7 +24,7 @@ Note: Support for mouseevents in Terminal.app could be added with SIMBL and [Mou
 ### Events ###
 Description of the event object properties which the callback is called with:
 
- - `type`: {String} "key" when a key event has occured, "mouse" when a mouse event has occured (see TTYUtil.TYPE)
+ - `type`: {int} "key" when a key event has occured, "mouse" when a mouse event has occured (see TTYUtil.TYPE)
 
 Mouse events:
  - `action`: {int} mouse event action id (see TTYUtil.MOUSE)

@@ -1,4 +1,4 @@
-var TTYUtil = require("./build/Release/tty");
+var TTYUtil = require("../build/Debug/tty");
 
 var events = [
     "error",

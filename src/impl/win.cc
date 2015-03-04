@@ -61,7 +61,8 @@ void TTYInputWorker::Execute(const ExecutionProgress& progress) {
                             GetCtrlCodes(
                                     ir[i].Event.KeyEvent.dwControlKeyState),
                             (char)ir[i].Event.KeyEvent.uChar.UnicodeChar,
-                            (int)ir[i].Event.KeyEvent.wVirtualKeyCode))));
+                            (int)ir[i].Event.KeyEvent.wVirtualKeyCode,
+                            -1))));
             } else if(WINDOW_BUFFER_SIZE_EVENT == ir[i].EventType) {
                 progress.Send(const_cast<const ttyutil_event*>(
                         ttyutil_event_create(EVENT_RESIZE, NULL)));
@@ -73,19 +74,19 @@ void TTYInputWorker::Execute(const ExecutionProgress& progress) {
 };
 
 int GetMouseAction(DWORD flags, DWORD button) {
-    int action = 0;
+    int action = -1;
     if(button == 0 && flags == 0) {
-        action = MOUSE_ACTION_RELEASED;
+        action = MOUSE_ACTION_UP;
     } else if(flags == 0) {
-        action = MOUSE_ACTION_PRESSED;
+        action = MOUSE_ACTION_DOWN;
     } else if(flags == 2) {
-        action = MOUSE_ACTION_DBLCLICKED;
+        action = MOUSE_ACTION_DOWN;
     } else if(flags == 1) {
-        action = MOUSE_ACTION_MOVED;
+        action = MOUSE_ACTION_MOVE;
     } else if(flags == 4) {
-        action = MOUSE_ACTION_WHEELED;
+        action = MOUSE_ACTION_WHEEL;
     } else if(flags == 8) {
-        action = MOUSE_ACTION_HWHEELED;
+        action = MOUSE_ACTION_HWHEEL;
     }
     return action;
 };

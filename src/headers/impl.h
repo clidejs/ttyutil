@@ -13,11 +13,12 @@ ttyutil_key* ttyutil_key_destroy(ttyutil_key *ptr) {
     if(ptr) { delete[] ptr; }
     return NULL;
 };
-ttyutil_key* ttyutil_key_create(int ctrl, char c, int code) {
+ttyutil_key* ttyutil_key_create(int ctrl, char c, int code, int which) {
     ttyutil_key *ev = (struct ttyutil_key *) malloc(sizeof(struct ttyutil_key));
     ev->ctrl = ctrl;
     ev->c = c;
     ev->code = code;
+    ev->which = which;
 
     return ev;
 };

@@ -1,4 +1,4 @@
-var TTYUtil = require("./build/Release/tty");
+var TTYUtil = require("./index");
 
 var events = [
     "error",
@@ -15,10 +15,12 @@ function listen(tty, event) {
         console.log(event + ": ", out, "\r");
     });
 }
-var tty = new TTYUtil.TTYUtil();
+var tty = new TTYUtil.create();
 
 for(var i = 0; i < events.length; ++i) {
     listen(tty, events[i]);
 }
 
-tty.start();
+//tty.start();
+console.log(tty);
+console.log(TTYUtil.TTYUtil.prototype);

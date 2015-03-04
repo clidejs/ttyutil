@@ -7,6 +7,12 @@
 
 #include "../../test/dbg.h"
 
+#ifdef PLATFORM_WINDOWS
+#   include "win.h"
+#else
+#   include "unix.h"
+#endif
+
 #include "event.h"
 #include "mouse.h"
 #include "key.h"

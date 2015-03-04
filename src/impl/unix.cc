@@ -3,165 +3,179 @@
 #include "../headers/impl.h"
 #include "../headers/tty.h"
 
-#include <curses.h>
-
-/* TODO any way to implement mouse tracking for VT100 Terminals
-    (at least for Mac Terminal.app)? */
-void TTYInputWorker::Execute(const ExecutionProgress& progress) {
-    int c;
-    int ctrl = CTRL_NULL;
-    MEVENT event;
-    ttyutil_mouse *ev;
-    char ch;
-
-    initscr();
+void TTYUTIL_DATA::init() {
+    win = initscr();
     noecho();
     cbreak();
-    keypad(stdscr, TRUE);
-    mousemask(ALL_MOUSE_EVENTS + 1, NULL);
+    keypad(win, TRUE);
+    mousemask(ALL_MOUSE_EVENTS + 1, &old_mouse_mask);
+    mouseinterval(0); // disable clicks
+    fps = DEFAULT_FPS;
+}
 
-    read:
-        c = getch();
+void TTYUTIL_DATA::destroy() {
+    keypad(win, FALSE);
+    mousemask(old_mouse_mask, NULL);
+    endwin();
+}
 
-        if(c == ERR) {
-            goto end;
-        } else if(c == KEY_MOUSE) {
-            if(getmouse(&event) == OK) {
-                // mouse event
-                ev = ttyutil_mouse_create(0, event.x, event.y, -1, ctrl);
+bool run(const TTYInputWorker::ExecutionProgress& progress) {
+    int c = getch();
+    int ctrl = CTRL_NULL;
+    MEVENT event;
+    char ch;
 
-                // add button control key sequences if possible
-                if(event.bstate & BUTTON_SHIFT) { ev->ctrl |= CTRL_SHIFT; }
-                if(event.bstate & BUTTON_CTRL) { ev->ctrl |= CTRL_CTRL; }
-                if(event.bstate & BUTTON_ALT) { ev->ctrl |= CTRL_ALT; }
+    if(c == ERR) {
+        return TRUE;
+    } else if(c == KEY_MOUSE) {
+        if(getmouse(&event) == OK) {
+            // mouse event
+            ttyutil_mouse *ev =
+                    ttyutil_mouse_create(0, event.x, event.y, -1, ctrl);
 
-                // convert button codes and event type
-                if(event.bstate & BUTTON1_RELEASED) {
-                    ev->button = MOUSE_BUTTON_LEFT;
-                    ev->action = MOUSE_ACTION_UP;
-                } else if(event.bstate & BUTTON1_PRESSED) {
-                    ev->button = MOUSE_BUTTON_LEFT;
-                    ev->action = MOUSE_ACTION_DOWN;
-                } else if(event.bstate & BUTTON1_CLICKED) {
-                    ev->button = MOUSE_BUTTON_LEFT;
-                    //ev->action = MOUSE_ACTION_CLICKED;
-                } else if(event.bstate & BUTTON1_DOUBLE_CLICKED) {
-                    ev->button = MOUSE_BUTTON_LEFT;
-                    //ev->action = MOUSE_ACTION_DBLCLICKED;
-                } else if(event.bstate & BUTTON1_TRIPLE_CLICKED) {
-                    ev->button = MOUSE_BUTTON_LEFT;
-                    //ev->action = MOUSE_ACTION_TRICLICKED;
+            // add button control key sequences if possible
+            if(event.bstate & BUTTON_SHIFT) { ev->ctrl |= CTRL_SHIFT; }
+            if(event.bstate & BUTTON_CTRL) { ev->ctrl |= CTRL_CTRL; }
+            if(event.bstate & BUTTON_ALT) { ev->ctrl |= CTRL_ALT; }
 
-                } else if(event.bstate & BUTTON2_RELEASED) {
-                    ev->button = MOUSE_BUTTON_LEFT2;
-                    ev->action = MOUSE_ACTION_UP;
-                } else if(event.bstate & BUTTON2_PRESSED) {
-                    ev->button = MOUSE_BUTTON_LEFT2;
-                    ev->action = MOUSE_ACTION_DOWN;
-                } else if(event.bstate & BUTTON2_CLICKED) {
-                    ev->button = MOUSE_BUTTON_LEFT2;
-                    //ev->action = MOUSE_ACTION_CLICKED;
-                } else if(event.bstate & BUTTON2_DOUBLE_CLICKED) {
-                    ev->button = MOUSE_BUTTON_LEFT2;
-                    //ev->action = MOUSE_ACTION_DBLCLICKED;
-                } else if(event.bstate & BUTTON2_TRIPLE_CLICKED) {
-                    ev->button = MOUSE_BUTTON_LEFT2;
-                    //ev->action = MOUSE_ACTION_TRICLICKED;
+            // convert button codes and event type
+            if(event.bstate & BUTTON1_RELEASED) {
+                ev->button = MOUSE_BUTTON_LEFT;
+                ev->action = MOUSE_ACTION_UP;
+            } else if(event.bstate & BUTTON1_PRESSED) {
+                ev->button = MOUSE_BUTTON_LEFT;
+                ev->action = MOUSE_ACTION_DOWN;
 
-                } else if(event.bstate & BUTTON3_RELEASED) {
-                    ev->button = MOUSE_BUTTON_LEFT3;
-                    ev->action = MOUSE_ACTION_UP;
-                } else if(event.bstate & BUTTON3_PRESSED) {
-                    ev->button = MOUSE_BUTTON_LEFT3;
-                    ev->action = MOUSE_ACTION_DOWN;
-                } else if(event.bstate & BUTTON3_CLICKED) {
-                    ev->button = MOUSE_BUTTON_LEFT3;
-                    //ev->action = MOUSE_ACTION_CLICKED;
-                } else if(event.bstate & BUTTON3_DOUBLE_CLICKED) {
-                    ev->button = MOUSE_BUTTON_LEFT3;
-                    //ev->action = MOUSE_ACTION_DBLCLICKED;
-                } else if(event.bstate & BUTTON3_TRIPLE_CLICKED) {
-                    ev->button = MOUSE_BUTTON_LEFT3;
-                    //ev->action = MOUSE_ACTION_TRICLICKED;
-                } else
+            } else if(event.bstate & BUTTON2_RELEASED) {
+                ev->button = MOUSE_BUTTON_LEFT2;
+                ev->action = MOUSE_ACTION_UP;
+            } else if(event.bstate & BUTTON2_PRESSED) {
+                ev->button = MOUSE_BUTTON_LEFT2;
+                ev->action = MOUSE_ACTION_DOWN;
+
+            } else if(event.bstate & BUTTON3_RELEASED) {
+                ev->button = MOUSE_BUTTON_LEFT3;
+                ev->action = MOUSE_ACTION_UP;
+            } else if(event.bstate & BUTTON3_PRESSED) {
+                ev->button = MOUSE_BUTTON_LEFT3;
+                ev->action = MOUSE_ACTION_DOWN;
+            } else
 #if NCURSES_MOUSE_VERSION > 1
-                if(event.bstate & BUTTON4_RELEASED) {
-                    ev->button = MOUSE_BUTTON_LEFT4;
-                    ev->action = MOUSE_ACTION_UP;
-                } else if(event.bstate & BUTTON4_PRESSED) {
-                    ev->button = MOUSE_BUTTON_LEFT4;
-                    ev->action = MOUSE_ACTION_DOWN;
-                } else if(event.bstate & BUTTON4_CLICKED) {
-                    ev->button = MOUSE_BUTTON_LEFT4;
-                    //ev->action = MOUSE_ACTION_CLICKED;
-                } else if(event.bstate & BUTTON4_DOUBLE_CLICKED) {
-                    ev->button = MOUSE_BUTTON_LEFT4;
-                    //ev->action = MOUSE_ACTION_DBLCLICKED;
-                } else if(event.bstate & BUTTON4_TRIPLE_CLICKED) {
-                    ev->button = MOUSE_BUTTON_LEFT4;
-                    //ev->action = MOUSE_ACTION_TRICLICKED;
+            if(event.bstate & BUTTON4_RELEASED) {
+                ev->button = MOUSE_BUTTON_LEFT4;
+                ev->action = MOUSE_ACTION_UP;
+            } else if(event.bstate & BUTTON4_PRESSED) {
+                ev->button = MOUSE_BUTTON_LEFT4;
+                ev->action = MOUSE_ACTION_DOWN;
 
-                } else if(event.bstate & BUTTON5_RELEASED) {
-                    ev->button = MOUSE_BUTTON_RIGHT;
-                    ev->action = MOUSE_ACTION_UP;
-                } else if(event.bstate & BUTTON5_PRESSED) {
-                    ev->button = MOUSE_BUTTON_RIGHT;
-                    ev->action = MOUSE_ACTION_DOWN;
-                } else if(event.bstate & BUTTON5_CLICKED) {
-                    ev->button = MOUSE_BUTTON_RIGHT;
-                    //ev->action = MOUSE_ACTION_CLICKED;
-                } else if(event.bstate & BUTTON5_DOUBLE_CLICKED) {
-                    ev->button = MOUSE_BUTTON_RIGHT;
-                    //ev->action = MOUSE_ACTION_DBLCLICKED;
-                } else if(event.bstate & BUTTON5_TRIPLE_CLICKED) {
-                    ev->button = MOUSE_BUTTON_RIGHT;
-                    //ev->action = MOUSE_ACTION_TRICLICKED;
-                }
+            } else if(event.bstate & BUTTON5_RELEASED) {
+                ev->button = MOUSE_BUTTON_RIGHT;
+                ev->action = MOUSE_ACTION_UP;
+            } else if(event.bstate & BUTTON5_PRESSED) {
+                ev->button = MOUSE_BUTTON_RIGHT;
+                ev->action = MOUSE_ACTION_DOWN;
+            }
 #else
-                if(event.bstate & BUTTON4_RELEASED) {
-                    ev->button = MOUSE_BUTTON_RIGHT;
-                    ev->action = MOUSE_ACTION_UP;
-                } else if(event.bstate & BUTTON4_PRESSED) {
-                    ev->button = MOUSE_BUTTON_RIGHT;
-                    ev->action = MOUSE_ACTION_DOWN;
-                } else if(event.bstate & BUTTON4_CLICKED) {
-                    ev->button = MOUSE_BUTTON_RIGHT;
-                    //ev->action = MOUSE_ACTION_CLICKED;
-                } else if(event.bstate & BUTTON4_DOUBLE_CLICKED) {
-                    ev->button = MOUSE_BUTTON_RIGHT;
-                    //ev->action = MOUSE_ACTION_DBLCLICKED;
-                } else if(event.bstate & BUTTON4_TRIPLE_CLICKED) {
-                    ev->button = MOUSE_BUTTON_RIGHT;
-                    //ev->action = MOUSE_ACTION_TRICLICKED;
-                }
+            if(event.bstate & BUTTON4_RELEASED) {
+                ev->button = MOUSE_BUTTON_RIGHT;
+                ev->action = MOUSE_ACTION_UP;
+            } else if(event.bstate & BUTTON4_PRESSED) {
+                ev->button = MOUSE_BUTTON_RIGHT;
+                ev->action = MOUSE_ACTION_DOWN;
+            }
 #endif
 
-                progress.Send(const_cast<const ttyutil_event*>(
-                        ttyutil_event_create(EVENT_MOUSE, ev)));
-            } else { /* bad one */ }
-        } else if(c == KEY_RESIZE) {
             progress.Send(const_cast<const ttyutil_event*>(
-                    ttyutil_event_create(EVENT_RESIZE, NULL)));
+                    ttyutil_event_create(EVENT_MOUSE, ev)));
+        } else { /* bad one */ }
+    } else if(c == KEY_RESIZE) {
+        progress.Send(const_cast<const ttyutil_event*>(
+                ttyutil_event_create(EVENT_RESIZE, NULL)));
+    } else {
+        // key event
+        ch = *const_cast<char *>(keyname(c));
+
+        // TODO save ctrl character codes
+        // ctrl =
+
+        progress.Send(const_cast<const ttyutil_event*>(
+                ttyutil_event_create(EVENT_KEY,
+                        ttyutil_key_create(ctrl, ch, c, -1))));
+    }
+    return FALSE;
+}
+
+void TTYInputWorker::Execute(const ExecutionProgress& progress) {
+    read:
+        if(run(progress)) {
+            return;
         } else {
-            // key event
-            ch = *const_cast<char *>(keyname(c));
-
-            // TODO save ctrl character codes
-            // ctrl =
-
-            progress.Send(const_cast<const ttyutil_event*>(
-                    ttyutil_event_create(EVENT_KEY,
-                            ttyutil_key_create(ctrl, ch, c, -1))));
+            goto read;
         }
-        goto read;
-
-    end:
-        return;
 }
 
 NAN_GETTER(TTYUtil::GetWidth) {
     NanScope();
     NanReturnValue(NanNew<v8::Number>(COLS));
+}
+
+NAN_GETTER(TTYUtil::GetHeight) {
+    NanScope();
+    NanReturnValue(NanNew<v8::Number>(LINES));
+}
+
+NAN_GETTER(TTYUtil::GetMode) {
+    NanScope();
+    //TODO get difference to VT102
+    NanReturnValue(NanNew<v8::Number>(MODE_VT100));
+}
+
+NAN_GETTER(TTYUtil::GetColors) {
+    NanScope();
+    NanReturnValue(NanNew<v8::Number>(COLORS));
+}
+
+NAN_GETTER(TTYUtil::GetX) {
+    NanScope();
+    TTYUtil *obj = ObjectWrap::Unwrap<TTYUtil>(args.This());
+    NanReturnValue(NanNew<v8::Number>(obj->data->win->_curx));
+}
+
+NAN_SETTER(TTYUtil::SetX) {
+    NanScope();
+    TTYUtil *obj = ObjectWrap::Unwrap<TTYUtil>(args.This());
+    obj->data->win->_curx = args.Data()->Int32Value();
+}
+
+NAN_GETTER(TTYUtil::GetY) {
+    NanScope();
+    TTYUtil *obj = ObjectWrap::Unwrap<TTYUtil>(args.This());
+    NanReturnValue(NanNew<v8::Number>(obj->data->win->_cury));
+}
+
+NAN_SETTER(TTYUtil::SetY) {
+    NanScope();
+    TTYUtil *obj = ObjectWrap::Unwrap<TTYUtil>(args.This());
+    obj->data->win->_cury = args.Data()->Int32Value();
+}
+
+NAN_GETTER(TTYUtil::GetFPS) {
+    NanScope();
+    TTYUtil *obj = ObjectWrap::Unwrap<TTYUtil>(args.This());
+    NanReturnValue(NanNew<v8::Number>(obj->data->fps));
+}
+
+NAN_SETTER(TTYUtil::SetFPS) {
+    NanScope();
+    TTYUtil *obj = ObjectWrap::Unwrap<TTYUtil>(args.This());
+    obj->data->fps = args.Data()->Int32Value();
+}
+
+NAN_METHOD(TTYUtil::Goto) {
+    NanScope();
+    TTYUtil *obj = ObjectWrap::Unwrap<TTYUtil>(args.This());
+    wmove(obj->data->win, args[1]->Int32Value(), args[0]->Int32Value());
+    NanReturnThis();
 }
 
 #endif // !PLATFORM_WINDOWS

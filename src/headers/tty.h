@@ -1,6 +1,12 @@
 #ifndef TTYUTIL_TTY_H_
 #define TTYUTIL_TTY_H_
 
+#define MODE_CMD    0x01
+#define MODE_VT102  0x02
+#define MODE_VT100  0x03
+
+#define DEFAULT_FPS 20
+
 #include <nan.h>
 
 #include "ttyinputworker.h"
@@ -96,6 +102,8 @@ private:
     struct ttyutil_eventlistener *resizeroot;
     // error event listeners
     struct ttyutil_eventlistener *errorroot;
+    // os-specific data structure
+    TTYUTIL_DATA *data;
 };
 
 #endif //TTYUTIL_TTY_H_

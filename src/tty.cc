@@ -48,15 +48,19 @@ void ttyutil_eventlistener_exec(ttyutil_eventlistener *root, const int len,
 }
 
 TTYUtil::TTYUtil() : running_(false) {
+    data = (TTYUTIL_DATA *)malloc(sizeof(TTYUTIL_DATA));
+    data->init();
+
     keyroot = ttyutil_eventlistener_new(NULL);
     resizeroot = ttyutil_eventlistener_new(NULL);
     errorroot = ttyutil_eventlistener_new(NULL);
-
     for(int i = 0; i < MOUSE_ACTION_LENGTH; ++i) {
         mouseroot[i] = ttyutil_eventlistener_new(NULL);
     }
 }
 TTYUtil::~TTYUtil() {
+    data->destroy();
+    delete data;
     delete worker_;
 }
 
@@ -224,22 +228,24 @@ void TTYUtil::Init(v8::Handle<v8::Object> target) {
     EXPORT_PROTOTYPE_GET(tpl, "running", IsRunning);
     EXPORT_PROTOTYPE_METHOD(tpl, "on", On);
     EXPORT_PROTOTYPE_METHOD(tpl, "removeListener", RemoveListener);
-/* TODO:
     EXPORT_PROTOTYPE_GET(tpl, "width", GetWidth);
     EXPORT_PROTOTYPE_GET(tpl, "height", GetHeight);
     EXPORT_PROTOTYPE_GET(tpl, "mode", GetMode);
     EXPORT_PROTOTYPE_GET(tpl, "colors", GetColors);
     EXPORT_PROTOTYPE_GETSET(tpl, "x", GetX, SetX);
     EXPORT_PROTOTYPE_GETSET(tpl, "y", GetY, SetY);
-    EXPORT_PROTOTYPE_GETSET(tpl, "title", GetTitle, SetTitle);
-    EXPORT_PROTOTYPE_GETSET(tpl, "cursor", GetCursor, SetCursor);
     EXPORT_PROTOTYPE_GETSET(tpl, "fps", GetFPS, SetFPS);
+
     EXPORT_PROTOTYPE_METHOD(tpl, "goto", Goto);
+/* TODO:
     EXPORT_PROTOTYPE_METHOD(tpl, "write", Write);
     EXPORT_PROTOTYPE_METHOD(tpl, "beep", Beep);
     EXPORT_PROTOTYPE_METHOD(tpl, "clear", Clear);
     EXPORT_PROTOTYPE_METHOD(tpl, "prepare", Prepare);
     EXPORT_PROTOTYPE_METHOD(tpl, "color", Color);
+
+    EXPORT_PROTOTYPE_GETSET(tpl, "cursor", GetCursor, SetCursor);
+    EXPORT_PROTOTYPE_GETSET(tpl, "title", GetTitle, SetTitle);
     EXPORT_PROTOTYPE_METHOD(tpl, "requestAnimationFrame",
             RequestAnimationFrame);
     EXPORT_PROTOTYPE_METHOD(tpl, "cancelAnimationFrame", CancelAnimationFrame);
@@ -270,6 +276,13 @@ void TTYUtil::Init(v8::Handle<v8::Object> target) {
     EXPORT_CONSTANT(mouse, "LEFT4", MOUSE_BUTTON_LEFT4);
     EXPORT_CONSTANT(mouse, "RIGHT", MOUSE_BUTTON_RIGHT);
     target->Set(NanNew<v8::String>("MOUSE"), mouse);
+
+    // export mouse button types
+    v8::Handle<v8::Object> mode = NanNew<v8::Object>();
+    EXPORT_CONSTANT(mode, "CMD", MODE_CMD);
+    EXPORT_CONSTANT(mode, "VT102", MODE_VT102);
+    EXPORT_CONSTANT(mode, "VT100", MODE_VT100);
+    target->Set(NanNew<v8::String>("MODE"), mode);
 }
 
 NODE_MODULE(tty, TTYUtil::Init);

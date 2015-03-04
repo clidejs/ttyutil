@@ -25,7 +25,6 @@
   },
   "homepage": "https://github.com/clidejs/ttyutil",
   "dependencies": {
-    "keypress": "^0.2.1",
     "nan": "^1.6.1"
   }
 }

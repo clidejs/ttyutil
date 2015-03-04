@@ -11,6 +11,8 @@
 
 using namespace v8;
 
+class TTY;
+
 class TTYInputWorker : public NanAsyncWorker {
 public:
     class ExecutionProgress {
@@ -31,8 +33,8 @@ public:
         TTYInputWorker* const that_;
     };
 
-    TTYInputWorker(NanCallback *callback) :
-        NanAsyncWorker(callback), asyncdata_(NULL) {
+    TTYInputWorker(TTY *obj) :
+        NanAsyncWorker(NULL), asyncdata_(NULL), obj_(obj) {
             async = new uv_async_t;
             uv_async_init(uv_default_loop(), async, AsyncProgress_);
             async->data = this;
@@ -51,7 +53,7 @@ public:
         asyncdata_ = NULL;
         uv_mutex_unlock(&async_lock);
 
-        if(callback && event) {
+        if(event) {
             HandleProgressCallback(event);
         }
 
@@ -60,45 +62,7 @@ public:
 
     void Execute(const ExecutionProgress& progress);
 
-    void HandleProgressCallback(ttyutil_event *event) {
-        NanScope();
-
-        if(event->type == EVENT_MOUSE) {
-            Local<Value> argv[] = {
-                NanNull(),
-                NanNew<Integer>(event->type),
-                NanNew<Integer>(event->mouse->button),
-                NanNew<Integer>(event->mouse->x),
-                NanNew<Integer>(event->mouse->y),
-                NanNew<Integer>(event->mouse->action),
-                NanNew<Integer>(event->mouse->ctrl)
-            };
-
-            callback->Call(7, argv);
-        } else if(event->type == EVENT_KEY) {
-            Local<Value> argv[] = {
-                NanNull(),
-                NanNew<Integer>(event->type),
-                NanNew<Integer>(event->key->ctrl),
-                NanNew<String>(&event->key->c),
-                NanNew<Integer>(event->key->code)
-            };
-
-            callback->Call(5, argv);
-        } else if(event->type == EVENT_RESIZE) {
-            Local<Value> argv[] = {
-                NanNull(),
-                NanNew<Integer>(event->type)
-            };
-
-            callback->Call(2, argv);
-        } else {
-            Local<Value> argv[] = {
-                NanNew<String>("unhandled event occured")
-            };
-            callback->Call(1, argv);
-        }
-    };
+    void HandleProgressCallback(ttyutil_event *event);
 
     virtual void Destroy() {
         uv_close(reinterpret_cast<uv_handle_t*>(async), AsyncClose_);
@@ -110,7 +74,8 @@ private:
     };
 
     void SendProgress_(const ttyutil_event *event) {
-        ttyutil_event *new_event = (struct ttyutil_event *) malloc(sizeof(struct ttyutil_event));
+        ttyutil_event *new_event =
+                (struct ttyutil_event *) malloc(sizeof(struct ttyutil_event));
         memcpy(&new_event, &event, sizeof(event));
 
         uv_mutex_lock(&async_lock);
@@ -136,6 +101,7 @@ private:
     uv_async_t *async;
     uv_mutex_t async_lock;
     ttyutil_event *asyncdata_;
+    TTY *obj_;
 };
 
 #endif // TTYUTIL_TTYINPUTWORKER_H_

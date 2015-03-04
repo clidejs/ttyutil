@@ -23,13 +23,16 @@ struct ttyutil_mouse {
 #define MOUSE_ACTION_RELEASED (0x0000)
 #define MOUSE_ACTION_PRESSED (0x0001)
 #define MOUSE_ACTION_CLICKED (0x0002)
-#define MOUSE_ACTION_DBLCLICKED (0x0004)
-#define MOUSE_ACTION_TRICLICKED (0x0008)
-#define MOUSE_ACTION_MOVED (0x0010)
-#define MOUSE_ACTION_WHEELED (0x0020)
-#define MOUSE_ACTION_HWHEELED (0x0040)
+#define MOUSE_ACTION_DBLCLICKED (0x0003)
+#define MOUSE_ACTION_TRICLICKED (0x0004)
+#define MOUSE_ACTION_MOVED (0x0005)
+#define MOUSE_ACTION_WHEELED (0x0006)
+#define MOUSE_ACTION_HWHEELED (0x0007)
+// number of different mouse actions
+#define MOUSE_ACTION_LENGTH 8
 
 ttyutil_mouse* ttyutil_mouse_destroy(ttyutil_mouse *ptr);
-ttyutil_mouse* ttyutil_mouse_create(int button, int x, int y, int action, int ctrl);
+ttyutil_mouse* ttyutil_mouse_create(int button, int x, int y, int action,
+        int ctrl);
 
 #endif // TTYUTIL_MOUSE_H_

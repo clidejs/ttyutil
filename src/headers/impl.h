@@ -26,8 +26,10 @@ ttyutil_mouse* ttyutil_mouse_destroy(ttyutil_mouse *ptr) {
     if(ptr) { delete[] ptr; }
     return NULL;
 };
-ttyutil_mouse* ttyutil_mouse_create(int button, int x, int y, int action, int ctrl) {
-    ttyutil_mouse *ev = (struct ttyutil_mouse *) malloc(sizeof(struct ttyutil_mouse));
+ttyutil_mouse* ttyutil_mouse_create(int button, int x, int y, int action,
+        int ctrl) {
+    ttyutil_mouse *ev =
+            (struct ttyutil_mouse *) malloc(sizeof(struct ttyutil_mouse));
     ev->button = button;
     ev->x = x;
     ev->y = y;
@@ -47,7 +49,8 @@ ttyutil_event* ttyutil_event_destroy(ttyutil_event *ptr) {
     return NULL;
 };
 ttyutil_event* ttyutil_event_create(int type, void *ptr) {
-    struct ttyutil_event *event = (struct ttyutil_event *) malloc(sizeof(struct ttyutil_event));
+    struct ttyutil_event *event =
+        (struct ttyutil_event *) malloc(sizeof(struct ttyutil_event));
     event->type = type;
     event->key = NULL;
     event->mouse = NULL;

@@ -58,4 +58,6 @@
 #   define DBGZ
 #endif // DEBUG
 
+#define DBG(a) std::cout << a << std::endl
+
 #endif // DBG_H_

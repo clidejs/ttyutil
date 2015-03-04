@@ -2,6 +2,9 @@
 
 #include "../headers/impl.h"
 #include "../headers/tty.h"
+#include "../headers/util.h"
+
+#include <stdio.h>
 
 void TTYUTIL_DATA::init() {
     win = initscr();
@@ -175,6 +178,66 @@ NAN_METHOD(TTYUtil::Goto) {
     NanScope();
     TTYUtil *obj = ObjectWrap::Unwrap<TTYUtil>(args.This());
     wmove(obj->data->win, args[1]->Int32Value(), args[0]->Int32Value());
+    NanReturnThis();
+}
+
+NAN_METHOD(TTYUtil::Color) {
+    NanScope();
+    v8::String::Utf8Value *ch = new v8::String::Utf8Value(args[0]->ToString());
+    NanReturnValue(NanNew<v8::Integer>(util_color(ch->operator*())));
+}
+
+NAN_METHOD(TTYUtil::Beep) {
+    NanScope();
+    beep();
+    NanReturnThis();
+}
+
+NAN_METHOD(TTYUtil::Clear) {
+    NanScope();
+    TTYUtil *obj = ObjectWrap::Unwrap<TTYUtil>(args.This());
+
+    if(args[0]->IsNumber() && args[1]->IsNumber() && args[2]->IsNumber() &&
+            args[3]->IsNumber()) {
+        //int x = util_max(args[0]->Int32Value(), 0);
+        //int y = util_max(args[1]->Int32Value(), 0);
+        //int width = util_min(args[2]->Int32Value(), COLS);
+        //int height = util_min(args[3]->Int32Value(), LINES);
+
+        // TODO!
+    } else {
+        wclear(obj->data->win);
+    }
+    NanReturnThis();
+}
+
+NAN_METHOD(TTYUtil::Prepare) {
+    NanScope();
+    v8::String::Utf8Value *ch = new v8::String::Utf8Value(args[0]->ToString());
+    int fg = args[1]->IsNumber() ? args[1]->Int32Value() : (
+            args[1]->IsString() ? util_color(
+            (new v8::String::Utf8Value(args[1]->ToString()))->operator*())
+            : - 1);
+    int bg = args[2]->IsNumber() ? args[2]->Int32Value() : (
+            args[2]->IsString() ? util_color(
+            (new v8::String::Utf8Value(args[2]->ToString()))->operator*())
+            : - 1);
+    NanReturnValue(NanNew<v8::String>(util_render(ch->operator*(), fg, bg)));
+}
+
+NAN_METHOD(TTYUtil::Write) {
+    NanScope();
+    v8::String::Utf8Value *ch = new v8::String::Utf8Value(args[0]->ToString());
+    int fg = args[1]->IsNumber() ? args[1]->Int32Value() : (
+            args[1]->IsString() ? util_color(
+            (new v8::String::Utf8Value(args[1]->ToString()))->operator*())
+            : - 1);
+    int bg = args[2]->IsNumber() ? args[2]->Int32Value() : (
+            args[2]->IsString() ? util_color(
+            (new v8::String::Utf8Value(args[2]->ToString()))->operator*())
+            : - 1);
+    printf(util_render(ch->operator*(), fg, bg));
+    //refresh();
     NanReturnThis();
 }
 

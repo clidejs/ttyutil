@@ -234,15 +234,16 @@ void TTYUtil::Init(v8::Handle<v8::Object> target) {
     EXPORT_PROTOTYPE_GET(tpl, "colors", GetColors);
     EXPORT_PROTOTYPE_GETSET(tpl, "x", GetX, SetX);
     EXPORT_PROTOTYPE_GETSET(tpl, "y", GetY, SetY);
-    EXPORT_PROTOTYPE_GETSET(tpl, "fps", GetFPS, SetFPS);
-
     EXPORT_PROTOTYPE_METHOD(tpl, "goto", Goto);
-/* TODO:
-    EXPORT_PROTOTYPE_METHOD(tpl, "write", Write);
+    EXPORT_PROTOTYPE_METHOD(tpl, "color", Color);
     EXPORT_PROTOTYPE_METHOD(tpl, "beep", Beep);
+
     EXPORT_PROTOTYPE_METHOD(tpl, "clear", Clear);
     EXPORT_PROTOTYPE_METHOD(tpl, "prepare", Prepare);
-    EXPORT_PROTOTYPE_METHOD(tpl, "color", Color);
+    EXPORT_PROTOTYPE_METHOD(tpl, "write", Write);
+
+/* TODO:
+    EXPORT_PROTOTYPE_GETSET(tpl, "fps", GetFPS, SetFPS);
 
     EXPORT_PROTOTYPE_GETSET(tpl, "cursor", GetCursor, SetCursor);
     EXPORT_PROTOTYPE_GETSET(tpl, "title", GetTitle, SetTitle);

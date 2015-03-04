@@ -14,11 +14,14 @@
                         "PLATFORM_WINDOWS"
                     ],
                     "sources": [
-                        "src/input/ttyinputworker-win.cc"
+                        "src/impl/win.cc"
                     ]
                 }, { # "OS!='win"
+                    "libraries": [
+                        "-lcurses" # add ncurses compiler flag
+                    ],
                     "sources": [
-                        "src/input/ttyinputworker-unix.cc"
+                        "src/impl/unix.cc"
                     ]
                 }]
             ]

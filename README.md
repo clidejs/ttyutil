@@ -28,29 +28,6 @@ Features under consideration:
 Note: Support for mouseevents in Terminal.app could be added with SIMBL and
  [MouseTerm](https://github.com/brodie/mouseterm) (untested).
 
-### Events ###
-Description of the event object properties which the callback is called with:
-
- - `type`: {int} "key" when a key event has occured, "mouse" when a mouse event
- has occured (see TTYUtil.TYPE)
-
-Mouse events:
-
- - `action`: {int} mouse event action id (see TTYUtil.MOUSE)
- - `x`: {int} x-coordinate of the terminal stream, where the mouse event occured
- - `y`: {int} y-coordinate of the terminal stream, where the mouse event occured
- - `scrollx`: {int} scroll amount of the mouse event in x-axis
- - `scrolly`: {int} scroll amount of the mouse event in y-axis
- - `button`: {int} button id (see TTYUtil.BUTTON)
- - `state`: {int} control keys that where active when the event occured
-
-Key events:
-
- - `action`: {int} key event action id (see TTYUtil.KEY)
- - `state`: {int} control keys that where active when the event occured
- - `name`: {String} key name
- - `code`: {int} key code (see TTYUtil.KEYCODE)
-
 ### Usage ###
 see test.js
 

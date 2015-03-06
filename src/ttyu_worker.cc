@@ -37,11 +37,11 @@ void ttyu_worker_c::handle(ttyu_event_t *event) {
   if(ee_count(obj_->emitter, event->type) == 0) {
     return;
   }
-  v8::Local<v8::Value> args[1];
+  v8::Local<v8::Value> arg;
   v8::Local<v8::Object> obj;
   switch(event->type) {
     case EVENT_RESIZE:
-      args[0] = NanUndefined();
+      arg = NanUndefined();
       break;
     case EVENT_KEY:
       obj = NanNew<v8::Object>();
@@ -52,7 +52,7 @@ void ttyu_worker_c::handle(ttyu_event_t *event) {
           NanNew<v8::Integer>(event->key->code));
       obj->Set(NanNew<v8::String>("which"),
           NanNew<v8::Integer>(event->key->which));
-      args[0] = obj;
+      arg = obj;
       break;
     case EVENT_MOUSEDOWN:
     case EVENT_MOUSEUP:
@@ -66,13 +66,13 @@ void ttyu_worker_c::handle(ttyu_event_t *event) {
       obj->Set(NanNew<v8::String>("y"), NanNew<v8::Integer>(event->mouse->y));
       obj->Set(NanNew<v8::String>("ctrl"),
           NanNew<v8::Integer>(event->mouse->ctrl));
-      args[0] = obj;
+      arg = obj;
       break;
     default: // EVENT_ERROR
-      args[0] = NanNew<v8::String>(event->err);
+      arg = NanError(event->err);
       break;
   }
-  ee_emit(obj_->emitter, event->type, args);
+  ee_emit(obj_->emitter, event->type, arg);
 }
 
 void ttyu_worker_c::destroy() {
@@ -81,7 +81,8 @@ void ttyu_worker_c::destroy() {
 
 void ttyu_worker_c::Execute() {
   ttyu_progress_c progress(this);
-  Execute(progress, obj_->data);
+  // loop execute until it returns false (error)
+  while(execute(progress, obj_->data));
 }
 
 void ttyu_worker_c::send_(const ttyu_event_t *event) {

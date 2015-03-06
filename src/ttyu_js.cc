@@ -1,7 +1,22 @@
 #include <ttyu.h>
 
-void ttyu_js_c::init(v8::Handle<v8::Object> target) {
+v8::Persistent<v8::Function> ttyu_js_c::constructor;
 
+void ttyu_js_c::init(v8::Handle<v8::Object> target) {
+  v8::Local<v8::FunctionTemplate> tpl =
+      NanNew<v8::FunctionTemplate>(new_instance);
+  tpl->SetClassName(NanNew<v8::String>("TTYUtil"));
+  tpl->InstanceTemplate()->SetInternalFieldCount(5);
+
+  NODE_SET_PROTOTYPE_METHOD(tpl, "start", start);
+  NODE_SET_PROTOTYPE_METHOD(tpl, "stop", stop);
+  NODE_SET_PROTOTYPE_METHOD(tpl, "__on__", on);
+  NODE_SET_PROTOTYPE_METHOD(tpl, "__off__", off);
+  tpl->InstanceTemplate()->SetAccessor(NanNew<v8::String>("running"),
+      (is_running));
+
+  constructor.Reset(v8::Isolate::GetCurrent(), tpl->GetFunction());
+  target->Set(NanNew<v8::String>("TTYUtil"), tpl->GetFunction());
 }
 
 ttyu_js_c::ttyu_js_c() {
@@ -11,7 +26,7 @@ ttyu_js_c::ttyu_js_c() {
   ttyu_data_init(data);
 
   emitter = (ee_emitter_t *)malloc(sizeof(ee_emitter_t));
-  ee_init(emitter);
+  ee_init(emitter, ttyu_ee_cb_call);
 }
 
 ttyu_js_c::~ttyu_js_c() {

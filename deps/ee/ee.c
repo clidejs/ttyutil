@@ -33,8 +33,10 @@ extern "C" {
 #include <stdlib.h>
 
 // initialize empty emitter
-void ee_init(ee_emitter_t *emitter) {
+void ee_init(ee_emitter_t *emitter,
+    int (*emit)(ee__listener_t *, EE_DATA_TYPE())) {
   emitter->root = 0;
+  emitter->emit = emit;
 }
 
 void ee_on(ee_emitter_t *emitter, int event, EE_CB_TYPE(cb)) {
@@ -85,10 +87,16 @@ int ee_emit(ee_emitter_t *emitter, int event, EE_DATA_TYPE(data)) {
     l = ee__event_find(emitter->root, event)->root;
   }
   if(l != 0) {
-    do {
-      EE_CB_CALL(l->cb, data);
-      ++count;
-    } while((l = l->next));
+    if(emitter->emit) {
+      return emitter->emit(l, data);
+    } else {
+      do {
+        if(l->cb) {
+          l->cb(data);
+        }
+        ++count;
+      } while((l = l->next));
+    }
   }
   return count;
 }

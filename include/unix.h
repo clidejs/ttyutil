@@ -4,25 +4,15 @@
 #define NCURSES_OPAQUE FALSE
 #include <curses.h>
 
+#define ERROR_UNIX_UNDEF "unknown error occured while reading input"
+#define ERROR_UNIX_MOUSEBAD "skipping unreadable mouse event"
+#define ERROR_UNIX_MOUSEUNCAUGHT "skipping unknown mouse event"
+
 // unixy data structure
 struct ttyu_data_s {
     WINDOW *win;
     mmask_t old_mouse_mask;
+    int ctrl;
 };
-
-void ttyu_data_init(ttyu_data_t *data) {
-    data->win = initscr();
-    noecho();
-    cbreak();
-    keypad(data->win, TRUE);
-    mousemask(ALL_MOUSE_EVENTS + 1, &(data->old_mouse_mask));
-    mouseinterval(0);
-}
-
-void ttyu_data_destroy(ttyu_data_t *data) {
-    keypad(data->win, FALSE);
-    mousemask(data->old_mouse_mask, NULL);
-    endwin();
-}
 
 #endif // TTYU_UNIX_H_

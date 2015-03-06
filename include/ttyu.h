@@ -30,15 +30,17 @@
 #include <nan.h>
 #include <uv.h>
 #include <generated.h>
-#include <util.h>
+#include "util.h"
 //#include <stdlib.h>
 //#include <stdio.h>
 
 // predefine event data and callbacks for ee.c
-#define EE_DATA_TYPE(name) v8::Local<v8::Value> name[]
+#define EE_DATA_TYPE(name) v8::Local<v8::Value> name
 #define EE_CB_TYPE(name) NanCallback *name
-#define EE_CB_CALL(cb, data) cb->Call(1, data)
 #include <ee.h>
+
+// callback call function for the event emitter
+int ttyu_ee_cb_call(ee__listener_t *l, v8::Local<v8::Value> data);
 
 // predefine classes
 class ttyu_js_c;
@@ -141,7 +143,7 @@ public:
 
   void progress();
 
-  void Execute(const ttyu_progress_c& progress, const ttyu_data_t *data);
+  bool execute(const ttyu_progress_c& progress, const ttyu_data_t *data);
   void handle(ttyu_event_t *event);
 
   virtual void destroy();

@@ -34,5 +34,11 @@ module.exports = {
         NUMLOCK: 0x20,
         SCROLLLOCK: 0x40,
         CAPSLOCK: 0x80
+    },
+
+    Mode: {
+        CMD: 0x00,
+        VT102: 0x01,
+        VT100: 0x02
     }
 };

@@ -86,12 +86,11 @@ void ttyu_worker_c::Execute() {
 }
 
 void ttyu_worker_c::send_(const ttyu_event_t *event) {
-// TODO: is this necessary
-//  ttyu_event_t *new_event = (ttyu_event_t *)malloc(sizeof(event));
-//  memcpy(&new_event, &event, sizeof(event));
+  ttyu_event_t *new_event = (ttyu_event_t *)malloc(sizeof(event));
+  memcpy(&new_event, &event, sizeof(event));
   uv_mutex_lock(async_lock);
   ttyu_event_t *old_event = asyncdata_;
-  asyncdata_ = const_cast<ttyu_event_t *>(event);
+  asyncdata_ = new_event;
   uv_mutex_unlock(async_lock);
 
   ttyu_event_destroy(old_event);

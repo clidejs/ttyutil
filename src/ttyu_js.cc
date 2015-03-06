@@ -8,12 +8,24 @@ void ttyu_js_c::init(v8::Handle<v8::Object> target) {
   tpl->SetClassName(NanNew<v8::String>("TTYUtil"));
   tpl->InstanceTemplate()->SetInternalFieldCount(5);
 
-  NODE_SET_PROTOTYPE_METHOD(tpl, "start", start);
-  NODE_SET_PROTOTYPE_METHOD(tpl, "stop", stop);
-  NODE_SET_PROTOTYPE_METHOD(tpl, "__on__", on);
-  NODE_SET_PROTOTYPE_METHOD(tpl, "__off__", off);
-  tpl->InstanceTemplate()->SetAccessor(NanNew<v8::String>("running"),
-      (is_running));
+  EXPORT_PROTOTYPE_METHOD(tpl, "start", start);
+  EXPORT_PROTOTYPE_METHOD(tpl, "stop", stop);
+  EXPORT_PROTOTYPE_METHOD(tpl, "__on__", on);
+  EXPORT_PROTOTYPE_METHOD(tpl, "__off__", off);
+  EXPORT_PROTOTYPE_GET(tpl, "running", is_running);
+
+  EXPORT_PROTOTYPE_GET(tpl, "width", get_width);
+  EXPORT_PROTOTYPE_GET(tpl, "height", get_height);
+  EXPORT_PROTOTYPE_GET(tpl, "mode", get_mode);
+  EXPORT_PROTOTYPE_GET(tpl, "colors", get_colors);
+  EXPORT_PROTOTYPE_GETSET(tpl, "x", getx, setx);
+  EXPORT_PROTOTYPE_GETSET(tpl, "y", gety, sety);
+  EXPORT_PROTOTYPE_METHOD(tpl, "goto", gotoxy);
+  EXPORT_PROTOTYPE_METHOD(tpl, "color", color);
+  EXPORT_PROTOTYPE_METHOD(tpl, "beep", beep);
+  EXPORT_PROTOTYPE_METHOD(tpl, "clear", clear);
+  EXPORT_PROTOTYPE_METHOD(tpl, "prepare", prepare);
+  EXPORT_PROTOTYPE_METHOD(tpl, "write", write);
 
   constructor.Reset(v8::Isolate::GetCurrent(), tpl->GetFunction());
   target->Set(NanNew<v8::String>("TTYUtil"), tpl->GetFunction());

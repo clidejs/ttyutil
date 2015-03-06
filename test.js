@@ -24,10 +24,18 @@ var ttyu = new TTYUtil();
 for(var e in Const.Event) {
     ttyu.on(e, emitter(e));
 }
+
+
 ttyu.start();
+
+ttyu.write(JSON.stringify(ttyu) + "\r\n", "#365cff", "#000");
 
 function emitter(e) {
     return function(obj) {
-        console.log(e, obj, "\r");
+        if(e === "error") {
+            ttyu.write(e + ": " + JSON.stringify(obj) + "\r\n", "#F00", "#400");
+        } else {
+            ttyu.write(e + ": " + JSON.stringify(obj) + "\r\n", "#0F0", "#040");
+        }
     };
 }

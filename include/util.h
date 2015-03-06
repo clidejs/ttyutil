@@ -1,7 +1,16 @@
 #ifndef TTYU_UTIL_H_
 #define TTYU_UTIL_H_
 
+#include <string.h>
 #include <iostream>
+
+#define EXPORT_PROTOTYPE_METHOD NODE_SET_PROTOTYPE_METHOD
+
+#define EXPORT_PROTOTYPE_GET(tpl, name, fn)                                    \
+    tpl->InstanceTemplate()->SetAccessor(NanNew<v8::String>(name), (fn))
+
+#define EXPORT_PROTOTYPE_GETSET(tpl, name, get, set)                           \
+    tpl->InstanceTemplate()->SetAccessor(NanNew<v8::String>(name), (get), (set))
 
 int util_rgbi2term(float r, float g, float b);
 const char *util_render(const char *ch, int fg, int bg);

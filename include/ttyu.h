@@ -31,8 +31,6 @@
 #include <uv.h>
 #include <generated.h>
 #include "util.h"
-//#include <stdlib.h>
-//#include <stdio.h>
 
 // predefine event data and callbacks for ee.c
 #define EE_DATA_TYPE(name) v8::Local<v8::Value> name

@@ -12,7 +12,8 @@
                 "src/ttyu_event.cc",
                 "src/ttyu_worker.cc",
                 "src/ttyu_js.cc",
-                "src/ttyu.cc"
+                "src/ttyu.cc",
+                "src/util.cc"
             ],
             "conditions": [
                 ["OS=='win'", {

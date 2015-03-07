@@ -1,7 +1,7 @@
-var ttyu = require("./build/Debug/ttyu");
+var tty = require("./build/Debug/ttyu");
 var Const = require("./const");
 
-var TTYUtil = ttyu.TTYUtil;
+var TTYUtil = tty.TTYUtil;
 
 TTYUtil.prototype.on = function(ev, listener) {
     if(ev in Const.Event && listener instanceof Function) {

@@ -7,6 +7,8 @@ void ttyu_data_init(ttyu_data_t *data) {
   keypad(data->win, TRUE);
   mousemask(ALL_MOUSE_EVENTS + 1, &(data->old_mouse_mask));
   mouseinterval(0);
+  data->ctrl = 0;
+  data->mode = MODE_VT100;
 }
 
 void ttyu_data_destroy(ttyu_data_t *data) {
@@ -85,9 +87,14 @@ bool ttyu_worker_c::execute(const ttyu_worker_c::ttyu_progress_c& progress,
 #endif
       if(event->type == EVENT_ERROR) {
         // uncaught mouse event
-        event->err = ERROR_UNIX_MOUSEUNCAUGHT;
+        // this will be pretty much be a VT100 terminal
+        ttyu_event_destroy(event);
+        ttyu_event_create_error(event, ERROR_UNIX_MOUSEUNCAUGHT);
+      } else {
+        // pretty save its VT102
+        // TODO: const!
+        //data->mode = MODE_VT102;
       }
-      free(&mev);
     } else {
       // bad mouse event
       ttyu_event_create_error(event, ERROR_UNIX_MOUSEBAD);
@@ -102,7 +109,6 @@ bool ttyu_worker_c::execute(const ttyu_worker_c::ttyu_progress_c& progress,
     ttyu_event_create_key(event, data->ctrl, ch, c, WHICH_UNKNOWN);
     progress.send(const_cast<const ttyu_event_t *>(event));
   }
-  ttyu_event_destroy(event);
   return TRUE;
 }
 
@@ -118,8 +124,8 @@ NAN_GETTER(ttyu_js_c::get_height) {
 
 NAN_GETTER(ttyu_js_c::get_mode) {
   NanScope();
-  //TODO get difference to VT102
-  NanReturnValue(NanNew<v8::Number>(MODE_VT100));
+  ttyu_js_c *obj = ObjectWrap::Unwrap<ttyu_js_c>(args.This());
+  NanReturnValue(NanNew<v8::Number>(obj->data->mode));
 }
 
 NAN_GETTER(ttyu_js_c::get_colors) {
@@ -168,6 +174,7 @@ NAN_METHOD(ttyu_js_c::write) {
   int bg = args[2]->IsNumber() ? args[2]->Int32Value() : (
       args[2]->IsString() ? util_color(
       (new v8::String::Utf8Value(args[2]->ToString()))->operator*()) : - 1);
+  // TODO fix the -Wformat-security warning
   printf(util_render(ch->operator*(), fg, bg));
   refresh();
   NanReturnThis();

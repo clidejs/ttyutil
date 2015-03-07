@@ -49,8 +49,8 @@ void ttyu_event_destroy(ttyu_event_t *event) {
       free(event->mouse);
     }
     if(event->err) {
-      free(const_cast<char *>(event->err));
+// TODO free err message?
+//      free(const_cast<char *>(event->err));
     }
-    free(event);
   }
 }

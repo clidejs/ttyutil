@@ -125,7 +125,6 @@ void ee_destroy(ee_emitter_t *emitter) {
     emitter->root = tmp->next;
     ee__event_destroy(tmp);
   }
-  free(emitter);
 }
 
 ee__listener_t *ee__listener_new(EE_CB_TYPE(cb)) {

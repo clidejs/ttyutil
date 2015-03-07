@@ -19,6 +19,7 @@ ttyu_worker_c::ttyu_worker_c(ttyu_js_c *obj) :
 ttyu_worker_c::~ttyu_worker_c() {
   uv_mutex_destroy(async_lock);
   ttyu_event_destroy(asyncdata_);
+  free(asyncdata_);
 }
 
 void ttyu_worker_c::progress() {
@@ -31,6 +32,7 @@ void ttyu_worker_c::progress() {
     handle(event);
   }
   ttyu_event_destroy(event);
+  free(event);
 }
 
 void ttyu_worker_c::handle(ttyu_event_t *event) {
@@ -94,6 +96,7 @@ void ttyu_worker_c::send_(const ttyu_event_t *event) {
   uv_mutex_unlock(async_lock);
 
   ttyu_event_destroy(old_event);
+  free(old_event);
   uv_async_send(async);
 }
 

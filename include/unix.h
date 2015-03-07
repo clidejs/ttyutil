@@ -10,9 +10,10 @@
 
 // unixy data structure
 struct ttyu_data_s {
-    WINDOW *win;
-    mmask_t old_mouse_mask;
-    int ctrl;
+  WINDOW *win;
+  mmask_t old_mouse_mask;
+  int ctrl;
+  int mode;
 };
 
 #endif // TTYU_UNIX_H_

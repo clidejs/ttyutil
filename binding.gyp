@@ -25,7 +25,7 @@
                     ]
                 }, { # "OS!='win"
                     "libraries": [
-                        "-lcurses" # add ncurses compiler flag
+                        "-lcurses" # add curses compiler flag
                     ],
                     "sources": [
                         "src/unix.cc"

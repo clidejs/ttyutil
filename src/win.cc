@@ -24,7 +24,7 @@ void ttyu_data_destroy(ttyu_data_t *data) {
 }
 
 bool ttyu_worker_c::execute(const ttyu_worker_c::ttyu_progress_c& progress,
-    const ttyu_data_t *data) {
+    ttyu_data_t *data) {
   DWORD readed;
   INPUT_RECORD ir[WIN_BUFFER_SIZE];
   CONSOLE_SCREEN_BUFFER_INFO conInfo;
@@ -52,7 +52,7 @@ bool ttyu_worker_c::execute(const ttyu_worker_c::ttyu_progress_c& progress,
             (int)ir[i].Event.MouseEvent.dwMousePosition.X,
             (int)ir[i].Event.MouseEvent.dwMousePosition.Y -
                 (int)conInfo.srWindow.Top,
-            ttyu_win_ctrl(ir[i].Event.MouseEvent.dwControlKeyState))
+            ttyu_win_ctrl(ir[i].Event.MouseEvent.dwControlKeyState));
 
       if(ir[i].Event.MouseEvent.dwButtonState == 0 &&
           ir[i].Event.MouseEvent.dwEventFlags == 0) {
@@ -74,7 +74,7 @@ bool ttyu_worker_c::execute(const ttyu_worker_c::ttyu_progress_c& progress,
       ttyu_event_t *event = (ttyu_event_t *)malloc(sizeof(ttyu_event_t));
       ttyu_event_create_key(event, ttyu_win_ctrl(
               ir[i].Event.KeyEvent.dwControlKeyState),
-          (char)ir[i].Event.KeyEvent.dwChar.UnicodeChar,
+          (char)ir[i].Event.KeyEvent.uChar.UnicodeChar,
           (int)ir[i].Event.KeyEvent.wVirtualKeyCode,
           WHICH_UNKNOWN); // TODO which
 
@@ -113,4 +113,73 @@ int ttyu_win_ctrl(DWORD state) {
     ctrl |= CTRL_CAPSLOCK;
   }
   return ctrl;
+}
+NAN_GETTER(ttyu_js_c::get_width) {
+  NanScope();
+  NanReturnUndefined();
+}
+
+NAN_GETTER(ttyu_js_c::get_height) {
+  NanScope();
+  NanReturnUndefined();
+}
+
+NAN_GETTER(ttyu_js_c::get_mode) {
+  NanScope();
+  NanReturnUndefined();
+}
+
+NAN_GETTER(ttyu_js_c::get_colors) {
+  NanScope();
+  NanReturnUndefined();
+}
+
+NAN_GETTER(ttyu_js_c::getx) {
+  NanScope();
+  NanReturnUndefined();
+}
+
+NAN_SETTER(ttyu_js_c::setx) {
+  NanScope();
+}
+
+NAN_GETTER(ttyu_js_c::gety) {
+  NanScope();
+  NanReturnUndefined();
+}
+
+NAN_SETTER(ttyu_js_c::sety) {
+  NanScope();
+}
+
+NAN_METHOD(ttyu_js_c::gotoxy) {
+  NanScope();
+  NanReturnUndefined();
+}
+
+NAN_METHOD(ttyu_js_c::write) {
+  NanScope();
+  v8::String::Utf8Value *ch = new v8::String::Utf8Value(args[0]->ToString());
+  printf(ch->operator*());
+  NanReturnUndefined();
+}
+
+NAN_METHOD(ttyu_js_c::beep) {
+  NanScope();
+  NanReturnUndefined();
+}
+
+NAN_METHOD(ttyu_js_c::clear) {
+  NanScope();
+  NanReturnUndefined();
+}
+
+NAN_METHOD(ttyu_js_c::prepare) {
+  NanScope();
+  NanReturnUndefined();
+}
+
+NAN_METHOD(ttyu_js_c::color) {
+  NanScope();
+  NanReturnUndefined();
 }

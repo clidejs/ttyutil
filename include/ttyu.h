@@ -140,7 +140,7 @@ public:
 
   void progress();
 
-  bool execute(const ttyu_progress_c& progress, const ttyu_data_t *data);
+  bool execute(const ttyu_progress_c& progress, ttyu_data_t *data);
   void handle(ttyu_event_t *event);
 
   virtual void destroy();

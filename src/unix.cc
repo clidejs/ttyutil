@@ -18,7 +18,7 @@ void ttyu_data_destroy(ttyu_data_t *data) {
 }
 
 bool ttyu_worker_c::execute(const ttyu_worker_c::ttyu_progress_c& progress,
-    const ttyu_data_t *data) {
+    ttyu_data_t *data) {
   int c = wgetch(data->win);
   MEVENT mev;
   char ch;
@@ -87,13 +87,12 @@ bool ttyu_worker_c::execute(const ttyu_worker_c::ttyu_progress_c& progress,
 #endif
       if(event->type == EVENT_ERROR) {
         // uncaught mouse event
-        // this will be pretty much be a VT100 terminal
+        // still could be VT100 (Terminal.app + SIMBL + MouseTerm)
         ttyu_event_destroy(event);
         ttyu_event_create_error(event, ERROR_UNIX_MOUSEUNCAUGHT);
       } else {
-        // pretty save its VT102
-        // TODO: const!
-        //data->mode = MODE_VT102;
+        // its VT102
+        data->mode = MODE_VT102;
       }
     } else {
       // bad mouse event
@@ -105,6 +104,7 @@ bool ttyu_worker_c::execute(const ttyu_worker_c::ttyu_progress_c& progress,
 
     // TODO ctrl chars
     // TODO which
+    // TODO c = 258 / 259 on Terminal.app => scrolling!
 
     ttyu_event_create_key(event, data->ctrl, ch, c, WHICH_UNKNOWN);
     progress.send(const_cast<const ttyu_event_t *>(event));

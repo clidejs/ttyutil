@@ -214,7 +214,6 @@ NAN_METHOD(ttyu_js_c::prepare) {
       args[2]->IsString() ? util_color(
       (new v8::String::Utf8Value(args[2]->ToString()))->operator*()) : - 1);
   NanReturnValue(NanNew<v8::String>(util_render(ch->operator*(), fg, bg)));
-
 }
 
 NAN_METHOD(ttyu_js_c::color) {

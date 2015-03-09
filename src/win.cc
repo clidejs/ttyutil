@@ -59,9 +59,8 @@ bool ttyu_worker_c::execute(const ttyu_worker_c::ttyu_progress_c& progress,
       if(ir[i].Event.MouseEvent.dwButtonState == 0 &&
           ir[i].Event.MouseEvent.dwEventFlags == 0) {
         event->type = EVENT_MOUSEUP;
-      } else if(ir[i].Event.MouseEvent.dwEventFlags == 0) {
-        event->type = EVENT_MOUSEDOWN;
-      } else if(ir[i].Event.MouseEvent.dwEventFlags == 2) {
+      } else if(ir[i].Event.MouseEvent.dwEventFlags == 0 ||
+          ir[i].Event.MouseEvent.dwEventFlags == 2) {
         event->type = EVENT_MOUSEDOWN;
       } else if(ir[i].Event.MouseEvent.dwEventFlags == 1) {
         event->type = EVENT_MOUSEMOVE;
@@ -125,12 +124,11 @@ int ttyu_win_ctrl(DWORD state) {
 bool ttyu_win_scr_update(ttyu_data_t *data, bool initial) {
   if(initial) {
     CONSOLE_SCREEN_BUFFER_INFOEX con_info;
-
+    con_info.cbSize = sizeof(con_info);
     if(!GetConsoleScreenBufferInfoEx(data->hout, &con_info)) {
-      DBG(GetLastError());
       data->err->msg = ERROR_WIN_GET;
-      //data->err->kill = TRUE;
-      //return FALSE;
+      data->err->kill = TRUE;
+      return FALSE;
     }
 
     data->top = (int)con_info.srWindow.Top;
@@ -168,9 +166,40 @@ int ttyu_win_color(char *c, ttyu_data_t *data) {
   return 0;
 }
 
-const char *ttyu_win_render(char *c, int fg, int bg) {
+void ttyu_win_render(char *c, ttyu_data_t *data) {
   // TODO
   return c;
+}
+
+bool ttyu_win_clrscr(ttyu_data_t *data, int x, int y, int width, int height) {
+   COORD coordhome = { x, y };
+   DWORD written;
+   CONSOLE_SCREEN_BUFFER_INFO con_info;
+   DWORD size = width * height;
+
+  // Fill the entire screen with blanks.
+  if(!FillConsoleOutputCharacter(data->hout, (TCHAR) ' ', size, coordhome,
+      &written)) {
+    data->err->msg = ERROR_WIN_FILL;
+    return (data->err->kill = FALSE);
+  }
+
+  // Get the current text attribute.
+  if(!GetConsoleScreenBufferInfo(data->hout, &con_info)) {
+    data->err->msg = ERROR_WIN_GET;
+    return (data->err->kill = FALSE);
+  }
+
+  // Set the buffer's attributes accordingly.
+  if( !FillConsoleOutputAttribute(data->hout, con_info.wAttributes, size,
+      coordhome, &writte)) {
+    data->err->msg = ERROR_WIN_FILL;
+    return (data->err->kill = FALSE);
+  }
+
+  // Put the cursor at its home coordinates.
+  SetConsoleCursorPosition(data->hout, coordhome);
+  return TRUE;
 }
 
 NAN_GETTER(ttyu_js_c::get_width) {
@@ -272,8 +301,7 @@ NAN_METHOD(ttyu_js_c::write) {
       args[2]->IsString() ? ttyu_win_color(
       (new v8::String::Utf8Value(args[2]->ToString()))->operator*(), obj->data)
           : - 1);
-  // TODO WriteConsoleOutput
-  printf(ttyu_win_render(ch->operator*(), fg, bg));
+  ttyu_win_render(util_render(ch->operator*(), fg, bg), obj->data);
   NanReturnThis();
 }
 
@@ -291,7 +319,7 @@ NAN_METHOD(ttyu_js_c::clear) {
   int width = obj->data->width;
   int height = obj->data->height;
 
-  if(args.length == 4 && args[0]->IsNumber() && args[1]->IsNumber() &&
+  if(args.Length() == 4 && args[0]->IsNumber() && args[1]->IsNumber() &&
       args[2]->IsNumber() && args[3]->IsNumber()) {
     x = util_max(args[0]->Int32Value(), x);
     y = util_max(args[1]->Int32Value(), y);
@@ -299,7 +327,7 @@ NAN_METHOD(ttyu_js_c::clear) {
     height = util_min(args[3]->Int32Value(), height);
   }
 
-  // TODO?!
+  ttyu_win_clrscr(obj->data, x, y, width, height);
   NanReturnThis();
 }
 
@@ -315,7 +343,7 @@ NAN_METHOD(ttyu_js_c::prepare) {
       args[2]->IsString() ? ttyu_win_color(
       (new v8::String::Utf8Value(args[2]->ToString()))->operator*(), obj->data)
           : - 1);
-  NanReturnValue(NanNew<v8::String>(ttyu_win_render(ch->operator*(), fg, bg)));
+  NanReturnValue(NanNew<v8::String>(util_render(ch->operator*(), fg, bg)));
 }
 
 NAN_METHOD(ttyu_js_c::color) {

@@ -13,13 +13,19 @@
     tpl->InstanceTemplate()->SetAccessor(NanNew<v8::String>(name), (get), (set))
 
 int util_rgbi2term(float r, float g, float b);
-const char *util_render(const char *ch, int fg, int bg);
+char *util_render(const char *ch, int fg, int bg);
+int util_parse_dec(char d);
 int util_parse_hex(char h);
+unsigned long util_term2argb(int t);
 int util_rgb2term(const char *rgb);
 int util_hex2term(const char *hex);
 int util_color(const char *c);
 bool util_max(int a, int b);
 bool util_min(int a, int b);
+char *util_error(char *name, int id);
+
+#undef ERROR
+#define ERROR(name, id) util_error(name, id)
 
 #ifdef DEBUG
 # define DBG(a) std::cout << a << std::endl

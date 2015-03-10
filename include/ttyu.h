@@ -32,8 +32,9 @@
 #include "util.h"
 
 // predefine event data and callbacks for ee.c
-#define EE_DATA_TYPE(name) v8::Local<v8::Value> name
-#define EE_CB_TYPE(name) NanCallback *name
+#define EE_DATA_TYPE v8::Local<v8::Value>
+#define EE_DATA_ARG(name) v8::Local<v8::Value> name
+#define EE_CB_ARG(name) NanCallback *name
 #include <ee.h>
 
 // callback call function for the event emitter

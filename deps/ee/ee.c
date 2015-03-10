@@ -34,12 +34,12 @@ extern "C" {
 
 // initialize empty emitter
 void ee_init(ee_emitter_t *emitter,
-    int (*emit)(ee__listener_t *, EE_DATA_TYPE())) {
+    int (*emit)(ee__listener_t *, EE_DATA_TYPE)) {
   emitter->root = 0;
   emitter->emit = emit;
 }
 
-void ee_on(ee_emitter_t *emitter, int event, EE_CB_TYPE(cb)) {
+void ee_on(ee_emitter_t *emitter, int event, EE_CB_ARG(cb)) {
   ee__event_t *ev;
   if(emitter->root == 0) {
     ev = ee__event_new(event);
@@ -56,7 +56,7 @@ void ee_on(ee_emitter_t *emitter, int event, EE_CB_TYPE(cb)) {
   }
 }
 
-void ee_off(ee_emitter_t *emitter, int event, EE_CB_TYPE(cb)) {
+void ee_off(ee_emitter_t *emitter, int event, EE_CB_ARG(cb)) {
   ee__event_t *ev;
   if(emitter->root == 0) {
     return;
@@ -76,7 +76,7 @@ void ee_off(ee_emitter_t *emitter, int event, EE_CB_TYPE(cb)) {
   }
 }
 
-int ee_emit(ee_emitter_t *emitter, int event, EE_DATA_TYPE(data)) {
+int ee_emit(ee_emitter_t *emitter, int event, EE_DATA_ARG(data)) {
   ee__listener_t *l;
   int count = 0;
   if(emitter->root == 0) {
@@ -127,7 +127,7 @@ void ee_destroy(ee_emitter_t *emitter) {
   }
 }
 
-ee__listener_t *ee__listener_new(EE_CB_TYPE(cb)) {
+ee__listener_t *ee__listener_new(EE_CB_ARG(cb)) {
   ee__listener_t *new_listener =
       (ee__listener_t *)malloc(sizeof(ee__listener_t));
   new_listener->next = 0;
@@ -135,7 +135,7 @@ ee__listener_t *ee__listener_new(EE_CB_TYPE(cb)) {
   return new_listener;
 }
 
-ee__listener_t *ee__listener_add(ee__listener_t *listener, EE_CB_TYPE(cb)) {
+ee__listener_t *ee__listener_add(ee__listener_t *listener, EE_CB_ARG(cb)) {
   if(listener->next == 0) {
     return (listener->next = ee__listener_new(cb));
   } else {
@@ -143,7 +143,7 @@ ee__listener_t *ee__listener_add(ee__listener_t *listener, EE_CB_TYPE(cb)) {
   }
 }
 
-void ee__listener_remove(ee__listener_t *listener, EE_CB_TYPE(cb)) {
+void ee__listener_remove(ee__listener_t *listener, EE_CB_ARG(cb)) {
   if(listener->next != 0) {
     if(listener->next->cb == cb) {
       ee__listener_t *old = listener->next;

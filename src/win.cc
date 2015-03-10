@@ -8,7 +8,7 @@ void ttyu_data_init(ttyu_data_t *data) {
   data->hout = GetStdHandle(STD_OUTPUT_HANDLE);
 
   if(INVALID_HANDLE_VALUE == data->hin || INVALID_HANDLE_VALUE == data->hout) {
-    data->err->msg = ERROR_WIN_INIT;
+    data->err->msg = ERROR(ERROR_WIN_INIT, GetLastError());
     data->err->kill = TRUE;
     return;
   }
@@ -26,6 +26,7 @@ void ttyu_data_init(ttyu_data_t *data) {
 
 void ttyu_data_destroy(ttyu_data_t *data) {
   SetConsoleMode(data->hin, data->old_mode);
+  ttyu_win_color_update(data, TRUE);
 }
 
 bool ttyu_worker_c::execute(const ttyu_worker_c::ttyu_progress_c& progress,
@@ -77,14 +78,14 @@ bool ttyu_worker_c::execute(const ttyu_worker_c::ttyu_progress_c& progress,
               ir[i].Event.KeyEvent.dwControlKeyState),
           (char)ir[i].Event.KeyEvent.uChar.UnicodeChar,
           (int)ir[i].Event.KeyEvent.wVirtualKeyCode,
-          WHICH_UNKNOWN); // TODO which
+          ttyu_win_which(ir[i].Event.KeyEvent.wVirtualKeyCode));
 
       progress.send(const_cast<const ttyu_event_t *>(event));
     } else if(WINDOW_BUFFER_SIZE_EVENT == ir[i].EventType) {
       ttyu_event_t *event = (ttyu_event_t *)malloc(sizeof(ttyu_event_t));
 
       if(!ttyu_win_scr_update(data)) {
-        ttyu_event_create_error(event, ERROR_WIN_GET);
+        ttyu_event_create_error(event, data->err->msg);
       } else {
         ttyu_event_create_resize(event);
       }
@@ -93,6 +94,13 @@ bool ttyu_worker_c::execute(const ttyu_worker_c::ttyu_progress_c& progress,
   }
 
   return TRUE;
+}
+
+int ttyu_win_which(DWORD code) {
+  if(code > 0) {
+    return (int) code;
+  }
+  return WHICH_UNKNOWN;
 }
 
 int ttyu_win_ctrl(DWORD state) {
@@ -126,9 +134,8 @@ bool ttyu_win_scr_update(ttyu_data_t *data, bool initial) {
     CONSOLE_SCREEN_BUFFER_INFOEX con_info;
     con_info.cbSize = sizeof(con_info);
     if(!GetConsoleScreenBufferInfoEx(data->hout, &con_info)) {
-      data->err->msg = ERROR_WIN_GET;
-      data->err->kill = TRUE;
-      return FALSE;
+      data->err->msg = ERROR(ERROR_WIN_GET, GetLastError());
+      return !(data->err->kill = TRUE);
     }
 
     data->top = (int)con_info.srWindow.Top;
@@ -138,17 +145,16 @@ bool ttyu_win_scr_update(ttyu_data_t *data, bool initial) {
     data->curx = (int)con_info.dwCursorPosition.X;
     data->cury = (int)con_info.dwCursorPosition.Y - data->top;
 
-    for(int i = 0; i < WIN_COLORS; ++i) {
-      data->initial_color_table[i] = data->color_table[i] =
-          (unsigned long) con_info.ColorTable[i];
+    for(short i = 0; i < WIN_COLORS; ++i) {
+      data->color_table[i] = { (data->initial_color_table[i] =
+          (unsigned long) con_info.ColorTable[i]), i };
     }
   } else {
     CONSOLE_SCREEN_BUFFER_INFO con_info;
 
     if(!GetConsoleScreenBufferInfo(data->hout, &con_info)) {
-      data->err->msg = ERROR_WIN_GET;
-      data->err->kill = TRUE;
-      return FALSE;
+      data->err->msg = ERROR(ERROR_WIN_GET, GetLastError());
+      return !(data->err->kill = TRUE);
     }
 
     data->top = (int)con_info.srWindow.Top;
@@ -161,14 +167,143 @@ bool ttyu_win_scr_update(ttyu_data_t *data, bool initial) {
   return TRUE;
 }
 
-int ttyu_win_color(char *c, ttyu_data_t *data) {
-  // TODO
+short ttyu_win_color(int color, ttyu_data_t *data) {
+  if(color < 16) {
+    return color;
+  }
+  unsigned long argb = util_term2argb(color);
+  int i = ttyu_win_color_index(data->color_table, argb);
+  if(i != -1) {
+    return ttyu_win_color_first(data->color_table, i);
+  } else {
+    return ttyu_win_color_push(data, argb);
+  }
+}
+
+short ttyu_win_color_index(ttyu_color_t table[], unsigned long argb) {
+  for(short i = 0; i < WIN_COLORS; ++i) {
+    if(table[i].argb == argb) {
+      return i;
+    }
+  }
+  return -1;
+}
+
+short ttyu_win_color_first(ttyu_color_t table[], short index) {
+  if(index != 0) {
+    ttyu_color_t tmp = table[index];
+
+    for(short i = index; i >= 1; --i) {
+      table[i] = table[i - 1];
+    }
+
+    table[0] = tmp;
+  }
   return 0;
 }
 
+short ttyu_win_color_push(ttyu_data_t *data, unsigned long argb) {
+  ttyu_color_t color = data->color_table[WIN_COLORS - 1];
+  color.argb = argb;
+
+  ttyu_win_color_update(data);
+  return ttyu_win_color_first(data->color_table);
+}
+
+void ttyu_win_color_update(ttyu_data_t *data, bool close) {
+  CONSOLE_SCREEN_BUFFER_INFOEX con_info;
+  con_info.cbSize = sizeof(con_info);
+
+  if(!GetConsoleScreenBufferInfoEx(data->hout, &con_info)) {
+    data->err->msg = ERROR(ERROR_WIN_GET, GetLastError());
+    data->err->kill = FALSE;
+    return;
+  }
+
+  for(short i = 0; i < WIN_COLORS; ++i) {
+    if(close) {
+      con_info.ColorTable[i] = data->initial_color_table[i];
+    } else {
+      con_info.ColorTable[data->color_table[i].id] = data->color_table[i].argb;
+    }
+  }
+
+  if(!SetConsoleScreenBufferInfoEx(data->hout, &con_info)) {
+    data->err->msg = ERROR(ERROR_WIN_SET, GetLastError());
+    data->err->kill = FALSE;
+  }
+}
+
 void ttyu_win_render(char *c, ttyu_data_t *data) {
-  // TODO
-  return c;
+  int fg = -1;
+  int bg = -1;
+  int len = strlen(c); // content length
+  int cstart = 0; // content start position
+  int clen = 0; // content stop position
+  int i; // position
+  int j; // lookahead position
+
+  for(i = cstart; i < len; ++i) {
+    if(c[i] == '\x1b' && c[i+1] == '[') {
+      j = 1;
+      while(i+j < len && c[i+j] != 'm') ++j;
+
+      ttyu_win_render_token(c, fg, bg, cstart, clen, data);
+
+      if(j == 3) {
+        // end token
+        if(c[i+2] == '3') {
+          fg = -1;
+        } else {
+          bg = -1;
+        }
+      } else {
+        // start token
+        if(c[i+2] == '3') { // foreground
+          if(j == 9) {
+            fg = util_parse_dec(c[i+7]) * 100 + util_parse_dec(c[i+8]) * 10 +
+                util_parse_dec(c[i+9]);
+          } else if(j == 8) {
+            fg = util_parse_dec(c[i+7]) * 10 + util_parse_dec(c[i+8]);
+          } else {
+            fg = util_parse_dec(c[i+7]);
+          }
+        } else { // background
+          if(j == 9) {
+            bg = util_parse_dec(c[i+7]) * 100 + util_parse_dec(c[i+8]) * 10 +
+                util_parse_dec(c[i+9]);
+          } else if(j == 8) {
+            bg = util_parse_dec(c[i+7]) * 10 + util_parse_dec(c[i+8]);
+          } else {
+            bg = util_parse_dec(c[i+7]);
+          }
+        }
+      }
+      i += j + 1;
+      cstart = i;
+      clen = 0;
+    } else {
+      // token content
+      ++clen;
+    }
+  }
+  ttyu_win_render_token(c, fg, bg, cstart, clen, data);
+}
+
+void ttyu_win_render_token(char *c, int fg, int bg, int cstart, int clen,
+    ttyu_data_t *data) {
+  if(clen > 0 && strlen(c) > cstart + clen) {
+    fg = ttyu_win_color(fg, data);
+    bg = ttyu_win_color(bg, data);
+    /* TODO
+    const CHAR_INFO *buffer;
+    COORD buffer_size = { 1, clen };
+    COORD buffer_coord = { data->curx + cstart, data->cury };
+    SMALL_RECT region;
+
+    WriteConsoleOutput(data->hout, buffer, buffer_size, buffer_coord, &region);
+    */
+  }
 }
 
 bool ttyu_win_clrscr(ttyu_data_t *data, int x, int y, int width, int height) {
@@ -180,20 +315,20 @@ bool ttyu_win_clrscr(ttyu_data_t *data, int x, int y, int width, int height) {
   // Fill the entire screen with blanks.
   if(!FillConsoleOutputCharacter(data->hout, (TCHAR) ' ', size, coordhome,
       &written)) {
-    data->err->msg = ERROR_WIN_FILL;
+    data->err->msg = ERROR(ERROR_WIN_FILL, GetLastError());
     return (data->err->kill = FALSE);
   }
 
   // Get the current text attribute.
   if(!GetConsoleScreenBufferInfo(data->hout, &con_info)) {
-    data->err->msg = ERROR_WIN_GET;
+    data->err->msg = ERROR(ERROR_WIN_GET, GetLastError());
     return (data->err->kill = FALSE);
   }
 
   // Set the buffer's attributes accordingly.
   if( !FillConsoleOutputAttribute(data->hout, con_info.wAttributes, size,
-      coordhome, &writte)) {
-    data->err->msg = ERROR_WIN_FILL;
+      coordhome, &written)) {
+    data->err->msg = ERROR(ERROR_WIN_FILL, GetLastError());
     return (data->err->kill = FALSE);
   }
 
@@ -240,10 +375,10 @@ NAN_SETTER(ttyu_js_c::setx) {
   if(GetConsoleScreenBufferInfoEx(obj->data->hout, &con_info)) {
     con_info.dwCursorPosition.X = obj->data->curx;
     if(!SetConsoleScreenBufferInfoEx(obj->data->hout, &con_info)) {
-      obj->data->err->msg = ERROR_WIN_SET;
+      obj->data->err->msg = ERROR(ERROR_WIN_SET, GetLastError());
     }
   } else {
-    obj->data->err->msg = ERROR_WIN_GET;
+    obj->data->err->msg = ERROR(ERROR_WIN_GET, GetLastError());
   }
 }
 
@@ -263,10 +398,10 @@ NAN_SETTER(ttyu_js_c::sety) {
   if(GetConsoleScreenBufferInfoEx(obj->data->hout, &con_info)) {
     con_info.dwCursorPosition.Y = obj->data->cury;
     if(!SetConsoleScreenBufferInfoEx(obj->data->hout, &con_info)) {
-      obj->data->err->msg = ERROR_WIN_SET;
+      obj->data->err->msg = ERROR(ERROR_WIN_SET, GetLastError());
     }
   } else {
-    obj->data->err->msg = ERROR_WIN_GET;
+    obj->data->err->msg = ERROR(ERROR_WIN_GET, GetLastError());
   }
 }
 
@@ -281,10 +416,10 @@ NAN_METHOD(ttyu_js_c::gotoxy) {
     con_info.dwCursorPosition.X = obj->data->curx;
     con_info.dwCursorPosition.Y = obj->data->cury;
     if(!SetConsoleScreenBufferInfoEx(obj->data->hout, &con_info)) {
-      obj->data->err->msg = ERROR_WIN_SET;
+      obj->data->err->msg = ERROR(ERROR_WIN_SET, GetLastError());
     }
   } else {
-    obj->data->err->msg = ERROR_WIN_GET;
+    obj->data->err->msg = ERROR(ERROR_WIN_GET, GetLastError());
   }
   NanReturnUndefined();
 }
@@ -294,13 +429,11 @@ NAN_METHOD(ttyu_js_c::write) {
   ttyu_js_c *obj = ObjectWrap::Unwrap<ttyu_js_c>(args.This());
   v8::String::Utf8Value *ch = new v8::String::Utf8Value(args[0]->ToString());
   int fg = args[1]->IsNumber() ? args[1]->Int32Value() : (
-      args[1]->IsString() ? ttyu_win_color(
-      (new v8::String::Utf8Value(args[1]->ToString()))->operator*(), obj->data)
-          : - 1);
+      args[1]->IsString() ? util_color(
+      (new v8::String::Utf8Value(args[1]->ToString()))->operator*()) : - 1);
   int bg = args[2]->IsNumber() ? args[2]->Int32Value() : (
-      args[2]->IsString() ? ttyu_win_color(
-      (new v8::String::Utf8Value(args[2]->ToString()))->operator*(), obj->data)
-          : - 1);
+      args[2]->IsString() ? util_color(
+      (new v8::String::Utf8Value(args[2]->ToString()))->operator*()) : - 1);
   ttyu_win_render(util_render(ch->operator*(), fg, bg), obj->data);
   NanReturnThis();
 }
@@ -336,13 +469,11 @@ NAN_METHOD(ttyu_js_c::prepare) {
   ttyu_js_c *obj = ObjectWrap::Unwrap<ttyu_js_c>(args.This());
   v8::String::Utf8Value *ch = new v8::String::Utf8Value(args[0]->ToString());
   int fg = args[1]->IsNumber() ? args[1]->Int32Value() : (
-      args[1]->IsString() ? ttyu_win_color(
-      (new v8::String::Utf8Value(args[1]->ToString()))->operator*(), obj->data)
-          : - 1);
+      args[1]->IsString() ? util_color(
+      (new v8::String::Utf8Value(args[1]->ToString()))->operator*()) : - 1);
   int bg = args[2]->IsNumber() ? args[2]->Int32Value() : (
-      args[2]->IsString() ? ttyu_win_color(
-      (new v8::String::Utf8Value(args[2]->ToString()))->operator*(), obj->data)
-          : - 1);
+      args[2]->IsString() ? util_color(
+      (new v8::String::Utf8Value(args[2]->ToString()))->operator*()) : - 1);
   NanReturnValue(NanNew<v8::String>(util_render(ch->operator*(), fg, bg)));
 }
 
@@ -350,6 +481,5 @@ NAN_METHOD(ttyu_js_c::color) {
   NanScope();
   ttyu_js_c *obj = ObjectWrap::Unwrap<ttyu_js_c>(args.This());
   v8::String::Utf8Value *ch = new v8::String::Utf8Value(args[0]->ToString());
-  NanReturnValue(NanNew<v8::Integer>(ttyu_win_color(ch->operator*(),
-      obj->data)));
+  NanReturnValue(NanNew<v8::Integer>(util_color(ch->operator*())));
 }

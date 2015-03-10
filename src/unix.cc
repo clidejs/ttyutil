@@ -39,6 +39,8 @@ bool ttyu_worker_c::execute(const ttyu_worker_c::ttyu_progress_c& progress,
       if(mev.bstate & BUTTON_CTRL) { event->mouse->ctrl |= CTRL_CTRL; }
       if(mev.bstate & BUTTON_ALT) { event->mouse->ctrl |= CTRL_ALT; }
 
+      // TODO mousemove, mousewheel and mousehwheel
+
       // convert button codes and mev type
       if(mev.bstate & BUTTON1_RELEASED) {
           event->mouse->button = MOUSE_LEFT;
@@ -87,7 +89,6 @@ bool ttyu_worker_c::execute(const ttyu_worker_c::ttyu_progress_c& progress,
 #endif
       if(event->type == EVENT_ERROR) {
         // uncaught mouse event
-        // still could be VT100 (Terminal.app + SIMBL + MouseTerm)
         ttyu_event_destroy(event);
         ttyu_event_create_error(event, ERROR_UNIX_MOUSEUNCAUGHT);
       } else {
@@ -102,14 +103,23 @@ bool ttyu_worker_c::execute(const ttyu_worker_c::ttyu_progress_c& progress,
   } else {
     ch = *const_cast<char *>(keyname(c));
 
-    // TODO ctrl chars
-    // TODO which
     // TODO c = 258 / 259 on Terminal.app => scrolling!
 
-    ttyu_event_create_key(event, data->ctrl, ch, c, WHICH_UNKNOWN);
+    ttyu_event_create_key(event, ttyu_unix_ctrl(data, c), ch, c,
+        ttyu_unix_which(data, c));
     progress.send(const_cast<const ttyu_event_t *>(event));
   }
   return TRUE;
+}
+
+int ttyu_unix_which(ttyu_data_t *data, char c) {
+  // TODO convert to windows-style virtual-keycode
+  return WHICH_UNKNOWN;
+}
+
+int ttyu_unix_ctrl(ttyu_data_t *data, char c) {
+  // TODO get control codes
+  return data->ctrl;
 }
 
 NAN_GETTER(ttyu_js_c::get_width) {
@@ -166,7 +176,6 @@ NAN_METHOD(ttyu_js_c::gotoxy) {
 
 NAN_METHOD(ttyu_js_c::write) {
   NanScope();
-  //ttyu_js_c *obj = ObjectWrap::Unwrap<ttyu_js_c>(args.This());
   v8::String::Utf8Value *ch = new v8::String::Utf8Value(args[0]->ToString());
   int fg = args[1]->IsNumber() ? args[1]->Int32Value() : (
       args[1]->IsString() ? util_color(
@@ -174,8 +183,7 @@ NAN_METHOD(ttyu_js_c::write) {
   int bg = args[2]->IsNumber() ? args[2]->Int32Value() : (
       args[2]->IsString() ? util_color(
       (new v8::String::Utf8Value(args[2]->ToString()))->operator*()) : - 1);
-  // TODO fix the -Wformat-security warning
-  printf(util_render(ch->operator*(), fg, bg));
+  printf("%s", util_render(ch->operator*(), fg, bg));
   refresh();
   NanReturnThis();
 }

@@ -14,16 +14,13 @@ Implemented:
 
 TODO:
 
- - fix that annoying malloc error (Abort trap: 6)
  - add documentation
- - add error handling
- - add output functions and expose properties to the js module
  - add .which property on keys with key identifiers (like: `KEY_ENTER`, ...)
+ - add better color support for cmd.exe
 
 Features under consideration:
 
  - Mousepress support for VT100 Terminals
- - add better color support for cmd.exe
 
 Note: Support for mouseevents in Terminal.app could be added with SIMBL and
  [MouseTerm](https://github.com/brodie/mouseterm) (untested).

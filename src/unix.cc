@@ -5,9 +5,8 @@ void ttyu_data_init(ttyu_data_t *data) {
   noecho();
   cbreak();
   keypad(data->win, TRUE);
-  mousemask(ALL_MOUSE_EVENTS + 1, &(data->old_mouse_mask));
+  mousemask(ALL_MOUSE_EVENTS | REPORT_MOUSE_POSITION, &(data->old_mouse_mask));
   mouseinterval(0);
-  data->ctrl = 0;
   data->mode = MODE_VT100;
 }
 
@@ -39,52 +38,53 @@ bool ttyu_worker_c::execute(const ttyu_worker_c::ttyu_progress_c& progress,
       if(mev.bstate & BUTTON_CTRL) { event->mouse->ctrl |= CTRL_CTRL; }
       if(mev.bstate & BUTTON_ALT) { event->mouse->ctrl |= CTRL_ALT; }
 
-      // TODO mousemove, mousewheel and mousehwheel
-
       // convert button codes and mev type
-      if(mev.bstate & BUTTON1_RELEASED) {
-          event->mouse->button = MOUSE_LEFT;
-          event->type = EVENT_MOUSEUP;
+      if(mev.bstate & REPORT_MOUSE_POSITION) {
+        event->type = EVENT_MOUSEMOVE;
+
+      } else if(mev.bstate & BUTTON1_RELEASED) {
+        event->mouse->button = MOUSE_LEFT;
+        event->type = EVENT_MOUSEUP;
       } else if(mev.bstate & BUTTON1_PRESSED) {
-          event->mouse->button = MOUSE_LEFT;
-          event->type = EVENT_MOUSEDOWN;
+        event->mouse->button = MOUSE_LEFT;
+        event->type = EVENT_MOUSEDOWN;
 
       } else if(mev.bstate & BUTTON2_RELEASED) {
-          event->mouse->button = MOUSE_LEFT2;
-          event->type = EVENT_MOUSEUP;
+        event->mouse->button = MOUSE_LEFT2;
+        event->type = EVENT_MOUSEUP;
       } else if(mev.bstate & BUTTON2_PRESSED) {
-          event->mouse->button = MOUSE_LEFT2;
-          event->type = EVENT_MOUSEDOWN;
+        event->mouse->button = MOUSE_LEFT2;
+        event->type = EVENT_MOUSEDOWN;
 
       } else if(mev.bstate & BUTTON3_RELEASED) {
-          event->mouse->button = MOUSE_LEFT3;
-          event->type = EVENT_MOUSEUP;
+        event->mouse->button = MOUSE_LEFT3;
+        event->type = EVENT_MOUSEUP;
       } else if(mev.bstate & BUTTON3_PRESSED) {
-          event->mouse->button = MOUSE_LEFT3;
-          event->type = EVENT_MOUSEDOWN;
+        event->mouse->button = MOUSE_LEFT3;
+        event->type = EVENT_MOUSEDOWN;
       } else
 #if NCURSES_MOUSE_VERSION > 1
       if(mev.bstate & BUTTON4_RELEASED) {
-          event->mouse->button = MOUSE_LEFT4;
-          event->type = EVENT_MOUSEUP;
+        event->mouse->button = MOUSE_LEFT4;
+        event->type = EVENT_MOUSEUP;
       } else if(mev.bstate & BUTTON4_PRESSED) {
-          event->mouse->button = MOUSE_LEFT4;
-          event->type = EVENT_MOUSEDOWN;
+        event->mouse->button = MOUSE_LEFT4;
+        event->type = EVENT_MOUSEDOWN;
 
       } else if(mev.bstate & BUTTON5_RELEASED) {
-          event->mouse->button = MOUSE_RIGHT;
-          event->type = EVENT_MOUSEUP;
+        event->mouse->button = MOUSE_RIGHT;
+        event->type = EVENT_MOUSEUP;
       } else if(mev.bstate & BUTTON5_PRESSED) {
-          event->mouse->button = MOUSE_RIGHT;
-          event->type = EVENT_MOUSEDOWN;
+        event->mouse->button = MOUSE_RIGHT;
+        event->type = EVENT_MOUSEDOWN;
       }
 #else
       if(mev.bstate & BUTTON4_RELEASED) {
-          event->mouse->button = MOUSE_RIGHT;
-          event->type = EVENT_MOUSEUP;
+        event->mouse->button = MOUSE_RIGHT;
+        event->type = EVENT_MOUSEUP;
       } else if(mev.bstate & BUTTON4_PRESSED) {
-          event->mouse->button = MOUSE_RIGHT;
-          event->type = EVENT_MOUSEDOWN;
+        event->mouse->button = MOUSE_RIGHT;
+        event->type = EVENT_MOUSEDOWN;
       }
 #endif
       if(event->type == EVENT_ERROR) {
@@ -100,26 +100,172 @@ bool ttyu_worker_c::execute(const ttyu_worker_c::ttyu_progress_c& progress,
       ttyu_event_create_error(event, ERROR_UNIX_MOUSEBAD);
     }
     progress.send(const_cast<const ttyu_event_t *>(event));
+  } else if(c == KEY_SF) {
+    // TODO scroll forward
+  } else if(c == KEY_SR) {
+    // TODO scroll backward
   } else {
     ch = *const_cast<char *>(keyname(c));
+    int ctrl = CTRL_NULL;
+    int which = WHICH_UNKNOWN;
 
-    // TODO c = 258 / 259 on Terminal.app => scrolling!
+    if(c == KEY_DOWN) {
+      which = WHICH_DOWN;
+    } else if(c == KEY_UP) {
+      which = WHICH_UP;
+    } else if(c == KEY_LEFT) {
+      which = WHICH_LEFT;
+    } else if(c == KEY_RIGHT) {
+      which = WHICH_RIGHT;
+    } else if(c == KEY_HOME) {
+      which = WHICH_HOME;
+    } else if(c == KEY_BACKSPACE) {
+      which = WHICH_BACKSPACE;
+    } else if(c == KEY_F(1)) {
+      which = WHICH_F1;
+    } else if(c == KEY_F(2)) {
+      which = WHICH_F2;
+    } else if(c == KEY_F(3)) {
+      which = WHICH_F3;
+    } else if(c == KEY_F(4)) {
+      which = WHICH_F4;
+    } else if(c == KEY_F(5)) {
+      which = WHICH_F5;
+    } else if(c == KEY_F(6)) {
+      which = WHICH_F6;
+    } else if(c == KEY_F(7)) {
+      which = WHICH_F7;
+    } else if(c == KEY_F(8)) {
+      which = WHICH_F8;
+    } else if(c == KEY_F(9)) {
+      which = WHICH_F9;
+    } else if(c == KEY_F(10)) {
+      which = WHICH_F10;
+    } else if(c == KEY_F(11)) {
+      which = WHICH_F11;
+    } else if(c == KEY_F(12)) {
+      which = WHICH_F12;
+    } else if(c == KEY_F(13)) {
+      which = WHICH_F13;
+    } else if(c == KEY_F(14)) {
+      which = WHICH_F14;
+    } else if(c == KEY_F(15)) {
+      which = WHICH_F15;
+    } else if(c == KEY_F(16)) {
+      which = WHICH_F16;
+    } else if(c == KEY_F(17)) {
+      which = WHICH_F17;
+    } else if(c == KEY_F(18)) {
+      which = WHICH_F18;
+    } else if(c == KEY_F(19)) {
+      which = WHICH_F19;
+    } else if(c == KEY_F(20)) {
+      which = WHICH_F20;
+    } else if(c == KEY_F(21)) {
+      which = WHICH_F21;
+    } else if(c == KEY_F(22)) {
+      which = WHICH_F22;
+    } else if(c == KEY_F(23)) {
+      which = WHICH_F23;
+    } else if(c == KEY_F(24)) {
+      which = WHICH_F24;
+    } else if(c == KEY_DC) {
+      which = WHICH_DELETE;
+    } else if(c == KEY_IC) {
+      which = WHICH_INSERT;
+    } else if(c == KEY_EIC) {
+      which = WHICH_INSERT;
+    } else if(c == KEY_CLEAR) {
+      which = WHICH_CLEAR;
+    } else if(c == KEY_EOS) {
+      which = WHICH_CLEAR;
+    } else if(c == KEY_EOL) {
+      which = WHICH_CLEAR;
+    } else if(c == KEY_NPAGE) {
+      which = WHICH_NEXT;
+    } else if(c == KEY_PPAGE) {
+      which = WHICH_PRIOR;
+    } else if(c == KEY_STAB) {
+      which = WHICH_TAB;
+    } else if(c == KEY_ENTER) {
+      which = WHICH_ENTER;
+    } else if(c == KEY_PRINT) {
+      which = WHICH_PRINT;
+    } else if(c == KEY_LL) {
+      which = WHICH_HOME;
+    } else if(c == KEY_BTAB) {
+      which = WHICH_BACKSPACE;
+    } else if(c == KEY_BEG) {
+      which = WHICH_HOME;
+    } else if(c == KEY_COMMAND) {
+      ctrl |= CTRL_CMD;
+    } else if(c == KEY_END) {
+      which = WHICH_END;
+    } else if(c == KEY_HELP) {
+      which = WHICH_HELP;
+    } else if(c == KEY_REFRESH) {
+      which = WHICH_BROWSER_REFRESH;
+    } else if(c == KEY_SBEG) {
+      which = WHICH_HOME;
+      ctrl |= CTRL_CTRL;
+    } else if(c == KEY_SCOMMAND) {
+      ctrl |= CTRL_CTRL | CTRL_CMD;
+    } else if(c == KEY_SDC) {
+      which = WHICH_DELETE;
+      ctrl |= CTRL_CTRL;
+    } else if(c == KEY_SEND) {
+      which = WHICH_END;
+      ctrl |= CTRL_CTRL;
+    } else if(c == KEY_SEOL) {
+      which = WHICH_CLEAR;
+      ctrl |= CTRL_CTRL;
+    } else if(c == KEY_SHELP) {
+      which = WHICH_HELP;
+      ctrl |= CTRL_CTRL;
+    } else if(c == KEY_SHOME) {
+      which = WHICH_HOME;
+      ctrl |= CTRL_CTRL;
+    } else if(c == KEY_SIC) {
+      which = WHICH_INSERT;
+      ctrl |= CTRL_CTRL;
+    } else if(c == KEY_SLEFT) {
+      which = WHICH_LEFT;
+      ctrl |= CTRL_CTRL;
+    } else if(c == KEY_SNEXT) {
+      which = WHICH_NEXT;
+      ctrl |= CTRL_CTRL;
+    } else if(c == KEY_SPREVIOUS) {
+      which = WHICH_PRIOR;
+      ctrl |= CTRL_CTRL;
+    } else if(c == KEY_SPRINT) {
+      which = WHICH_PRINT;
+      ctrl |= CTRL_CTRL;
+    } else if(c == KEY_SRIGHT) {
+      which = WHICH_RIGHT;
+      ctrl |= CTRL_CTRL;
+    } else {
+      if(c >= 65 && c <= 90) {
+        ctrl |= CTRL_CTRL;
+        which = c; // WHICH_CHARA to WHICH_CHARZ
+      } else if(c >= 97 && c <= 122) {
+        which = c - 32; // WHICH_CHARA to WHICH_CHARZ
+      } else {
+        which = c; // WHICH_CHAR0 to WHICH_CHAR9
+      }
+    }
 
-    ttyu_event_create_key(event, ttyu_unix_ctrl(data, c), ch, c,
-        ttyu_unix_which(data, c));
+    /* TODO:
+     * KEY_DL, KEY_IL, KEY_A1, KEY_A3, KEY_B2, KEY_C1, KEY_C3, KEY_CANCEL,
+     * KEY_COPY, KEY_CTAB, KEY_CATAB, KEY_CREATE, KEY_EXIT, KEY_FIND, KEY_MARK,
+     * KEY_OPEN, KEY_OPTIONS, KEY_PREVIOUS, KEY_REDO, KEY_REFERENCE,
+     * KEY_REPLACE, KEY_RESTART,KEY_RESUME, KEY_SAVE, KEY_SUSPEND, KEY_UNDO,
+     * KEY_SELECT, KEY_MESSAGE, KEY_MOVE
+     */
+
+    ttyu_event_create_key(event, ctrl, ch, c, which);
     progress.send(const_cast<const ttyu_event_t *>(event));
   }
   return TRUE;
-}
-
-int ttyu_unix_which(ttyu_data_t *data, char c) {
-  // TODO convert to windows-style virtual-keycode
-  return WHICH_UNKNOWN;
-}
-
-int ttyu_unix_ctrl(ttyu_data_t *data, char c) {
-  // TODO get control codes
-  return data->ctrl;
 }
 
 NAN_GETTER(ttyu_js_c::get_width) {

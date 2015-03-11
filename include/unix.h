@@ -12,11 +12,7 @@
 struct ttyu_data_s {
   WINDOW *win;
   mmask_t old_mouse_mask;
-  int ctrl;
   int mode;
 };
-
-int ttyu_unix_which(ttyu_data_t *data, char c);
-int ttyu_unix_ctrl(ttyu_data_t *data, char c);
 
 #endif // TTYU_UNIX_H_

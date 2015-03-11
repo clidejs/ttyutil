@@ -24,7 +24,7 @@ void ttyu_event_create_key(ttyu_event_t *event, int ctrl, char c,
   event->key->ctrl = ctrl;
   event->key->c = c;
   event->key->code = code;
-  event->key->which = 0;
+  event->key->which = which;
 }
 
 void ttyu_event_create_mouse(ttyu_event_t *event, int type, int button,

@@ -33,19 +33,20 @@ struct ttyu_data_s {
   int cury;
   ttyu_color_t color_table[WIN_COLORS];
   unsigned long initial_color_table[WIN_COLORS];
+  unsigned long base_fg;
+  unsigned long base_bg;
 };
 
 int ttyu_win_which(DWORD code);
 int ttyu_win_ctrl(DWORD state);
 bool ttyu_win_scr_update(ttyu_data_t *data, bool initial = FALSE);
 short ttyu_win_color(int color, ttyu_data_t *data);
+short ttyu_win_color_argb(unsigned long argb, ttyu_data_t *data);
 short ttyu_win_color_index(ttyu_color_t table[], unsigned long argb);
 short ttyu_win_color_first(ttyu_color_t table[], short index = WIN_COLORS - 1);
 short ttyu_win_color_push(ttyu_data_t *data, unsigned long argb);
 void ttyu_win_color_update(ttyu_data_t *data, bool close = FALSE);
 void ttyu_win_render(char *c, ttyu_data_t *data);
-void ttyu_win_render_token(char *c, int fg, int bg, int cstart, int clen,
-    ttyu_data_t *data);
 bool ttyu_win_clrscr(ttyu_data_t *data, int x, int y, int width, int height);
 
 #endif // TTYU_WIN_H_

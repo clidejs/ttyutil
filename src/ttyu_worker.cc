@@ -49,7 +49,8 @@ void ttyu_worker_c::handle(ttyu_event_t *event) {
       obj = NanNew<v8::Object>();
       obj->Set(NanNew<v8::String>("ctrl"),
           NanNew<v8::Integer>(event->key->ctrl));
-      obj->Set(NanNew<v8::String>("char"), NanNew<v8::String>(&event->key->c));
+      obj->Set(NanNew<v8::String>("char"),
+          NanNew<v8::String>(&(event->key->c)));
       obj->Set(NanNew<v8::String>("code"),
           NanNew<v8::Integer>(event->key->code));
       obj->Set(NanNew<v8::String>("which"),

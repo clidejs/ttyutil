@@ -149,6 +149,8 @@ bool ttyu_win_scr_update(ttyu_data_t *data, bool initial) {
       data->color_table[i] = { (data->initial_color_table[i] =
           (unsigned long) con_info.ColorTable[i]), i };
     }
+    data->base_fg = con_info.ColorTable[0];
+    data->base_bg = con_info.ColorTable[7];
   } else {
     CONSOLE_SCREEN_BUFFER_INFO con_info;
 
@@ -168,10 +170,13 @@ bool ttyu_win_scr_update(ttyu_data_t *data, bool initial) {
 }
 
 short ttyu_win_color(int color, ttyu_data_t *data) {
-  if(color < 16) {
+  if(color <= 16 || color > 0) {
     return color;
   }
-  unsigned long argb = util_term2argb(color);
+  return ttyu_win_color_argb(util_term2argb(color), data);
+}
+
+short ttyu_win_color_argb(unsigned long argb, ttyu_data_t *data) {
   int i = ttyu_win_color_index(data->color_table, argb);
   if(i != -1) {
     return ttyu_win_color_first(data->color_table, i);
@@ -238,17 +243,14 @@ void ttyu_win_render(char *c, ttyu_data_t *data) {
   int fg = -1;
   int bg = -1;
   int len = strlen(c); // content length
-  int cstart = 0; // content start position
-  int clen = 0; // content stop position
   int i; // position
   int j; // lookahead position
+  int color;
 
-  for(i = cstart; i < len; ++i) {
+  for(i = 0; i < len; ++i) {
     if(c[i] == '\x1b' && c[i+1] == '[') {
       j = 1;
       while(i+j < len && c[i+j] != 'm') ++j;
-
-      ttyu_win_render_token(c, fg, bg, cstart, clen, data);
 
       if(j == 3) {
         // end token
@@ -258,6 +260,8 @@ void ttyu_win_render(char *c, ttyu_data_t *data) {
           bg = -1;
         }
       } else {
+        fg = fg != -1 ? fg + 1 : fg;
+        bg = bg != -1 ? bg + 1 : bg;
         // start token
         if(c[i+2] == '3') { // foreground
           if(j == 9) {
@@ -279,31 +283,22 @@ void ttyu_win_render(char *c, ttyu_data_t *data) {
           }
         }
       }
-      i += j + 1;
-      cstart = i;
-      clen = 0;
+
+      color = ((fg != -1 ? ttyu_win_color(fg, data) :
+          ttyu_win_color_argb(data->base_fg, data)) << 4) + (bg != -1 ?
+          ttyu_win_color(bg, data) : ttyu_win_color_argb(data->base_bg, data));
+
+      SetConsoleTextAttribute(data->hout, color);
+
+      i += j;
     } else {
-      // token content
-      ++clen;
+      std::cout << c[i];
     }
   }
-  ttyu_win_render_token(c, fg, bg, cstart, clen, data);
-}
 
-void ttyu_win_render_token(char *c, int fg, int bg, int cstart, int clen,
-    ttyu_data_t *data) {
-  if(clen > 0 && strlen(c) > cstart + clen) {
-    fg = ttyu_win_color(fg, data);
-    bg = ttyu_win_color(bg, data);
-    /* TODO
-    const CHAR_INFO *buffer;
-    COORD buffer_size = { 1, clen };
-    COORD buffer_coord = { data->curx + cstart, data->cury };
-    SMALL_RECT region;
-
-    WriteConsoleOutput(data->hout, buffer, buffer_size, buffer_coord, &region);
-    */
-  }
+  ttyu_win_color_argb(data->base_bg, data);
+  ttyu_win_color_argb(data->base_fg, data);
+  SetConsoleTextAttribute(data->hout, 0x17);
 }
 
 bool ttyu_win_clrscr(ttyu_data_t *data, int x, int y, int width, int height) {

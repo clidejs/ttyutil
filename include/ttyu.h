@@ -53,7 +53,7 @@ void ttyu_data_destroy(ttyu_data_t *data);
 // key event structure
 typedef struct ttyu_key_s {
   int ctrl;
-  char c;
+  char *c;
   int code;
   int which;
 } ttyu_key_t;
@@ -73,7 +73,7 @@ typedef struct ttyu_event_s {
 } ttyu_event_t;
 void ttyu_event_create_error(ttyu_event_t *event, const char *err);
 void ttyu_event_create_resize(ttyu_event_t *event);
-void ttyu_event_create_key(ttyu_event_t *event, int ctrl, char c, int code,
+void ttyu_event_create_key(ttyu_event_t *event, int ctrl, char *c, int code,
     int which);
 void ttyu_event_create_mouse(ttyu_event_t *event, int type, int button, int x,
     int y, int ctrl);

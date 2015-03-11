@@ -11,7 +11,8 @@ for(var i = 0; i < events.length; ++i) {
 
 function listener(name) {
     return function(ev) {
-        console.log(name + ": " + JSON.stringify(ev) + "\r");
+        ttyu.write(name + ": " + JSON.stringify(ev) + "\r\n", ev === "error" ?
+                "#F00" : "#0F0", ev === "error" ? "#400" : "#040");
     };
 }
 

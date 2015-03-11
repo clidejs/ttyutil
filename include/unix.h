@@ -15,4 +15,6 @@ struct ttyu_data_s {
   int mode;
 };
 
+void ttyu_unix_clrscr(ttyu_data_t *data, int x, int y, int width, int height);
+
 #endif // TTYU_UNIX_H_

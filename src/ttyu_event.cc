@@ -14,15 +14,18 @@ void ttyu_event_create_resize(ttyu_event_t *event) {
   event->mouse = NULL;
 }
 
-void ttyu_event_create_key(ttyu_event_t *event, int ctrl, char c,
+void ttyu_event_create_key(ttyu_event_t *event, int ctrl, char *c,
     int code, int which) {
+  char *ch = (char *)malloc(sizeof(char) * strlen(c));
+  memcpy(ch, c, sizeof(char) * strlen(c));
+
   event->type = EVENT_KEY;
   event->err = NULL;
   event->key = (ttyu_key_t *)malloc(sizeof(ttyu_key_t));
   event->mouse = NULL;
 
   event->key->ctrl = ctrl;
-  event->key->c = c;
+  event->key->c = ch;
   event->key->code = code;
   event->key->which = which;
 }
@@ -46,6 +49,9 @@ void ttyu_event_destroy(ttyu_event_t *event) {
       free(event->mouse);
     }
     if(event->key) {
+      if(event->key->c) {
+        free(event->key->c);
+      }
       free(event->mouse);
     }
   }

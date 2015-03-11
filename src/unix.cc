@@ -20,7 +20,6 @@ bool ttyu_worker_c::execute(const ttyu_worker_c::ttyu_progress_c& progress,
     ttyu_data_t *data) {
   int c = wgetch(data->win);
   MEVENT mev;
-  char ch;
   ttyu_event_t *event = (ttyu_event_t *)malloc(sizeof(ttyu_event_t));
 
   if(c == ERR) {
@@ -100,12 +99,8 @@ bool ttyu_worker_c::execute(const ttyu_worker_c::ttyu_progress_c& progress,
       ttyu_event_create_error(event, ERROR_UNIX_MOUSEBAD);
     }
     progress.send(const_cast<const ttyu_event_t *>(event));
-  } else if(c == KEY_SF) {
-    // TODO scroll forward
-  } else if(c == KEY_SR) {
-    // TODO scroll backward
   } else {
-    ch = *const_cast<char *>(keyname(c));
+    char *ch = const_cast<char *>(keyname(c));
     int ctrl = CTRL_NULL;
     int which = WHICH_UNKNOWN;
 
@@ -207,50 +202,57 @@ bool ttyu_worker_c::execute(const ttyu_worker_c::ttyu_progress_c& progress,
       which = WHICH_BROWSER_REFRESH;
     } else if(c == KEY_SBEG) {
       which = WHICH_HOME;
-      ctrl |= CTRL_CTRL;
+      ctrl |= CTRL_SHIFT;
     } else if(c == KEY_SCOMMAND) {
-      ctrl |= CTRL_CTRL | CTRL_CMD;
+      ctrl |= CTRL_SHIFT | CTRL_CMD;
     } else if(c == KEY_SDC) {
       which = WHICH_DELETE;
-      ctrl |= CTRL_CTRL;
+      ctrl |= CTRL_SHIFT;
     } else if(c == KEY_SEND) {
       which = WHICH_END;
-      ctrl |= CTRL_CTRL;
+      ctrl |= CTRL_SHIFT;
     } else if(c == KEY_SEOL) {
       which = WHICH_CLEAR;
-      ctrl |= CTRL_CTRL;
+      ctrl |= CTRL_SHIFT;
     } else if(c == KEY_SHELP) {
       which = WHICH_HELP;
-      ctrl |= CTRL_CTRL;
+      ctrl |= CTRL_SHIFT;
     } else if(c == KEY_SHOME) {
       which = WHICH_HOME;
-      ctrl |= CTRL_CTRL;
+      ctrl |= CTRL_SHIFT;
     } else if(c == KEY_SIC) {
       which = WHICH_INSERT;
-      ctrl |= CTRL_CTRL;
+      ctrl |= CTRL_SHIFT;
     } else if(c == KEY_SLEFT) {
       which = WHICH_LEFT;
-      ctrl |= CTRL_CTRL;
+      ctrl |= CTRL_SHIFT;
     } else if(c == KEY_SNEXT) {
       which = WHICH_NEXT;
-      ctrl |= CTRL_CTRL;
+      ctrl |= CTRL_SHIFT;
     } else if(c == KEY_SPREVIOUS) {
       which = WHICH_PRIOR;
-      ctrl |= CTRL_CTRL;
+      ctrl |= CTRL_SHIFT;
     } else if(c == KEY_SPRINT) {
       which = WHICH_PRINT;
-      ctrl |= CTRL_CTRL;
+      ctrl |= CTRL_SHIFT;
     } else if(c == KEY_SRIGHT) {
       which = WHICH_RIGHT;
-      ctrl |= CTRL_CTRL;
+      ctrl |= CTRL_SHIFT;
+    } else if(c == KEY_SF) {
+      which = WHICH_DOWN;
+    } else if(c == KEY_SR) {
+      which = WHICH_UP;
     } else {
       if(c >= 65 && c <= 90) {
-        ctrl |= CTRL_CTRL;
+        ctrl |= CTRL_SHIFT;
         which = c; // WHICH_CHARA to WHICH_CHARZ
       } else if(c >= 97 && c <= 122) {
         which = c - 32; // WHICH_CHARA to WHICH_CHARZ
       } else {
-        which = c; // WHICH_CHAR0 to WHICH_CHAR9
+        which = c; // try direct mapping
+      }
+      if(ch[0] == '^') {
+        ctrl |= CTRL_CTRL;
       }
     }
 
@@ -266,6 +268,24 @@ bool ttyu_worker_c::execute(const ttyu_worker_c::ttyu_progress_c& progress,
     progress.send(const_cast<const ttyu_event_t *>(event));
   }
   return TRUE;
+}
+
+void ttyu_unix_clrscr(ttyu_data_t *data, int x, int y, int width, int height) {
+  if(x == 0 && y == 0 && width == COLS && height == LINES) {
+    wclear(data->win);
+  } else if(width != 0 || height != 0 || x < COLS || y < LINES) {
+    int ox = data->win->_curx;
+    int oy = data->win->_cury;
+    wmove(data->win, x, y);
+
+    for(int j = 0; j < height; ++j) {
+      for(int i = 0; i < width; ++i) {
+        std::cout << " ";
+      }
+      std::cout << "\r\n";
+    }
+    wmove(data->win, ox, oy);
+  }
 }
 
 NAN_GETTER(ttyu_js_c::get_width) {
@@ -346,14 +366,13 @@ NAN_METHOD(ttyu_js_c::clear) {
 
   if(args[0]->IsNumber() && args[1]->IsNumber() && args[2]->IsNumber() &&
       args[3]->IsNumber()) {
-    //int x = util_max(args[0]->Int32Value(), 0);
-    //int y = util_max(args[1]->Int32Value(), 0);
-    //int width = util_min(args[2]->Int32Value(), COLS);
-    //int height = util_min(args[3]->Int32Value(), LINES);
-
-    // TODO!
+    ttyu_unix_clrscr(obj->data,
+        util_max(args[0]->Int32Value(), 0),     // x
+        util_max(args[1]->Int32Value(), 0),     // y
+        util_min(args[2]->Int32Value(), COLS),  // width
+        util_min(args[3]->Int32Value(), LINES));// height
   } else {
-    wclear(obj->data->win);
+    ttyu_unix_clrscr(obj->data, 0, 0, COLS, LINES);
   }
   NanReturnThis();
 }

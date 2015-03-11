@@ -15,6 +15,16 @@ module.exports = function(ttyu) {
         return this;
     };
 
+    ttyu.TTYUtil.EVENT = {
+        ERROR: "error",
+        KEY: "key",
+        RESIZE: "resize",
+        MOUSEDOWN: "mousedown",
+        MOUSEUP: "mouseup",
+        MOUSEMOVE: "mousemove",
+        MOUSEWHEEL: "mousewheel",
+        MOUSEHWHEEL: "mousehwheel"
+    };
     ttyu.TTYUtil.MOUSE = Const.Mouse;
     ttyu.TTYUtil.WHICH = Const.Which;
     ttyu.TTYUtil.CTRL = Const.Ctrl;

@@ -238,7 +238,7 @@ bool ttyu_worker_c::execute(const ttyu_worker_c::ttyu_progress_c& progress,
     } else if(c == KEY_SRIGHT) {
       which = WHICH_RIGHT;
       ctrl |= CTRL_SHIFT;
-    } else if(c == KEY_SF) {
+    } else if(c == KEY_SF) {
       which = WHICH_DOWN;
     } else if(c == KEY_SR) {
       which = WHICH_UP;
@@ -273,7 +273,7 @@ bool ttyu_worker_c::execute(const ttyu_worker_c::ttyu_progress_c& progress,
 void ttyu_unix_clrscr(ttyu_data_t *data, int x, int y, int width, int height) {
   if(x == 0 && y == 0 && width == COLS && height == LINES) {
     wclear(data->win);
-  } else if(width != 0 || height != 0 || x < COLS || y < LINES) {
+  } else if(width != 0 || height != 0 || x < COLS || y < LINES) {
     int ox = data->win->_curx;
     int oy = data->win->_cury;
     wmove(data->win, x, y);

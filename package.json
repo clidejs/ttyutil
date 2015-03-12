@@ -1,6 +1,6 @@
 {
   "name": "ttyutil",
-  "version": "0.0.2",
+  "version": "0.1.0",
   "description": "cross-platform terminal utilities",
   "main": "index.js",
   "scripts": {

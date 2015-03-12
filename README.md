@@ -7,6 +7,14 @@
 
 A terminal utility module for node.js serving a cross-platform console api.
 
+## [Changelog](https://github.com/clidejs/ttyutil/tree/master/CHANGELOG.md)
+
+## Note
+
+This project is still under development and thus the API may change, please
+report any bugs [here](https://github.com/clidejs/ttyutil/issues), and feel free
+to make feature requests.
+
 ## Installation
 
 Simply add **ttyutil** to the dependencies of your project:

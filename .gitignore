@@ -1,9 +1,7 @@
+build
 node_modules
 npm-debug.log
 .DS_Store
 
-build
 tmp
-spec.js
-
-test.js
+TODO.md

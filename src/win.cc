@@ -76,7 +76,7 @@ bool ttyu_worker_c::execute(const ttyu_worker_c::ttyu_progress_c& progress,
       ttyu_event_t *event = (ttyu_event_t *)malloc(sizeof(ttyu_event_t));
       ttyu_event_create_key(event, ttyu_win_ctrl(
               ir[i].Event.KeyEvent.dwControlKeyState),
-          &((char)ir[i].Event.KeyEvent.uChar.UnicodeChar),
+          (char *)(&(ir[i].Event.KeyEvent.uChar.UnicodeChar)),
           (int)ir[i].Event.KeyEvent.wVirtualKeyCode,
           ttyu_win_which(ir[i].Event.KeyEvent.wVirtualKeyCode));
 

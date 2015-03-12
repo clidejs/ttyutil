@@ -25,6 +25,7 @@
 #ifndef TTYU_H_
 #define TTYU_H_
 
+#include <signal.h>
 #include <uv.h>
 #include <node.h>
 #include <nan.h>
@@ -49,6 +50,11 @@ class ttyu_worker_c;
 typedef struct ttyu_data_s ttyu_data_t;
 void ttyu_data_init(ttyu_data_t *data);
 void ttyu_data_destroy(ttyu_data_t *data);
+
+// functions necessary for cleanup and memory management
+void ttyu_init();
+ttyu_js_c *ttyu_get();
+void ttyu_destroy(int param);
 
 // key event structure
 typedef struct ttyu_key_s {
@@ -83,11 +89,12 @@ void ttyu_event_destroy(ttyu_event_t *event);
 class ttyu_js_c : public node::ObjectWrap {
 public:
   static void init(v8::Handle<v8::Object> target);
+  explicit ttyu_js_c();
+  void destroy();
 
   ttyu_data_t *data;
   ee_emitter_t *emitter;
 private:
-  explicit ttyu_js_c();
   ~ttyu_js_c();
 
   static NAN_METHOD(new_instance);

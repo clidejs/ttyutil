@@ -3,6 +3,8 @@
 v8::Persistent<v8::Function> ttyu_js_c::constructor;
 
 void ttyu_js_c::init(v8::Handle<v8::Object> target) {
+  ttyu_init();
+
   v8::Local<v8::FunctionTemplate> tpl =
       NanNew<v8::FunctionTemplate>(new_instance);
   tpl->SetClassName(NanNew<v8::String>("TTYUtil"));
@@ -27,7 +29,7 @@ void ttyu_js_c::init(v8::Handle<v8::Object> target) {
   EXPORT_PROTOTYPE_METHOD(tpl, "prepare", prepare);
   EXPORT_PROTOTYPE_METHOD(tpl, "write", write);
 
-  constructor.Reset(v8::Isolate::GetCurrent(), tpl->GetFunction());
+  NanAssignPersistent(constructor, tpl->GetFunction());
   target->Set(NanNew<v8::String>("TTYUtil"), tpl->GetFunction());
 }
 
@@ -42,6 +44,10 @@ ttyu_js_c::ttyu_js_c() {
 }
 
 ttyu_js_c::~ttyu_js_c() {
+  destroy();
+}
+
+void ttyu_js_c::destroy() {
   if(worker_) {
     worker_->destroy();
     delete worker_;
@@ -52,7 +58,7 @@ ttyu_js_c::~ttyu_js_c() {
 
 NAN_METHOD(ttyu_js_c::new_instance) {
   NanScope();
-  ttyu_js_c *obj = new ttyu_js_c();
+  ttyu_js_c *obj = ttyu_get();
   obj->Wrap(args.This());
   NanReturnThis();
 }

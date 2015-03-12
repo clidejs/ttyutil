@@ -6,6 +6,7 @@
 ## About
 
 A terminal utility module for node.js serving a cross-platform console api.
+Works with Node.js v0.8 and above.
 
 ## [Changelog](https://github.com/clidejs/ttyutil/tree/master/CHANGELOG.md)
 

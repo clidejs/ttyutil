@@ -298,7 +298,7 @@ void ttyu_win_render(char *c, ttyu_data_t *data) {
 
   ttyu_win_color_argb(data->base_bg, data);
   ttyu_win_color_argb(data->base_fg, data);
-  SetConsoleTextAttribute(data->hout, 0x17);
+  SetConsoleTextAttribute(data->hout, 0x16);
 }
 
 bool ttyu_win_clrscr(ttyu_data_t *data, int x, int y, int width, int height) {

@@ -1,7 +1,7 @@
 var TTYUtil = require("../index");
 
-var events = [ "error", "resize", "key", "mouseup", "mousedown", "mousemove",
-        "mousewheel", "mousehwheel"];
+var events = [ "error", "signal", "resize", "key", "mouseup", "mousedown",
+        "mousemove", "mousewheel", "mousehwheel"];
 
 var ttyu = new TTYUtil();
 
@@ -11,8 +11,11 @@ for(var i = 0; i < events.length; ++i) {
 
 function listener(name) {
     return function(ev) {
-        ttyu.write(name + ": " + JSON.stringify(ev) + "\r\n", ev === "error" ?
-                "#F00" : "#0F0", ev === "error" ? "#400" : "#040");
+        ttyu.write(name + ": " + JSON.stringify(ev) + "\r\n", name === "error" ?
+                "#F00" : "#0F0", name === "error" ? "#400" : "#040");
+        if(name == "signal") {
+            process.exit(0);
+        }
     };
 }
 

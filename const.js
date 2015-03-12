@@ -3,13 +3,14 @@
 module.exports = {
     Event: {
         error: 0,
-        resize: 1,
-        key: 2,
-        mouseup: 3,
-        mousedown: 4,
-        mousemove: 5,
-        mousewheel: 6,
-        mousehwheel: 7
+        signal: 1,
+        resize: 2,
+        key: 3,
+        mouseup: 4,
+        mousedown: 5,
+        mousemove: 6,
+        mousewheel: 7,
+        mousehwheel: 8
     },
 
     Mouse: {

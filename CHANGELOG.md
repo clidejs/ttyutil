@@ -1,8 +1,10 @@
 # ttyutil changelog
 
-## 0.1.0
+## 0.1.1
 
-### Features:
+ - fixed bugs when compiled in node <0.11. Is node 0.8+ compatible now
+
+## 0.1.0
 
  - first beta release
  - basic implementation for unix and windows
@@ -11,7 +13,3 @@
  - Setters for cursor position
  - Methods to move the cursor, write colored output, beep sound, clear screen
  parts, prepare rendering strings and receive color codes
-
-### Known Bugs:
-
- - colored output on windows is broken (do not use!)

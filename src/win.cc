@@ -147,7 +147,7 @@ bool ttyu_win_scr_update(ttyu_data_t *data, bool initial) {
 
     for(short i = 0; i < WIN_COLORS; ++i) {
       data->initial_color_table[i] = (unsigned long) con_info.ColorTable[i];
-      data->color_table[i] = { (unsigned long) con_info.ColorTable[i], i };
+      //data->color_table[i] = { (unsigned long) con_info.ColorTable[i], i };
     }
     data->base_fg = con_info.ColorTable[0];
     data->base_bg = con_info.ColorTable[7];

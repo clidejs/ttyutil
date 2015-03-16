@@ -1,4 +1,4 @@
-# clidejs/ttyutil
+# clidejs/ttyutil [![AppVeyor](https://ci.appveyor.com/api/projects/status/github/clidejs/ttyutil?branch=master&retina=true&svg=true)](https://ci.appveyor.com/project/bbuecherl/ttyutil) [![Build Status](https://travis-ci.org/clidejs/ttyutil.png)](https://travis-ci.org/clidejs/ttyutil)
 
 [![NPM](https://nodei.co/npm/ttyutil.png?downloads=true&downloadRank=true)](https://nodei.co/npm/ttyutil/)
 [![NPM](https://nodei.co/npm-dl/ttyutil.png?months=6&height=3)](https://nodei.co/npm/ttyutil/)

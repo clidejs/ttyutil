@@ -99,11 +99,11 @@ int util_color(const char *c) {
   }
 }
 
-bool util_max(int a, int b) {
+int util_max(int a, int b) {
   return (a>b)?a:b;
 }
 
-bool util_min(int a, int b) {
+int util_min(int a, int b) {
   return (a>b)?b:a;
 }
 

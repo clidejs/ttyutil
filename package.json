@@ -26,6 +26,6 @@
   },
   "homepage": "https://github.com/clidejs/ttyutil",
   "dependencies": {
-    "nan": "^1.6.1"
+    "nan": "1.7.0"
   }
 }

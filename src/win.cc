@@ -146,8 +146,8 @@ bool ttyu_win_scr_update(ttyu_data_t *data, bool initial) {
     data->cury = (int)con_info.dwCursorPosition.Y - data->top;
 
     for(short i = 0; i < WIN_COLORS; ++i) {
-      data->color_table[i] = { (data->initial_color_table[i] =
-          (unsigned long) con_info.ColorTable[i]), i };
+      data->initial_color_table[i] = (unsigned long) con_info.ColorTable[i];
+      data->color_table[i] = { (unsigned long) con_info.ColorTable[i], i };
     }
     data->base_fg = con_info.ColorTable[0];
     data->base_bg = con_info.ColorTable[7];
@@ -298,7 +298,7 @@ void ttyu_win_render(char *c, ttyu_data_t *data) {
 
   ttyu_win_color_argb(data->base_bg, data);
   ttyu_win_color_argb(data->base_fg, data);
-  SetConsoleTextAttribute(data->hout, 0x16);
+  SetConsoleTextAttribute(data->hout, 0x7);
 }
 
 bool ttyu_win_clrscr(ttyu_data_t *data, int x, int y, int width, int height) {

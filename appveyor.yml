@@ -1,4 +1,4 @@
-version: 0.1.{build}
+version: 0.1.0.{build}
 os: Windows Server 2012 R2
 
 environment:
@@ -25,5 +25,4 @@ test_script:
   # run tests
   - npm test
 
-build:
-  verbosity: detailed
+build: off

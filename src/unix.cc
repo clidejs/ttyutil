@@ -256,14 +256,6 @@ bool ttyu_worker_c::execute(const ttyu_worker_c::ttyu_progress_c& progress,
       }
     }
 
-    /* TODO:
-     * KEY_DL, KEY_IL, KEY_A1, KEY_A3, KEY_B2, KEY_C1, KEY_C3, KEY_CANCEL,
-     * KEY_COPY, KEY_CTAB, KEY_CATAB, KEY_CREATE, KEY_EXIT, KEY_FIND, KEY_MARK,
-     * KEY_OPEN, KEY_OPTIONS, KEY_PREVIOUS, KEY_REDO, KEY_REFERENCE,
-     * KEY_REPLACE, KEY_RESTART,KEY_RESUME, KEY_SAVE, KEY_SUSPEND, KEY_UNDO,
-     * KEY_SELECT, KEY_MESSAGE, KEY_MOVE
-     */
-
     ttyu_event_create_key(event, ctrl, ch, c, which);
     progress.send(const_cast<const ttyu_event_t *>(event));
   }

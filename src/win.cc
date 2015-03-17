@@ -26,7 +26,6 @@ void ttyu_data_init(ttyu_data_t *data) {
 
 void ttyu_data_destroy(ttyu_data_t *data) {
   SetConsoleMode(data->hin, data->old_mode);
-  ttyu_win_color_update(data, TRUE);
 }
 
 bool ttyu_worker_c::execute(const ttyu_worker_c::ttyu_progress_c& progress,
@@ -130,113 +129,24 @@ int ttyu_win_ctrl(DWORD state) {
 }
 
 bool ttyu_win_scr_update(ttyu_data_t *data, bool initial) {
+  CONSOLE_SCREEN_BUFFER_INFO con_info;
+
+  if(!GetConsoleScreenBufferInfo(data->hout, &con_info)) {
+    data->err->msg = ERROR(ERROR_WIN_GET, GetLastError());
+    return !(data->err->kill = TRUE);
+  }
+
+  data->top = (int)con_info.srWindow.Top;
+  data->width = (int)con_info.dwSize.X;
+  data->height = (int)con_info.dwSize.Y - data->top;
+
+  data->curx = (int)con_info.dwCursorPosition.X;
+  data->cury = (int)con_info.dwCursorPosition.Y - data->top;
+
   if(initial) {
-    CONSOLE_SCREEN_BUFFER_INFOEX con_info;
-    con_info.cbSize = sizeof(con_info);
-    if(!GetConsoleScreenBufferInfoEx(data->hout, &con_info)) {
-      data->err->msg = ERROR(ERROR_WIN_GET, GetLastError());
-      return !(data->err->kill = TRUE);
-    }
-
-    data->top = (int)con_info.srWindow.Top;
-    data->width = (int)con_info.dwSize.X;
-    data->height = (int)con_info.dwSize.Y - data->top;
-
-    data->curx = (int)con_info.dwCursorPosition.X;
-    data->cury = (int)con_info.dwCursorPosition.Y - data->top;
-
-    for(short i = 0; i < WIN_COLORS; ++i) {
-      data->initial_color_table[i] = (unsigned long) con_info.ColorTable[i];
-      //data->color_table[i] = { (unsigned long) con_info.ColorTable[i], i };
-    }
-    data->base_fg = con_info.ColorTable[0];
-    data->base_bg = con_info.ColorTable[7];
-  } else {
-    CONSOLE_SCREEN_BUFFER_INFO con_info;
-
-    if(!GetConsoleScreenBufferInfo(data->hout, &con_info)) {
-      data->err->msg = ERROR(ERROR_WIN_GET, GetLastError());
-      return !(data->err->kill = TRUE);
-    }
-
-    data->top = (int)con_info.srWindow.Top;
-    data->width = (int)con_info.dwSize.X;
-    data->height = (int)con_info.dwSize.Y - data->top;
-
-    data->curx = (int)con_info.dwCursorPosition.X;
-    data->cury = (int)con_info.dwCursorPosition.Y - data->top;
+    data->base_color = (int)con_info.wAttributes;
   }
   return TRUE;
-}
-
-short ttyu_win_color(int color, ttyu_data_t *data) {
-  if(color <= 16 || color > 0) {
-    return color;
-  }
-  return ttyu_win_color_argb(util_term2argb(color), data);
-}
-
-short ttyu_win_color_argb(unsigned long argb, ttyu_data_t *data) {
-  int i = ttyu_win_color_index(data->color_table, argb);
-  if(i != -1) {
-    return ttyu_win_color_first(data->color_table, i);
-  } else {
-    return ttyu_win_color_push(data, argb);
-  }
-}
-
-short ttyu_win_color_index(ttyu_color_t table[], unsigned long argb) {
-  for(short i = 0; i < WIN_COLORS; ++i) {
-    if(table[i].argb == argb) {
-      return i;
-    }
-  }
-  return -1;
-}
-
-short ttyu_win_color_first(ttyu_color_t table[], short index) {
-  if(index != 0) {
-    ttyu_color_t tmp = table[index];
-
-    for(short i = index; i >= 1; --i) {
-      table[i] = table[i - 1];
-    }
-
-    table[0] = tmp;
-  }
-  return 0;
-}
-
-short ttyu_win_color_push(ttyu_data_t *data, unsigned long argb) {
-  ttyu_color_t color = data->color_table[WIN_COLORS - 1];
-  color.argb = argb;
-
-  ttyu_win_color_update(data);
-  return ttyu_win_color_first(data->color_table);
-}
-
-void ttyu_win_color_update(ttyu_data_t *data, bool close) {
-  CONSOLE_SCREEN_BUFFER_INFOEX con_info;
-  con_info.cbSize = sizeof(con_info);
-
-  if(!GetConsoleScreenBufferInfoEx(data->hout, &con_info)) {
-    data->err->msg = ERROR(ERROR_WIN_GET, GetLastError());
-    data->err->kill = FALSE;
-    return;
-  }
-
-  for(short i = 0; i < WIN_COLORS; ++i) {
-    if(close) {
-      con_info.ColorTable[i] = data->initial_color_table[i];
-    } else {
-      con_info.ColorTable[data->color_table[i].id] = data->color_table[i].argb;
-    }
-  }
-
-  if(!SetConsoleScreenBufferInfoEx(data->hout, &con_info)) {
-    data->err->msg = ERROR(ERROR_WIN_SET, GetLastError());
-    data->err->kill = FALSE;
-  }
 }
 
 void ttyu_win_render(char *c, ttyu_data_t *data) {
@@ -260,8 +170,6 @@ void ttyu_win_render(char *c, ttyu_data_t *data) {
           bg = -1;
         }
       } else {
-        fg = fg != -1 ? fg + 1 : fg;
-        bg = bg != -1 ? bg + 1 : bg;
         // start token
         if(c[i+2] == '3') { // foreground
           if(j == 9) {
@@ -284,9 +192,13 @@ void ttyu_win_render(char *c, ttyu_data_t *data) {
         }
       }
 
-      color = ((fg != -1 ? ttyu_win_color(fg, data) :
-          ttyu_win_color_argb(data->base_fg, data)) << 4) + (bg != -1 ?
-          ttyu_win_color(bg, data) : ttyu_win_color_argb(data->base_bg, data));
+      color = data->base_color;
+      if(fg != -1) {
+        color += fg << 4;
+      }
+      if(bg != -1) {
+        color += bg;
+      }
 
       SetConsoleTextAttribute(data->hout, color);
 
@@ -296,9 +208,7 @@ void ttyu_win_render(char *c, ttyu_data_t *data) {
     }
   }
 
-  ttyu_win_color_argb(data->base_bg, data);
-  ttyu_win_color_argb(data->base_fg, data);
-  SetConsoleTextAttribute(data->hout, 0x7);
+  SetConsoleTextAttribute(data->hout, data->base_color);
 }
 
 bool ttyu_win_clrscr(ttyu_data_t *data, int x, int y, int width, int height) {

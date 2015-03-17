@@ -25,6 +25,7 @@ short util_hex2term(const char *hex);
 short util_color(const char *c);
 int util_max(int a, int b);
 int util_min(int a, int b);
+int util_abs(int a);
 char *util_error(char *name, int id);
 
 #undef ERROR

@@ -1,5 +1,7 @@
 # clidejs/ttyutil [![NPM](https://img.shields.io/npm/v/ttyutil.svg)](https://npmjs.com/package/ttyutil) [![AppVeyor](https://img.shields.io/appveyor/ci/bbuecherl/ttyutil.svg)](https://ci.appveyor.com/project/bbuecherl/ttyutil) [![Build Status](https://img.shields.io/travis/clidejs/ttyutil.svg)](https://travis-ci.org/clidejs/ttyutil)
 
+[![Join the chat at https://gitter.im/clidejs/ttyutil](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/clidejs/ttyutil?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
+
 [![NPM](https://nodei.co/npm/ttyutil.png?downloads=true&downloadRank=true)](https://nodei.co/npm/ttyutil/)
 [![NPM](https://nodei.co/npm-dl/ttyutil.png?months=6&height=3)](https://nodei.co/npm/ttyutil/)
 

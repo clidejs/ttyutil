@@ -4,7 +4,7 @@
   "description": "cross-platform terminal utilities",
   "main": "index.js",
   "scripts": {
-    "test": "node build && node-gyp rebuild -d && node tests/run",
+    "test": "./node_modules/.bin/mocha tests/run",
     "start": "node build && node-gyp rebuild"
   },
   "repository": {
@@ -27,5 +27,10 @@
   "homepage": "https://github.com/clidejs/ttyutil",
   "dependencies": {
     "nan": "1.7.0"
+  },
+  "devDependencies": {
+    "chai": "2.1.2",
+    "mocha": "2.2.1",
+    "node-is": "0.5.2"
   }
 }

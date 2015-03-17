@@ -31,4 +31,4 @@ module.exports = function(ttyu) {
     ttyu.TTYUtil.MODE = Const.Mode;
 
     return ttyu.TTYUtil;
-}
+};

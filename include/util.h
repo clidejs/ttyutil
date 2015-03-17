@@ -12,14 +12,17 @@
 #define EXPORT_PROTOTYPE_GETSET(tpl, name, get, set)                           \
     tpl->InstanceTemplate()->SetAccessor(NanNew<v8::String>(name), (get), (set))
 
-int util_rgbi2term(float r, float g, float b);
-char *util_render(const char *ch, int fg, int bg);
-int util_parse_dec(char d);
-int util_parse_hex(char h);
-unsigned long util_term2argb(int t);
-int util_rgb2term(const char *rgb);
-int util_hex2term(const char *hex);
-int util_color(const char *c);
+#define WIN_COLORS 16
+
+short util_rgbi2term(short r, short g, short b);
+short util_rgbi2win(short r, short g, short b);
+char *util_render(const char *ch, short fg, short bg);
+short util_parse_dec(char d);
+short util_parse_hex(char h);
+unsigned long util_term2argb(short t);
+short util_rgb2term(const char *rgb);
+short util_hex2term(const char *hex);
+short util_color(const char *c);
 int util_max(int a, int b);
 int util_min(int a, int b);
 char *util_error(char *name, int id);

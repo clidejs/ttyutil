@@ -4,7 +4,6 @@
 #include <windows.h>
 
 #define WIN_BUFFER_SIZE 128
-#define WIN_COLORS 16
 
 typedef struct ttyu_error_s {
   char *msg;

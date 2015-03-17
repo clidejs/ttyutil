@@ -1,10 +1,32 @@
 #include <ttyu.h>
 
-int util_rgbi2term(float r, float g, float b) {
-  return r / 51 * 36 + g / 51 * 6 + b / 51 + 16;
+unsigned long util_colors_a[] = { 0x000000, 0x800000, 0x008000, 0x808000,
+    0x000080, 0x800080, 0x008080, 0xc0c0c0, 0x808080, 0xff0000, 0x00ff00,
+    0xffff00, 0x0000ff, 0xff00ff, 0x00ffff, 0xffffff };
+
+short util_rgbi2term(short r, short g, short b) {
+  return (short)(r / 51 * 36 + g / 51 * 6 + b / 51 + 16);
 }
 
-char *util_render(const char *ch, int fg, int bg) {
+short util_rgbi2win(short r, short g, short b) {
+  unsigned long match;
+  short match_i = 0;
+  int match_diff = 256*256*256;
+  int diff = match_diff;
+  short mr;
+  short mg;
+  short mb;
+
+  for(short i = 0; i < WIN_COLORS; ++i) {
+    match = util_colors_a[i];
+    mr = match >> 16;
+    mg = (match << 16) >> 24;
+    mb = (match << 24) >> 32;
+  }
+  return match_i;
+}
+
+char *util_render(const char *ch, short fg, short bg) {
   char *out = (char *)malloc(sizeof(char) * (strlen(ch) + 30));
   if(fg != -1 && bg != -1) {
     sprintf(out, "\x1b[38;5;%dm\x1b[48;5;%dm%s\x1b[49m\x1b[39m", fg, bg, ch);
@@ -18,14 +40,14 @@ char *util_render(const char *ch, int fg, int bg) {
   return out;
 }
 
-int util_parse_dec(char d) {
+short util_parse_dec(char d) {
   if(d >= '0' && d <= '9') {
     return d - '0';
   }
   return 0;
 }
 
-int util_parse_hex(char h) {
+short util_parse_hex(char h) {
   if(h >= 'A' && h <= 'F') {
     return h - 'A' + 10;
   } else if(h >= 'a' && h <= 'f') {
@@ -34,7 +56,7 @@ int util_parse_hex(char h) {
   return util_parse_dec(h);
 }
 
-unsigned long util_term2argb(int t) {
+unsigned long util_term2argb(short t) {
   unsigned long argb = 0;
   t -= 16;
   argb = ((t / 36) * 51) << 8;
@@ -44,14 +66,14 @@ unsigned long util_term2argb(int t) {
   return argb;
 }
 
-int util_rgb2term(const char *rgb) {
-  int r = 0;
-  int g = 0;
-  int b = 0;
-  int cur = 0;
-  int pos = 0;
+short util_rgb2term(const char *rgb) {
+  short r = 0;
+  short g = 0;
+  short b = 0;
+  short cur = 0;
+  short pos = 0;
 
-  for(int i = strlen(rgb); i >= 0; --i) {
+  for(short i = strlen(rgb); i >= 0; --i) {
     if(rgb[i] == ',') {
       ++cur;
       pos = 0;
@@ -67,13 +89,17 @@ int util_rgb2term(const char *rgb) {
     }
   }
 
+#ifdef PLATFORM_WINDOWS
+  return util_rgbi2win(r, g, b);
+#else
   return util_rgbi2term(r, g, b);
+#endif
 }
 
-int util_hex2term(const char *hex) {
-  int r = 0;
-  int g = 0;
-  int b = 0;
+short util_hex2term(const char *hex) {
+  short r = 0;
+  short g = 0;
+  short b = 0;
   if(strlen(hex) == 6) {
     r = util_parse_hex(hex[0]) * 16 + util_parse_hex(hex[1]);
     g = util_parse_hex(hex[2]) * 16 + util_parse_hex(hex[3]);
@@ -86,10 +112,14 @@ int util_hex2term(const char *hex) {
     g += g*16;
     b += b*16;
   }
+#ifdef PLATFORM_WINDOWS
+  return util_rgbi2win(r, g, b);
+#else
   return util_rgbi2term(r, g, b);
+#endif
 }
 
-int util_color(const char *c) {
+short util_color(const char *c) {
   if(c[0] == '#') {
     return util_hex2term(&c[1]);
   } else if(c[0] == 'r' && c[1] == 'g' && c[2] == 'b' && c[3] == '(') {

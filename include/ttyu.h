@@ -25,7 +25,9 @@
 #ifndef TTYU_H_
 #define TTYU_H_
 
+#include <cstdlib>
 #include <signal.h>
+
 #include <uv.h>
 #include <node.h>
 #include <nan.h>

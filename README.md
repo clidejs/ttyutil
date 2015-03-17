@@ -178,7 +178,12 @@ This object wraps all control key identifier as constants:
 This object wraps all key codes as constants.
 *(see /const.js for the complete list)*
 
+## Test
+
+run the tests using `npm test`. check out /tests for test cases.
+
 ## Example
+
 see the /examples folder
 
 ## License: MIT

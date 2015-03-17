@@ -15,8 +15,6 @@ platform:
 install:
   # Get the latest stable version of Node.js or io.js
   - ps: Install-Product node $env:nodejs_version
-  # install node-gyp globally
-  - npm install -g node-gyp
   # install modules
   - npm install
 

@@ -9,27 +9,28 @@ short util_rgbi2term(short r, short g, short b) {
 }
 
 short util_rgbi2win(short r, short g, short b) {
-  unsigned long match;
-  short match_i = 0;
-  short match_diff = 256+256+256;
-  short diff;
-  int mr;
-  int mg;
-  int mb;
+    unsigned long match;
+    short match_i = 0;
+    int match_diff = 256+256+256;
+    int diff;
+    unsigned char mr;
+    unsigned char mg;
+    unsigned char mb;
 
-  for(short i = 0; i < WIN_COLORS; ++i) {
-    match = util_colors_a[i];
-    mr = match >> 16;
-    mg = (match << 16) >> 24;
-    mb = (match << 24) >> 32;
+    for(short i = 0; i < 16; ++i) {
+        match = util_colors_a[i];
+        mr = (match >> 16);
+        mg = ((match << 16) >> 24);
+        mb = ((match << 24) >> 24);
 
-    diff = util_abs(mr - r) + util_abs(mg - g) + util_abs(mb - b);
-    if(diff < match_diff) {
-      match_diff = diff;
-      match_i = i;
+        diff = util_abs(mr - r) + util_abs(mg - g) + util_abs(mb - b);
+        //DBG(diff);
+        if(diff <= match_diff) {
+            match_diff = diff;
+            match_i = i;
+        }
     }
-  }
-  return match_i;
+    return match_i;
 }
 
 char *util_render(const char *ch, short fg, short bg) {

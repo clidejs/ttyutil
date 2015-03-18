@@ -53,11 +53,6 @@ typedef struct ttyu_data_s ttyu_data_t;
 void ttyu_data_init(ttyu_data_t *data);
 void ttyu_data_destroy(ttyu_data_t *data);
 
-// functions necessary for cleanup and memory management
-void ttyu_init();
-ttyu_js_c *ttyu_get();
-void ttyu_destroy(int param);
-
 // key event structure
 typedef struct ttyu_key_s {
   int ctrl;

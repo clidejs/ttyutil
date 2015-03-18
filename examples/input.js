@@ -14,7 +14,7 @@ function listener(name) {
         ttyu.write(name + ": " + JSON.stringify(ev) + "\r\n", name === "error" ?
                 "#F00" : "#0F0", name === "error" ? "#400" : "#040");
         if(name == "signal") {
-            process.exit(0);
+            ttyu.stop();
         }
     };
 }

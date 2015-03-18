@@ -13,6 +13,8 @@ void ttyu_data_init(ttyu_data_t *data) {
 void ttyu_data_destroy(ttyu_data_t *data) {
   keypad(data->win, FALSE);
   mousemask(data->old_mouse_mask, NULL);
+  echo();
+  nocbreak();
   endwin();
 }
 

@@ -13,7 +13,7 @@ function listener(name) {
     return function(ev) {
         ttyu.write(name + ": " + JSON.stringify(ev) + "\r\n", name === "error" ?
                 "#F00" : "#0F0", name === "error" ? "#400" : "#040");
-        if(name == "signal") {
+        if(name === "key" && ev.code === 3) {
             ttyu.stop();
         }
     };

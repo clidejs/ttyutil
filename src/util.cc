@@ -1,36 +1,50 @@
 #include <ttyu.h>
 
-unsigned long util_colors_a[] = { 0x000000, 0x800000, 0x008000, 0x808000,
-    0x000080, 0x800080, 0x008080, 0xc0c0c0, 0x808080, 0xff0000, 0x00ff00,
-    0xffff00, 0x0000ff, 0xff00ff, 0x00ffff, 0xffffff };
+unsigned long util_colors_a[] = {
+  0x000000,
+  0x800000,
+  0x008000,
+  0x808000,
+  0x000080,
+  0x800080,
+  0x008080,
+  0xc0c0c0,
+  0x808080,
+  0xff0000,
+  0x00ff00,
+  0xffff00,
+  0x0000ff,
+  0xff00ff,
+  0x00ffff,
+  0xffffff
+};
 
 short util_rgbi2term(short r, short g, short b) {
   return (short)(r / 51 * 36 + g / 51 * 6 + b / 51 + 16);
 }
 
 short util_rgbi2win(short r, short g, short b) {
-    unsigned long match;
-    short match_i = 0;
-    int match_diff = 256+256+256;
-    int diff;
-    unsigned char mr;
-    unsigned char mg;
-    unsigned char mb;
+  unsigned long match;
+  short match_i = 0;
+  int match_diff = 256+256+256;
+  int diff;
+  unsigned char mr;
+  unsigned char mg;
+  unsigned char mb;
 
-    for(short i = 0; i < 16; ++i) {
-        match = util_colors_a[i];
-        mr = (match >> 16);
-        mg = ((match << 16) >> 24);
-        mb = ((match << 24) >> 24);
+  for(short i = 0; i < 16; ++i) {
+    match = util_colors_a[i];
+    mb = ((match << 8) >> 24);
+    mg = ((match << 16) >> 24);
+    mr = ((match << 24) >> 24);
 
-        diff = util_abs(mr - r) + util_abs(mg - g) + util_abs(mb - b);
-        //DBG(diff);
-        if(diff <= match_diff) {
-            match_diff = diff;
-            match_i = i;
-        }
+    diff = util_abs(mr - r) + util_abs(mg - g) + util_abs(mb - b);
+    if(diff <= match_diff) {
+      match_diff = diff;
+      match_i = i;
     }
-    return match_i;
+  }
+  return match_i;
 }
 
 char *util_render(const char *ch, short fg, short bg) {
@@ -80,7 +94,7 @@ short util_rgb2term(const char *rgb) {
   short cur = 0;
   short pos = 0;
 
-  for(short i = strlen(rgb); i >= 0; --i) {
+  for(size_t i = strlen(rgb); i >= 0; --i) {
     if(rgb[i] == ',') {
       ++cur;
       pos = 0;
@@ -95,7 +109,6 @@ short util_rgb2term(const char *rgb) {
       ++pos;
     }
   }
-
 #ifdef PLATFORM_WINDOWS
   return util_rgbi2win(r, g, b);
 #else

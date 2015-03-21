@@ -144,25 +144,25 @@ bool ttyu_win_scr_update(ttyu_data_t *data, bool initial) {
   data->cury = (int)con_info.dwCursorPosition.Y - data->top;
 
   if(initial) {
-    data->base_color = (int)con_info.wAttributes;
+    data->base_color = (short)con_info.wAttributes;
   }
   return TRUE;
 }
 
 void ttyu_win_render(char *c, ttyu_data_t *data) {
-  int fg = -1;
-  int bg = -1;
-  int len = strlen(c); // content length
+  short fg = -1;
+  short bg = -1;
+  size_t len = strlen(c); // content length
   int i; // position
   int j; // lookahead position
-  int color;
+  short color;
 
   for(i = 0; i < len; ++i) {
     if(c[i] == '\x1b' && c[i+1] == '[') {
       j = 1;
       while(i+j < len && c[i+j] != 'm') ++j;
 
-      if(j == 3) {
+      if(j == 4) {
         // end token
         if(c[i+2] == '3') {
           fg = -1;
@@ -173,18 +173,12 @@ void ttyu_win_render(char *c, ttyu_data_t *data) {
         // start token
         if(c[i+2] == '3') { // foreground
           if(j == 9) {
-            fg = util_parse_dec(c[i+7]) * 100 + util_parse_dec(c[i+8]) * 10 +
-                util_parse_dec(c[i+9]);
-          } else if(j == 8) {
             fg = util_parse_dec(c[i+7]) * 10 + util_parse_dec(c[i+8]);
           } else {
             fg = util_parse_dec(c[i+7]);
           }
         } else { // background
           if(j == 9) {
-            bg = util_parse_dec(c[i+7]) * 100 + util_parse_dec(c[i+8]) * 10 +
-                util_parse_dec(c[i+9]);
-          } else if(j == 8) {
             bg = util_parse_dec(c[i+7]) * 10 + util_parse_dec(c[i+8]);
           } else {
             bg = util_parse_dec(c[i+7]);
@@ -192,12 +186,16 @@ void ttyu_win_render(char *c, ttyu_data_t *data) {
         }
       }
 
-      color = data->base_color;
+      color = 0;
       if(fg != -1) {
-        color += fg << 4;
+        color += fg;
+      } else {
+        color += (data->base_color << 4) >> 4;
       }
       if(bg != -1) {
-        color += bg;
+        color += bg << 4;
+      } else {
+        color += (data->base_color >> 4) << 4;
       }
 
       SetConsoleTextAttribute(data->hout, color);

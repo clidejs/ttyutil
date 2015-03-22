@@ -94,7 +94,7 @@ short util_rgb2term(const char *rgb) {
   short cur = 0;
   short pos = 0;
 
-  for(size_t i = strlen(rgb); i >= 0; --i) {
+  for(int i = (int)strlen(rgb); i >= 0; --i) {
     if(rgb[i] == ',') {
       ++cur;
       pos = 0;

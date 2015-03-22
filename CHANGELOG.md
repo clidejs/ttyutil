@@ -1,5 +1,10 @@
 # ttyutil changelog
 
+## 0.1.2
+ - fixed infinite loop in helper method `util_rgb2term()`
+ - added `EVENT.SIGNAL` events to handle low-level signals like `SIGINT`
+ - (unix) fixed cleanup after `.stop()`
+
 ## 0.1.1
 
  - fixed bugs when compiled in node <0.11. Is node 0.8+ compatible now

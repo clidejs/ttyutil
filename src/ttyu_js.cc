@@ -50,11 +50,14 @@ void ttyu_js_c::destroy() {
     worker_->destroy();
     delete worker_;
   }
-  ttyu_data_destroy(data);
-  ee_destroy(emitter);
-
-  free(data);
-  free(emitter);
+  if(data) {
+    ttyu_data_destroy(data);
+    free(data);
+  }
+  if(emitter) {
+    ee_destroy(emitter);
+    free(emitter);
+  }
 }
 
 NAN_METHOD(ttyu_js_c::new_instance) {

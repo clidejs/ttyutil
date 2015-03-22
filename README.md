@@ -138,6 +138,8 @@ Function to get the terminal color code from `str`, a hexadecimal string
 This object wraps all input events as constants:
 
 - `TTYUtil.EVENT.ERROR` {`String`}: `error` identifier for error events
+- `TTYUtil.EVENT.SIGNAL` {`String`}: `signal` identifier for process signal
+events
 - `TTYUtil.EVENT.KEY` {`String`}: `key` identifier for key events
 - `TTYUtil.EVENT.RESIZE` {`String`}: `resize` identifier for resize events
 - `TTYUtil.EVENT.MOUSEDOWN` {`String`}: `mousedown` identifier for mousedown
@@ -175,15 +177,24 @@ This object wraps all mouse buttons identifier as constants:
 
 This object wraps all control key identifier as constants:
 
-- `TTYUtil.CTRL.NULL` {`Integer`}: 0 no control key is active
-- `TTYUtil.CTRL.ALT` {`Integer`}: 1 the alt key is pressed
-- `TTYUtil.CTRL.CTRL` {`Integer`}: 2 the ctrl key is pressed
-- `TTYUtil.CTRL.SHIFT` {`Integer`}: 4 the shift key is pressed
-- `TTYUtil.CTRL.ENHANCED` {`Integer`}: 8 the enhanced key is pressed
-- `TTYUtil.CTRL.CMD` {`Integer`}: 16 the cmd key is pressed (OSX)
-- `TTYUtil.CTRL.NUMLOCK` {`Integer`}: 32 numlock is activated
-- `TTYUtil.CTRL.SCROLLLOCK` {`Integer`}: 64 scrolllock is activated
-- `TTYUtil.CTRL.CAPSLOCK` {`Integer`}: 128 capslock is activated
+- `TTYUtil.CTRL.NULL` {`Integer`}: `0` no control key is active
+- `TTYUtil.CTRL.ALT` {`Integer`}: `1` the alt key is pressed
+- `TTYUtil.CTRL.CTRL` {`Integer`}: `2` the ctrl key is pressed
+- `TTYUtil.CTRL.SHIFT` {`Integer`}: `4` the shift key is pressed
+- `TTYUtil.CTRL.ENHANCED` {`Integer`}: `8` the enhanced key is pressed
+- `TTYUtil.CTRL.CMD` {`Integer`}: `16` the cmd key is pressed (OSX)
+- `TTYUtil.CTRL.NUMLOCK` {`Integer`}: `32` numlock is activated
+- `TTYUtil.CTRL.SCROLLLOCK` {`Integer`}: `64` scrolllock is activated
+- `TTYUtil.CTRL.CAPSLOCK` {`Integer`}: `128` capslock is activated
+
+### `TTYUtil.SIGNAL`
+
+This object contains a list of all signals that can be catched by ttyutil:
+
+- `TTYUtil.SIGNAL.SIGINT` {`String`}: `SIGINT` interrupt event (e.g. CTRL+C)
+- `TTYUtil.SIGNAL.SIGTERM` {`String`}: `SIGTERM` termination event
+- `TTYUtil.SIGNAL.SIGPIPE` {`String`}: `SIGPIPE` pipe error event
+- `TTYUtil.SIGNAL.SIGHUP` {`String`}: `SIGHUP` terminal close event
 
 ### `TTYUtil.WHICH`
 

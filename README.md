@@ -18,10 +18,22 @@ to make feature requests.
 
 ## Installation
 
+Since this is a native c++ node.js addon, you will need these tools to build the
+packages (see [node-gyp](https://github.com/TooTallNate/node-gyp#installation)):
+
+ - python (v2.7+, but not 3.x)
+ - on unix:
+    - make
+    - c++ compiler (e.g. gcc)
+ - on mac:
+    - xcode command line tools
+ - on windows:
+    - Visual Studio 2010 or 2013
+
 Simply add **ttyutil** to the dependencies of your project:
 
 ``` bash
-npm install ttyutil
+npm install --save ttyutil
 ```
 
 And require it anywhere in your codebase:

@@ -3,6 +3,8 @@
 ## 0.1.1
 
  - fixed bugs when compiled in node <0.11. Is node 0.8+ compatible now
+ - windows colored output working now
+ - Known Bug: (unix) after `.stop()` the terminal is still recording raw input
 
 ## 0.1.0
 

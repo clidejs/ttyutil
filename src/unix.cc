@@ -286,6 +286,83 @@ void ttyu_unix_clrscr(ttyu_data_t *data, int x, int y, int width, int height) {
   }
 }
 
+char ttyu_unix_key(int which, int ctrl) {
+  // TODO reverse engineer WHICH
+  return (char)which;
+}
+
+NAN_METHOD(ttyu_js_c::emit) {
+  NanScope();
+  ttyu_js_c *obj = ObjectWrap::Unwrap<ttyu_js_c>(args.This());
+  if(obj->running_) {
+    int ev = args[0]->Int32Value();
+
+    switch(ev) {
+      case EVENT_KEY:
+        ungetch(ttyu_unix_key(args[1]->Int32Value(), args[2]->Int32Value());
+        break;
+      case EVENT_MOUSEDOWN:
+      case EVENT_MOUSEUP:
+      case EVENT_MOUSEMOVE: {
+        MEVENT mev;
+        int b = args[1]->Int32Value();
+        int ctrl = args[4]->Int32Value();
+
+        mev.x = (short)args[2]->Int32Value();
+        mev.y = (short)args[3]->Int32Value();
+        mev.bstate = 0;
+
+        if(ctrl & CTRL_ALT) { mev.bstate &= BUTTON_ALT; }
+        if(ctrl & CTRL_CTRL) { mev.bstate &= BUTTON_CTRL; }
+        if(ctrl & CTRL_SHIFT) { mev.bstate &= BUTTON_SHIFT; }
+
+        if(ev == EVENT_MOUSEMOVE) {
+          mev.bstate &= REPORT_MOUSE_POSITION;
+        } else if(ev == EVENT_MOUSEUP) {
+          if(b == MOUSE_LEFT) {
+            mev.bstate &= BUTTON1_RELEASED;
+          } else if(b == MOUSE_LEFT2) {
+            mev.bstate &= BUTTON2_RELEASED;
+          } else if(b == MOUSE_LEFT3) {
+            mev.bstate &= BUTTON3_RELEASED;
+          } else if(b == MOUSE_LEFT4) {
+            mev.bstate &= BUTTON4_RELEASED;
+          } else if(b == MOUSE_RIGHT) {
+#if NCURSES_MOUSE_VERSION > 1
+            mev.bstate &= BUTTON5_RELEASED;
+#else
+            mev.bstate &= BUTTON4_RELEASED;
+#endif
+          }
+        } else if(ev == EVENT_MOUSEDOWN) {
+          if(b == MOUSE_LEFT) {
+            mev.bstate &= BUTTON1_PRESSED;
+          } else if(b == MOUSE_LEFT2) {
+            mev.bstate &= BUTTON2_PRESSED;
+          } else if(b == MOUSE_LEFT3) {
+            mev.bstate &= BUTTON3_PRESSED;
+          } else if(b == MOUSE_LEFT4) {
+            mev.bstate &= BUTTON4_PRESSED;
+          } else if(b == MOUSE_RIGHT) {
+#if NCURSES_MOUSE_VERSION > 1
+            mev.bstate &= BUTTON5_PRESSED;
+#else
+            mev.bstate &= BUTTON4_PRESSED;
+#endif
+          }
+        }
+
+        ungetmouse(&mev);
+        } break;
+      default: // EVENT_ERROR, EVENT_SIGNAL, EVENT_RESIZE, EVENT_MOUSEWHEEL,
+               // EVENT_MOUSEHWHEEL
+        // do nothing
+        break;
+    }
+  }
+  NanReturnUndefined();
+}
+
 NAN_GETTER(ttyu_js_c::get_width) {
   NanScope();
   NanReturnValue(NanNew<v8::Number>(COLS));

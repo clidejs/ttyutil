@@ -19,6 +19,14 @@ module.exports = function(ttyu) {
         }
         return this;
     };
+    ttyu.TTYUtil.prototype.emit = function(ev, arg1, arg2, arg3, arg4) {
+        if(ev === ttyu.TTYUtil.EVENT.SIGNAL) {
+            signal.emit(arg1);
+        } else if(ev in Const.Event && ev !== ttyu.TTYUtil.EVENT.ERROR) {
+            this.__emit__(Const.Event[ev], arg1, arg2, arg3, arg4);
+        }
+        return this;
+    }
 
     ttyu.TTYUtil.EVENT = {
         ERROR: "error",

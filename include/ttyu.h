@@ -99,6 +99,7 @@ private:
   static NAN_METHOD(stop);
   static NAN_METHOD(on);
   static NAN_METHOD(off);
+  static NAN_METHOD(emit);
   static NAN_GETTER(is_running);
   static NAN_GETTER(get_width);
   static NAN_GETTER(get_height);

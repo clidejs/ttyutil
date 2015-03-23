@@ -117,28 +117,54 @@ int ttyu_win_which(DWORD code) {
 
 int ttyu_win_ctrl(DWORD state) {
   int ctrl = CTRL_NULL;
-  if(state | RIGHT_ALT_PRESSED || state | LEFT_ALT_PRESSED) {
-    ctrl |= CTRL_ALT;
+  if(state & RIGHT_ALT_PRESSED || state & LEFT_ALT_PRESSED) {
+    ctrl &= CTRL_ALT;
   }
-  if(state | RIGHT_CTRL_PRESSED || state | RIGHT_CTRL_PRESSED) {
-    ctrl |= CTRL_CTRL;
+  if(state & RIGHT_CTRL_PRESSED || state & LEFT_CTRL_PRESSED) {
+    ctrl &= CTRL_CTRL;
   }
-  if(state | SHIFT_PRESSED) {
-    ctrl |= CTRL_SHIFT;
+  if(state & SHIFT_PRESSED) {
+    ctrl &= CTRL_SHIFT;
   }
-  if(state | ENHANCED_KEY) {
-    ctrl |= CTRL_ENHANCED;
+  if(state & ENHANCED_KEY) {
+    ctrl &= CTRL_ENHANCED;
   }
-  if(state | NUMLOCK_ON) {
-    ctrl |= CTRL_NUMLOCK;
+  if(state & NUMLOCK_ON) {
+    ctrl &= CTRL_NUMLOCK;
   }
-  if(state | SCROLLLOCK_ON) {
-    ctrl |= CTRL_SCROLLLOCK;
+  if(state & SCROLLLOCK_ON) {
+    ctrl &= CTRL_SCROLLLOCK;
   }
-  if(state | CAPSLOCK_ON) {
-    ctrl |= CTRL_CAPSLOCK;
+  if(state & CAPSLOCK_ON) {
+    ctrl &= CTRL_CAPSLOCK;
   }
   return ctrl;
+}
+
+DWORD ttyu_win_state(int ctrl) {
+  DWORD state = 0;
+  if(ctrl & CTRL_ALT) {
+    state &= RIGHT_ALT_PRESSED & LEFT_ALT_PRESSED;
+  }
+  if(ctrl & CTRL_CTRL) {
+    state &= RIGHT_CTRL_PRESSED & LEFT_CTRL_PRESSED;
+  }
+  if(ctrl & CTRL_SHIFT) {
+    state &= SHIFT_PRESSED;
+  }
+  if(ctrl & CTRL_ENHANCED) {
+    state &= ENHANCED_KEY;
+  }
+  if(ctrl & CTRL_NUMLOCK) {
+    state &= NUMLOCK_ON;
+  }
+  if(ctrl & CTRL_SCROLLLOCK) {
+    state &= SCROLLLOCK_ON;
+  }
+  if(ctrl & CTRL_CAPSLOCK) {
+    state &= CAPSLOCK_ON;
+  }
+  return state;
 }
 
 bool ttyu_win_scr_update(ttyu_data_t *data, bool initial) {
@@ -251,6 +277,86 @@ bool ttyu_win_clrscr(ttyu_data_t *data, int x, int y, int width, int height) {
   // Put the cursor at its home coordinates.
   SetConsoleCursorPosition(data->hout, coordhome);
   return TRUE;
+}
+
+NAN_METHOD(ttyu_js_c::emit) {
+  NanScope();
+  ttyu_js_c *obj = ObjectWrap::Unwrap<ttyu_js_c>(args.This());
+  if(obj->running_) {
+    int ev = args[0]->Int32Value();
+    INPUT_RECORD in;
+    DWORD w;
+
+    in.EventType = 0;
+
+    switch(ev) {
+      case EVENT_KEY:
+        KEY_EVENT_RECORD kev;
+
+        kev.bKeyDown = TRUE;
+        kev.wVirtualKeyCode = (WORD)args[1]->Int32Value();
+        kev.dwControlKeyState = ttyu_win_state(args[2]->Int32Value());
+        kev.uChar.UnicodeChar = (WCHAR)kev.wVirtualKeyCode; // TODO
+        kev.uChar.Ascii = (WCHAR)kev.wVirtualKeyCode; // TODO
+
+        in.EventType = KEY_EVENT;
+        in.Event.KeyEvent = kev;
+        break;
+      case EVENT_RESIZE:
+        WINDOW_BUFFER_SIZE_RECORD wev;
+        COORD size;
+
+        size.X = args[1]->Int32Value();
+        size.Y = args[2]->Int32Value();
+
+        wev.dwSize = size;
+        in.EventType = WINDOW_BUFFER_SIZE_EVENT;
+        in.Event.WindowBufferSizeEvent = wev;
+        break;
+      case EVENT_MOUSEDOWN:
+      case EVENT_MOUSEUP:
+      case EVENT_MOUSEMOVE:
+      case EVENT_MOUSEWHEEL:
+      case EVENT_MOUSEHWHEEL:
+        MOUSE_EVENT_RECORD mev;
+        COORD pos;
+
+        in.EventType = MOUSE_EVENT;
+        pos.X = (short)args[2]->Int32Value();
+        pos.Y = (short)args[3]->Int32Value() + obj_->data->top;
+        mev.dwControlKeyState = ttyu_win_state(args[4]->Int32Value());
+
+        if(ev == EVENT_MOUSEUP) {
+          mev.dwButtonState = arg[1]->Int32Value();
+          mev.dwEventFlags = 0;
+        } else if(ev == EVENT_MOUSEDOWN) {
+          mev.dwButtonState = arg[1]->Int32Value();
+          mev.dwEventFlags = 2;
+        } else if(ev == EVENT_MOUSEMOVE) {
+          mev.dwEventFlags = 1;
+        } else if(ev == EVENT_MOUSEWHEEL) {
+          mev.dwEventFlags = 4;
+        } else if(ev == EVENT_MOUSEHWHEEL) {
+          mev.dwEventFlags = 8;
+        } else {
+          // invalidate event
+          in.EventType = 0;
+        }
+
+        mev.dwMousePosition = pos;
+        in.Event.MouseEvent = mev;
+        break;
+      default: // EVENT_ERROR, EVENT_SIGNAL
+        // do nothing
+        break;
+    }
+
+    if(in.EventType != 0) {
+      WriteConsoleInput(obj_->data->hin, const_cast<const INPUT_RECORD *>(&in),
+          1, &w);
+    }
+  }
+  NanReturnUndefined();
 }
 
 NAN_GETTER(ttyu_js_c::get_width) {

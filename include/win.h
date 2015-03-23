@@ -32,6 +32,7 @@ struct ttyu_data_s {
 
 int ttyu_win_which(DWORD code);
 int ttyu_win_ctrl(DWORD state);
+DWORD ttyu_win_state(int ctrl);
 bool ttyu_win_scr_update(ttyu_data_t *data, bool initial = FALSE);
 void ttyu_win_render(char *c, ttyu_data_t *data);
 bool ttyu_win_clrscr(ttyu_data_t *data, int x, int y, int width, int height);

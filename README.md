@@ -51,11 +51,14 @@ This creates the `ttyu` object which is used to interact with the terminal.
 
 #### `ttyu.on(event, listener)`
 
-Adds an event `listener` callback for the `event`(see TTYUtil.EVENT).
+Adds an event `listener` callback for the `event`(see
+[`TTYUtil.EVENT`](#__event)).
+For the event callback parameter see [here](#__callback).
 
 #### `ttyu.removeListener(event, listener)`
 
-Remove the event `listener` callback from the `event` (see TTYUtil.EVENT).
+Remove the event `listener` callback from the `event` (see
+[`TTYUtil.EVENT`](#__event)).
 
 #### `ttyu.off(event, listener)`
 
@@ -85,7 +88,8 @@ Integer amount of vertical character space in the terminal. *read-only*
 
 #### `ttyu.mode`
 
-Integer identifier for current terminal mode (can be one of TTYUtil.MODE).
+Integer identifier for current terminal mode (can be one of
+[`TTYUtil.MODE`](#__mode)).
 *read-only*
 
 #### `ttyu.colors`
@@ -133,6 +137,7 @@ complete (visible) terminal buffer.
 Function to get the terminal color code from `str`, a hexadecimal string
 (e.g. `"#FF0000"`) or rgb string (e.g. `"rgb(255,0,0)"`).
 
+<a id="__event" name="__event"> </a>
 ### `TTYUtil.EVENT`
 
 This object wraps all input events as constants:
@@ -153,6 +158,7 @@ wheel events (vertical scroll events)
 - `TTYUtil.EVENT.MOUSEHWHEEL` {`String`}: `mousehwheel` identifier for the
 mouse hwheel events (horizontal scroll events)
 
+<a id="__mode" name="__mode"> </a>
 ### `TTYUtil.MODE`
 
 This object wraps all terminal modes as constants:
@@ -163,6 +169,7 @@ This object wraps all terminal modes as constants:
 - `TTYUtil.MODE.VT100` {`Integer`}: `2` identifier for VT100 compilant terminals
 (e.g. Terminal.app for OSX)
 
+<a id="__mouse" name="__mouse"> </a>
 ### `TTYUtil.MOUSE`
 
 This object wraps all mouse buttons identifier as constants:
@@ -173,6 +180,7 @@ This object wraps all mouse buttons identifier as constants:
 - `TTYUtil.MOUSE.LEFT4` {`Integer`}: `16` fourth left-most mouse button
 - `TTYUtil.MOUSE.RIGHT` {`Integer`}: `2` right-most mouse button
 
+<a id="__ctrl" name="__ctrl"> </a>
 ### `TTYUtil.CTRL`
 
 This object wraps all control key identifier as constants:
@@ -187,6 +195,7 @@ This object wraps all control key identifier as constants:
 - `TTYUtil.CTRL.SCROLLLOCK` {`Integer`}: `64` scrolllock is activated
 - `TTYUtil.CTRL.CAPSLOCK` {`Integer`}: `128` capslock is activated
 
+<a id="__signal" name="__signal"> </a>
 ### `TTYUtil.SIGNAL`
 
 This object contains a list of all signals that can be catched by ttyutil:
@@ -196,10 +205,35 @@ This object contains a list of all signals that can be catched by ttyutil:
 - `TTYUtil.SIGNAL.SIGPIPE` {`String`}: `SIGPIPE` pipe error event
 - `TTYUtil.SIGNAL.SIGHUP` {`String`}: `SIGHUP` terminal close event
 
+<a id="__which" name="__which"> </a>
 ### `TTYUtil.WHICH`
 
 This object wraps all key codes as constants.
 *(see /const.js for the complete list)*
+
+### TTYUtil event callback parameter
+
+Every event emits one parameter to the callbacks:
+
+- `error`-Event emits an error-object containing information about the error
+- `signal`-Event emits an object containing the raised signal (see
+[`TTYUtil.SIGNAL`](#__signal)) in the `signal` property
+(e.g. `{ signal: "SIGINT" }`)
+- `key`-Event emits an object containing following properties:
+    - `ctrl` {`Integer`} the control characters currently pressed
+    (see [`TTYUtil.CTRL`](#__ctrl))
+    - `char` {`String`} the string representation of the pressed key
+    - `code` {`Integer`} the ascii key-code of the pressed key
+    - `which` {`Integer`} unique identifier for the pressed key
+    (see[`TTYUtil.WHICH`](#__which))
+- `resize`-Event emits no parameter, use `ttyu.width`/`ttyu.height` to get the
+new window size
+- `mouse...`-Events emit an object containing following properties:
+    - `button` {`Integer`} the button pressed (see [`TTYUtil.MOUSE`](#__mouse))
+    - `x` {`Integer`} x-coordinate in the terminal, the event occured in
+    - `y` {`Integer`} x-coordinate in the terminal, the event occured in
+    - `ctrl` {`Integer`} the control characters currently pressed
+    (see [`TTYUtil.CTRL`](#__ctrl))
 
 ## Test
 

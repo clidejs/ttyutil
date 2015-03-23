@@ -19,5 +19,6 @@ struct ttyu_data_s {
 };
 
 void ttyu_unix_clrscr(ttyu_data_t *data, int x, int y, int width, int height);
+char ttyu_unix_key(int which, int ctrl);
 
 #endif // TTYU_UNIX_H_

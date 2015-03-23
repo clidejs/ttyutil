@@ -31,6 +31,10 @@ var signal = module.exports = {
         }
     },
 
+    emit: function(sig) {
+        process.emit(sig);
+    },
+
     listen: function(sig, that) {
         return function() {
             var ev = {

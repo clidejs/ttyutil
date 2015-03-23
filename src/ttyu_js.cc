@@ -12,6 +12,7 @@ void ttyu_js_c::init(v8::Handle<v8::Object> target) {
   EXPORT_PROTOTYPE_METHOD(tpl, "stop", stop);
   EXPORT_PROTOTYPE_METHOD(tpl, "__on__", on);
   EXPORT_PROTOTYPE_METHOD(tpl, "__off__", off);
+  EXPORT_PROTOTYPE_METHOD(tpl, "__emit__", emit);
   EXPORT_PROTOTYPE_GET(tpl, "running", is_running);
 
   EXPORT_PROTOTYPE_GET(tpl, "width", get_width);

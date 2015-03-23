@@ -5,8 +5,8 @@ module.exports = function(TTYUtil, expect) {
 
         describe("TTYUtil.prototype", function() {
             var keys = Object.keys(TTYUtil.prototype);
-            it("should have 13 enumerable properties", function() {
-                expect(keys.length).to.be.equal(13);
+            it("should have 15 enumerable properties", function() {
+                expect(keys.length).to.be.equal(15);
             });
 
             describe("#start()", function() {

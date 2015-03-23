@@ -284,10 +284,10 @@ NAN_METHOD(ttyu_js_c::emit) {
   ttyu_js_c *obj = ObjectWrap::Unwrap<ttyu_js_c>(args.This());
   if(obj->running_) {
     int ev = args[0]->Int32Value();
-    INPUT_RECORD in;
+    INPUT_RECORD in[1];
     DWORD w;
 
-    in.EventType = 0;
+    in[0].EventType = 0;
 
     switch(ev) {
       case EVENT_KEY:
@@ -298,9 +298,12 @@ NAN_METHOD(ttyu_js_c::emit) {
         kev.dwControlKeyState = ttyu_win_state(args[2]->Int32Value());
         kev.uChar.UnicodeChar = (WCHAR)kev.wVirtualKeyCode; // TODO
         kev.uChar.AsciiChar = (WCHAR)kev.wVirtualKeyCode; // TODO
+        kev.wRepeatCount = 1;
+        kev.wVirtualScanCode = MapVirtualKey(kev.wVirtualKeyCode,
+            MAPVK_VK_TO_VSC);
 
-        in.EventType = KEY_EVENT;
-        in.Event.KeyEvent = kev;
+        in[0].EventType = KEY_EVENT;
+        in[0].Event.KeyEvent = kev;
         break;
       case EVENT_RESIZE:
         WINDOW_BUFFER_SIZE_RECORD wev;
@@ -310,8 +313,8 @@ NAN_METHOD(ttyu_js_c::emit) {
         size.Y = args[2]->Int32Value();
 
         wev.dwSize = size;
-        in.EventType = WINDOW_BUFFER_SIZE_EVENT;
-        in.Event.WindowBufferSizeEvent = wev;
+        in[0].EventType = WINDOW_BUFFER_SIZE_EVENT;
+        in[0].Event.WindowBufferSizeEvent = wev;
         break;
       case EVENT_MOUSEDOWN:
       case EVENT_MOUSEUP:
@@ -321,7 +324,7 @@ NAN_METHOD(ttyu_js_c::emit) {
         MOUSE_EVENT_RECORD mev;
         COORD pos;
 
-        in.EventType = MOUSE_EVENT;
+        in[0].EventType = MOUSE_EVENT;
         pos.X = (short)args[2]->Int32Value();
         pos.Y = (short)args[3]->Int32Value() + obj->data->top;
         mev.dwControlKeyState = ttyu_win_state(args[4]->Int32Value());
@@ -344,16 +347,15 @@ NAN_METHOD(ttyu_js_c::emit) {
         }
 
         mev.dwMousePosition = pos;
-        in.Event.MouseEvent = mev;
+        in[0].Event.MouseEvent = mev;
         break;
       default: // EVENT_ERROR, EVENT_SIGNAL
         // do nothing
         break;
     }
 
-    if(in.EventType != 0) {
-      WriteConsoleInput(obj->data->hin, const_cast<const INPUT_RECORD *>(&in),
-          1, &w);
+    if(in[0].EventType != 0) {
+      WriteConsoleInput(obj->data->hin, in, 1, &w);
     }
   }
   NanReturnUndefined();

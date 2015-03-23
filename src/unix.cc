@@ -299,7 +299,7 @@ NAN_METHOD(ttyu_js_c::emit) {
 
     switch(ev) {
       case EVENT_KEY:
-        ungetch(ttyu_unix_key(args[1]->Int32Value(), args[2]->Int32Value());
+        ungetch(ttyu_unix_key(args[1]->Int32Value(), args[2]->Int32Value()));
         break;
       case EVENT_MOUSEDOWN:
       case EVENT_MOUSEUP:

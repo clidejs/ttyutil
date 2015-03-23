@@ -6,7 +6,7 @@ void ttyu_js_c::init(v8::Handle<v8::Object> target) {
   v8::Local<v8::FunctionTemplate> tpl =
       NanNew<v8::FunctionTemplate>(new_instance);
   tpl->SetClassName(NanNew<v8::String>("TTYUtil"));
-  tpl->InstanceTemplate()->SetInternalFieldCount(17);
+  tpl->InstanceTemplate()->SetInternalFieldCount(18);
 
   EXPORT_PROTOTYPE_METHOD(tpl, "start", start);
   EXPORT_PROTOTYPE_METHOD(tpl, "stop", stop);

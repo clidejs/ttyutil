@@ -297,7 +297,7 @@ NAN_METHOD(ttyu_js_c::emit) {
         kev.wVirtualKeyCode = (WORD)args[1]->Int32Value();
         kev.dwControlKeyState = ttyu_win_state(args[2]->Int32Value());
         kev.uChar.UnicodeChar = (WCHAR)kev.wVirtualKeyCode; // TODO
-        kev.uChar.Ascii = (WCHAR)kev.wVirtualKeyCode; // TODO
+        kev.uChar.AsciiChar = (WCHAR)kev.wVirtualKeyCode; // TODO
 
         in.EventType = KEY_EVENT;
         in.Event.KeyEvent = kev;
@@ -323,14 +323,14 @@ NAN_METHOD(ttyu_js_c::emit) {
 
         in.EventType = MOUSE_EVENT;
         pos.X = (short)args[2]->Int32Value();
-        pos.Y = (short)args[3]->Int32Value() + obj_->data->top;
+        pos.Y = (short)args[3]->Int32Value() + obj->data->top;
         mev.dwControlKeyState = ttyu_win_state(args[4]->Int32Value());
 
         if(ev == EVENT_MOUSEUP) {
-          mev.dwButtonState = arg[1]->Int32Value();
+          mev.dwButtonState = args[1]->Int32Value();
           mev.dwEventFlags = 0;
         } else if(ev == EVENT_MOUSEDOWN) {
-          mev.dwButtonState = arg[1]->Int32Value();
+          mev.dwButtonState = args[1]->Int32Value();
           mev.dwEventFlags = 2;
         } else if(ev == EVENT_MOUSEMOVE) {
           mev.dwEventFlags = 1;
@@ -352,7 +352,7 @@ NAN_METHOD(ttyu_js_c::emit) {
     }
 
     if(in.EventType != 0) {
-      WriteConsoleInput(obj_->data->hin, const_cast<const INPUT_RECORD *>(&in),
+      WriteConsoleInput(obj->data->hin, const_cast<const INPUT_RECORD *>(&in),
           1, &w);
     }
   }

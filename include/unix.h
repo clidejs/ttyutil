@@ -8,11 +8,14 @@
 #define ERROR_UNIX_MOUSEBAD "skipping unreadable mouse event"
 #define ERROR_UNIX_MOUSEUNCAUGHT "skipping unknown mouse event"
 
+#define TTYU_EXIT 1337
+
 // unixy data structure
 struct ttyu_data_s {
   WINDOW *win;
   mmask_t old_mouse_mask;
   int mode;
+  bool closing;
 };
 
 void ttyu_unix_clrscr(ttyu_data_t *data, int x, int y, int width, int height);

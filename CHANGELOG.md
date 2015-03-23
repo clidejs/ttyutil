@@ -3,7 +3,7 @@
 ## 0.1.2
  - fixed infinite loop in helper method `util_rgb2term()`
  - added `EVENT.SIGNAL` events to handle low-level signals like `SIGINT`
- - (unix) fixed cleanup after `.stop()`
+ - fixed cleanup after `.stop()`
 
 ## 0.1.1
 

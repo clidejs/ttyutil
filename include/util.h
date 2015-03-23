@@ -30,6 +30,6 @@ char *util_error(char *name, int id);
 
 #undef ERROR
 #define ERROR(name, id) util_error(name, id)
-#define DBG(a) std::cout << a << std::endl
+#define DBG(a) std::cout << (a) << std::endl
 
 #endif // TTYUTIL_UTIL_H_

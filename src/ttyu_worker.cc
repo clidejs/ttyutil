@@ -70,14 +70,15 @@ void ttyu_worker_c::handle(ttyu_event_t *event) {
           NanNew<v8::Integer>(event->mouse->ctrl));
       arg = obj;
       break;
-    default: // EVENT_ERROR
+    default: // EVENT_ERROR, EVENT_SIGNAL
       arg = NanError(event->err);
+      event->type = EVENT_ERROR;
       break;
   }
   ee_emit(obj_->emitter, event->type, arg);
 }
 
-void ttyu_worker_c::destroy() {
+void ttyu_worker_c::Destroy() {
   uv_close(reinterpret_cast<uv_handle_t*>(async), async_close_);
 }
 
@@ -108,5 +109,15 @@ NAUV_WORK_CB(ttyu_worker_c::async_progress_) {
 void ttyu_worker_c::async_close_(uv_handle_t *handle) {
   ttyu_worker_c *worker = static_cast<ttyu_worker_c*>(handle->data);
   delete reinterpret_cast<uv_async_t*>(handle);
+
+  if(worker->obj_->emitter) {
+    ee_destroy(worker->obj_->emitter);
+    delete worker->obj_->emitter;
+  }
+
   delete worker;
+}
+
+void ttyu_worker_c::WorkComplete() {
+  // do nothing
 }

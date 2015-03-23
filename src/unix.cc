@@ -2,32 +2,36 @@
 
 void ttyu_data_init(ttyu_data_t *data) {
   data->win = initscr();
+  data->closing = false;
+  data->mode = MODE_VT100;
+
   noecho();
   cbreak();
   keypad(data->win, TRUE);
   mousemask(ALL_MOUSE_EVENTS | REPORT_MOUSE_POSITION, &(data->old_mouse_mask));
   mouseinterval(0);
-  data->mode = MODE_VT100;
+  nodelay(data->win, TRUE);
 }
 
 void ttyu_data_destroy(ttyu_data_t *data) {
-  keypad(data->win, FALSE);
-  mousemask(data->old_mouse_mask, NULL);
+  data->closing = true;
   echo();
-  nocbreak();
+  DBG(ungetch(TTYU_EXIT));
   endwin();
 }
 
 bool ttyu_worker_c::execute(const ttyu_worker_c::ttyu_progress_c& progress,
     ttyu_data_t *data) {
-  int c = wgetch(data->win);
+  int c = getch();
+
+  if(c == TTYU_EXIT) { return FALSE; }
+  if(data->closing) { return FALSE; }
+  if(c == ERR) { return TRUE; }
+
   MEVENT mev;
   ttyu_event_t *event = (ttyu_event_t *)malloc(sizeof(ttyu_event_t));
 
-  if(c == ERR) {
-    ttyu_event_create_error(event, ERROR_UNIX_UNDEF);
-    progress.send(const_cast<const ttyu_event_t *>(event));
-  } else if(c == KEY_RESIZE) {
+  if(c == KEY_RESIZE) {
     ttyu_event_create_resize(event);
     progress.send(const_cast<const ttyu_event_t *>(event));
   } else if(c == KEY_MOUSE) {

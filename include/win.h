@@ -27,6 +27,7 @@ struct ttyu_data_s {
   int curx;
   int cury;
   short base_color;
+  bool closing;
 };
 
 int ttyu_win_which(DWORD code);

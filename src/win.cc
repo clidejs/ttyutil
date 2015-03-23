@@ -6,6 +6,7 @@ void ttyu_data_init(ttyu_data_t *data) {
   data->err = (ttyu_error_t *)malloc(sizeof(ttyu_error_t));
   data->hin = GetStdHandle(STD_INPUT_HANDLE);
   data->hout = GetStdHandle(STD_OUTPUT_HANDLE);
+  data->closing = false;
 
   if(INVALID_HANDLE_VALUE == data->hin || INVALID_HANDLE_VALUE == data->hout) {
     data->err->msg = ERROR(ERROR_WIN_INIT, GetLastError());
@@ -25,6 +26,11 @@ void ttyu_data_init(ttyu_data_t *data) {
 }
 
 void ttyu_data_destroy(ttyu_data_t *data) {
+  data->closing = true;
+  DWORD w;
+  INPUT_RECORD in;
+  in.EventType = MENU_EVENT;
+  WriteConsoleInput(data->hin, const_cast<const INPUT_RECORD *>(&in), 1, &w);
   SetConsoleMode(data->hin, data->old_mode);
 }
 
@@ -46,6 +52,8 @@ bool ttyu_worker_c::execute(const ttyu_worker_c::ttyu_progress_c& progress,
   }
 
   ReadConsoleInput(data->hin, ir, WIN_BUFFER_SIZE, &readed);
+  // exit
+  if(data->closing) { return FALSE; }
 
   for(i = 0; i < readed; ++i) {
     if(MOUSE_EVENT == ir[i].EventType) {
@@ -73,11 +81,16 @@ bool ttyu_worker_c::execute(const ttyu_worker_c::ttyu_progress_c& progress,
       progress.send(const_cast<const ttyu_event_t *>(event));
     } else if(KEY_EVENT == ir[i].EventType && ir[i].Event.KeyEvent.bKeyDown) {
       ttyu_event_t *event = (ttyu_event_t *)malloc(sizeof(ttyu_event_t));
+      char *ch = (char *)std::malloc(sizeof(char) * 3);
+      memcpy(ch, &(ir[i].Event.KeyEvent.uChar.UnicodeChar), sizeof(char) * 2);
+      ch[2] = '\0';
+
       ttyu_event_create_key(event, ttyu_win_ctrl(
-              ir[i].Event.KeyEvent.dwControlKeyState),
-          (char *)(&(ir[i].Event.KeyEvent.uChar.UnicodeChar)),
+              ir[i].Event.KeyEvent.dwControlKeyState), ch,
           (int)ir[i].Event.KeyEvent.wVirtualKeyCode,
           ttyu_win_which(ir[i].Event.KeyEvent.wVirtualKeyCode));
+
+      free(ch);
 
       progress.send(const_cast<const ttyu_event_t *>(event));
     } else if(WINDOW_BUFFER_SIZE_EVENT == ir[i].EventType) {
@@ -152,7 +165,7 @@ bool ttyu_win_scr_update(ttyu_data_t *data, bool initial) {
 void ttyu_win_render(char *c, ttyu_data_t *data) {
   short fg = -1;
   short bg = -1;
-  size_t len = strlen(c); // content length
+  int len = (int)strlen(c); // content length
   int i; // position
   int j; // lookahead position
   short color;

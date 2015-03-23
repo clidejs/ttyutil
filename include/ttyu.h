@@ -148,9 +148,11 @@ public:
   bool execute(const ttyu_progress_c& progress, ttyu_data_t *data);
   void handle(ttyu_event_t *event);
 
-  virtual void destroy();
-private:
+  virtual void Destroy();
+
   void Execute();
+  virtual void WorkComplete();
+private:
   void send_(const ttyu_event_t *event);
 
   static NAUV_WORK_CB(async_progress_);

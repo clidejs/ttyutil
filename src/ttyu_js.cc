@@ -46,17 +46,9 @@ ttyu_js_c::~ttyu_js_c() {
 }
 
 void ttyu_js_c::destroy() {
-  if(worker_) {
-    worker_->destroy();
-    delete worker_;
-  }
   if(data) {
     ttyu_data_destroy(data);
     free(data);
-  }
-  if(emitter) {
-    ee_destroy(emitter);
-    free(emitter);
   }
 }
 
@@ -71,7 +63,7 @@ NAN_METHOD(ttyu_js_c::start) {
   NanScope();
   ttyu_js_c *obj = ObjectWrap::Unwrap<ttyu_js_c>(args.This());
   if(!obj->running_) {
-    obj->running_ = true;
+    obj->running_ = TRUE;
 
     ttyu_worker_c *w = new ttyu_worker_c(obj);
     NanAsyncQueueWorker(w);
@@ -83,7 +75,10 @@ NAN_METHOD(ttyu_js_c::start) {
 NAN_METHOD(ttyu_js_c::stop) {
   NanScope();
   ttyu_js_c *obj = ObjectWrap::Unwrap<ttyu_js_c>(args.This());
-  obj->destroy();
+  if(obj->running_) {
+    obj->destroy();
+    obj->running_ = FALSE;
+  }
   NanReturnThis();
 }
 

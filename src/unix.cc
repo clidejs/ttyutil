@@ -1,9 +1,21 @@
 #include <ttyu.h>
 
+ttyu_unix_kw_t *root = (ttyu_unix_kw_t *)std::malloc(sizeof(ttyu_unix_kw_t));
+void ttyu_unix_assign(int which, int key, bool shift) {
+  ttyu_unix_kw_t *n = (ttyu_unix_kw_t *)std::malloc(sizeof(ttyu_unix_kw_t));
+  n->next = root->next;
+  n->which = which;
+  n->key = key;
+  n->shift = shift;
+  root->next = n;
+}
+
 void ttyu_data_init(ttyu_data_t *data) {
   data->win = initscr();
   data->closing = false;
   data->mode = MODE_VT100;
+
+  TTYU_UNIX_KW(ttyu_unix_assign);
 
   noecho();
   cbreak();
@@ -110,153 +122,17 @@ bool ttyu_worker_c::execute(const ttyu_worker_c::ttyu_progress_c& progress,
     int ctrl = CTRL_NULL;
     int which = WHICH_UNKNOWN;
 
-    if(c == KEY_DOWN) {
-      which = WHICH_DOWN;
-    } else if(c == KEY_UP) {
-      which = WHICH_UP;
-    } else if(c == KEY_LEFT) {
-      which = WHICH_LEFT;
-    } else if(c == KEY_RIGHT) {
-      which = WHICH_RIGHT;
-    } else if(c == KEY_HOME) {
-      which = WHICH_HOME;
-    } else if(c == KEY_BACKSPACE) {
-      which = WHICH_BACKSPACE;
-    } else if(c == KEY_F(1)) {
-      which = WHICH_F1;
-    } else if(c == KEY_F(2)) {
-      which = WHICH_F2;
-    } else if(c == KEY_F(3)) {
-      which = WHICH_F3;
-    } else if(c == KEY_F(4)) {
-      which = WHICH_F4;
-    } else if(c == KEY_F(5)) {
-      which = WHICH_F5;
-    } else if(c == KEY_F(6)) {
-      which = WHICH_F6;
-    } else if(c == KEY_F(7)) {
-      which = WHICH_F7;
-    } else if(c == KEY_F(8)) {
-      which = WHICH_F8;
-    } else if(c == KEY_F(9)) {
-      which = WHICH_F9;
-    } else if(c == KEY_F(10)) {
-      which = WHICH_F10;
-    } else if(c == KEY_F(11)) {
-      which = WHICH_F11;
-    } else if(c == KEY_F(12)) {
-      which = WHICH_F12;
-    } else if(c == KEY_F(13)) {
-      which = WHICH_F13;
-    } else if(c == KEY_F(14)) {
-      which = WHICH_F14;
-    } else if(c == KEY_F(15)) {
-      which = WHICH_F15;
-    } else if(c == KEY_F(16)) {
-      which = WHICH_F16;
-    } else if(c == KEY_F(17)) {
-      which = WHICH_F17;
-    } else if(c == KEY_F(18)) {
-      which = WHICH_F18;
-    } else if(c == KEY_F(19)) {
-      which = WHICH_F19;
-    } else if(c == KEY_F(20)) {
-      which = WHICH_F20;
-    } else if(c == KEY_F(21)) {
-      which = WHICH_F21;
-    } else if(c == KEY_F(22)) {
-      which = WHICH_F22;
-    } else if(c == KEY_F(23)) {
-      which = WHICH_F23;
-    } else if(c == KEY_F(24)) {
-      which = WHICH_F24;
-    } else if(c == KEY_DC) {
-      which = WHICH_DELETE;
-    } else if(c == KEY_IC) {
-      which = WHICH_INSERT;
-    } else if(c == KEY_EIC) {
-      which = WHICH_INSERT;
-    } else if(c == KEY_CLEAR) {
-      which = WHICH_CLEAR;
-    } else if(c == KEY_EOS) {
-      which = WHICH_CLEAR;
-    } else if(c == KEY_EOL) {
-      which = WHICH_CLEAR;
-    } else if(c == KEY_NPAGE) {
-      which = WHICH_NEXT;
-    } else if(c == KEY_PPAGE) {
-      which = WHICH_PRIOR;
-    } else if(c == KEY_STAB) {
-      which = WHICH_TAB;
-    } else if(c == KEY_ENTER) {
-      which = WHICH_ENTER;
-    } else if(c == KEY_PRINT) {
-      which = WHICH_PRINT;
-    } else if(c == KEY_LL) {
-      which = WHICH_HOME;
-    } else if(c == KEY_BTAB) {
-      which = WHICH_BACKSPACE;
-    } else if(c == KEY_BEG) {
-      which = WHICH_HOME;
+    if(c >= 65 && c <= 90) {
+      ctrl |= CTRL_SHIFT;
+      which = c; // WHICH_CHARA to WHICH_CHARZ
+    } else if(c >= 97 && c <= 122) {
+      which = c - 32; // WHICH_CHARA to WHICH_CHARZ
     } else if(c == KEY_COMMAND) {
       ctrl |= CTRL_CMD;
-    } else if(c == KEY_END) {
-      which = WHICH_END;
-    } else if(c == KEY_HELP) {
-      which = WHICH_HELP;
-    } else if(c == KEY_REFRESH) {
-      which = WHICH_BROWSER_REFRESH;
-    } else if(c == KEY_SBEG) {
-      which = WHICH_HOME;
-      ctrl |= CTRL_SHIFT;
     } else if(c == KEY_SCOMMAND) {
-      ctrl |= CTRL_SHIFT | CTRL_CMD;
-    } else if(c == KEY_SDC) {
-      which = WHICH_DELETE;
-      ctrl |= CTRL_SHIFT;
-    } else if(c == KEY_SEND) {
-      which = WHICH_END;
-      ctrl |= CTRL_SHIFT;
-    } else if(c == KEY_SEOL) {
-      which = WHICH_CLEAR;
-      ctrl |= CTRL_SHIFT;
-    } else if(c == KEY_SHELP) {
-      which = WHICH_HELP;
-      ctrl |= CTRL_SHIFT;
-    } else if(c == KEY_SHOME) {
-      which = WHICH_HOME;
-      ctrl |= CTRL_SHIFT;
-    } else if(c == KEY_SIC) {
-      which = WHICH_INSERT;
-      ctrl |= CTRL_SHIFT;
-    } else if(c == KEY_SLEFT) {
-      which = WHICH_LEFT;
-      ctrl |= CTRL_SHIFT;
-    } else if(c == KEY_SNEXT) {
-      which = WHICH_NEXT;
-      ctrl |= CTRL_SHIFT;
-    } else if(c == KEY_SPREVIOUS) {
-      which = WHICH_PRIOR;
-      ctrl |= CTRL_SHIFT;
-    } else if(c == KEY_SPRINT) {
-      which = WHICH_PRINT;
-      ctrl |= CTRL_SHIFT;
-    } else if(c == KEY_SRIGHT) {
-      which = WHICH_RIGHT;
-      ctrl |= CTRL_SHIFT;
-    } else if(c == KEY_SF) {
-      which = WHICH_DOWN;
-    } else if(c == KEY_SR) {
-      which = WHICH_UP;
+      ctrl |= CTRL_CMD | CTRL_CTRL;
     } else {
-      if(c >= 65 && c <= 90) {
-        ctrl |= CTRL_SHIFT;
-        which = c; // WHICH_CHARA to WHICH_CHARZ
-      } else if(c >= 97 && c <= 122) {
-        which = c - 32; // WHICH_CHARA to WHICH_CHARZ
-      } else {
-        which = c; // try direct mapping
-      }
+      which = ttyu_unix_which(c);
       if(ch[0] == '^') {
         ctrl |= CTRL_CTRL;
       }
@@ -286,9 +162,28 @@ void ttyu_unix_clrscr(ttyu_data_t *data, int x, int y, int width, int height) {
   }
 }
 
-char ttyu_unix_key(int which, int ctrl) {
-  // TODO reverse engineer WHICH
-  return (char)which;
+int ttyu_unix_key(int which) {
+  ttyu_unix_kw_t *c = root->next;
+  if(c) {
+    do {
+      if(c->which == which) {
+        return c->key;
+      }
+    } while((c = c->next));
+  }
+  return which;
+}
+
+int ttyu_unix_which(int key) {
+  ttyu_unix_kw_t *c = root->next;
+  if(c) {
+    do {
+      if(c->key == key) {
+        return c->which;
+      }
+    } while((c = c->next));
+  }
+  return key;
 }
 
 NAN_METHOD(ttyu_js_c::emit) {
@@ -298,9 +193,23 @@ NAN_METHOD(ttyu_js_c::emit) {
     int ev = args[0]->Int32Value();
 
     switch(ev) {
-      case EVENT_KEY:
-        ungetch(ttyu_unix_key(args[1]->Int32Value(), args[2]->Int32Value()));
-        break;
+      case EVENT_KEY: {
+        int c = 0;
+        int which = args[1]->Int32Value();
+        int ctrl = args[2]->Int32Value();
+        if(ctrl & CTRL_CMD) {
+          c = KEY_COMMAND;
+        } else if(which >= 65 && which <= 90) {
+          if(ctrl & CTRL_SHIFT) {
+            c = which;
+          } else {
+            c = which + 32;
+          }
+        } else {
+          c = ttyu_unix_key(which);
+        }
+        ungetch(c);
+        } break;
       case EVENT_MOUSEDOWN:
       case EVENT_MOUSEUP:
       case EVENT_MOUSEMOVE: {

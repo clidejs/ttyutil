@@ -5,6 +5,11 @@
 #include <iostream>
 
 #define EXPORT_PROTOTYPE_METHOD NODE_SET_PROTOTYPE_METHOD
+#define EXPORT_PROTOTYPE_METHOD_HIDDEN(tpl, name, cb) do {                     \
+  v8::Local<v8::FunctionTemplate> t = NanNew<v8::FunctionTemplate>(cb);        \
+  tpl->InstanceTemplate()->Set(                                                \
+      NanNew<v8::String>(name), t->GetFunction(), v8::ReadOnly);               \
+} while(0)
 
 #define EXPORT_PROTOTYPE_GET(tpl, name, fn)                                    \
     tpl->InstanceTemplate()->SetAccessor(NanNew<v8::String>(name), (fn))

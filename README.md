@@ -64,6 +64,11 @@ Remove the event `listener` callback from the `event` (see
 
 Shortcut for `ttyu.removeListener(event, listener)`.
 
+### `ttyu.emit(event, arg1, arg2, arg3, arg4)`
+
+Emit an event programmatically, see /examples/emit.js. more documentation will
+be added soon.
+
 #### `ttyu.start()`
 
 Start emitting input events (mouse, key and resize events) to the listeners

@@ -10,6 +10,70 @@
 
 #define TTYU_EXIT 1337
 
+#define TTYU_UNIX_KW(XX)                                                       \
+  XX(WHICH_DOWN, KEY_DOWN, FALSE);                                             \
+  XX(WHICH_DOWN, KEY_SF, FALSE);                                               \
+  XX(WHICH_UP, KEY_UP, FALSE);                                                 \
+  XX(WHICH_UP, KEY_SR, FALSE);                                                 \
+  XX(WHICH_LEFT, KEY_LEFT, FALSE);                                             \
+  XX(WHICH_RIGHT, KEY_RIGHT, FALSE);                                           \
+  XX(WHICH_HOME, KEY_HOME, FALSE);                                             \
+  XX(WHICH_HOME, KEY_LL, FALSE);                                               \
+  XX(WHICH_HOME, KEY_BEG, FALSE);                                              \
+  XX(WHICH_BACKSPACE, KEY_BACKSPACE, FALSE);                                   \
+  XX(WHICH_BACKSPACE, KEY_BTAB, FALSE);                                        \
+  XX(WHICH_F1, KEY_F(1), FALSE);                                               \
+  XX(WHICH_F2, KEY_F(2), FALSE);                                               \
+  XX(WHICH_F3, KEY_F(3), FALSE);                                               \
+  XX(WHICH_F4, KEY_F(4), FALSE);                                               \
+  XX(WHICH_F5, KEY_F(5), FALSE);                                               \
+  XX(WHICH_F6, KEY_F(6), FALSE);                                               \
+  XX(WHICH_F7, KEY_F(7), FALSE);                                               \
+  XX(WHICH_F8, KEY_F(8), FALSE);                                               \
+  XX(WHICH_F9, KEY_F(9), FALSE);                                               \
+  XX(WHICH_F10, KEY_F(10), FALSE);                                             \
+  XX(WHICH_F11, KEY_F(11), FALSE);                                             \
+  XX(WHICH_F12, KEY_F(12), FALSE);                                             \
+  XX(WHICH_F13, KEY_F(13), FALSE);                                             \
+  XX(WHICH_F14, KEY_F(14), FALSE);                                             \
+  XX(WHICH_F15, KEY_F(15), FALSE);                                             \
+  XX(WHICH_F16, KEY_F(16), FALSE);                                             \
+  XX(WHICH_F17, KEY_F(17), FALSE);                                             \
+  XX(WHICH_F18, KEY_F(18), FALSE);                                             \
+  XX(WHICH_F19, KEY_F(19), FALSE);                                             \
+  XX(WHICH_F20, KEY_F(20), FALSE);                                             \
+  XX(WHICH_F21, KEY_F(21), FALSE);                                             \
+  XX(WHICH_F22, KEY_F(22), FALSE);                                             \
+  XX(WHICH_F23, KEY_F(23), FALSE);                                             \
+  XX(WHICH_F24, KEY_F(24), FALSE);                                             \
+  XX(WHICH_DELETE, KEY_DC, FALSE);                                             \
+  XX(WHICH_INSERT, KEY_IC, FALSE);                                             \
+  XX(WHICH_INSERT, KEY_EIC, FALSE);                                            \
+  XX(WHICH_CLEAR, KEY_CLEAR, FALSE);                                           \
+  XX(WHICH_CLEAR, KEY_EOS, FALSE);                                             \
+  XX(WHICH_CLEAR, KEY_EOL, FALSE);                                             \
+  XX(WHICH_NEXT, KEY_NPAGE, FALSE);                                            \
+  XX(WHICH_PRIOR, KEY_PPAGE, FALSE);                                           \
+  XX(WHICH_TAB, KEY_STAB, FALSE);                                              \
+  XX(WHICH_ENTER, KEY_ENTER, FALSE);                                           \
+  XX(WHICH_PRINT, KEY_PRINT, FALSE);                                           \
+  XX(WHICH_END, KEY_END, FALSE);                                               \
+  XX(WHICH_HELP, KEY_HELP, FALSE);                                             \
+  XX(WHICH_BROWSER_REFRESH, KEY_REFRESH, FALSE);                               \
+                                                                               \
+  XX(WHICH_HOME, KEY_SBEG, TRUE);                                              \
+  XX(WHICH_DELETE, KEY_SDC, TRUE);                                             \
+  XX(WHICH_END, KEY_SEND, TRUE);                                               \
+  XX(WHICH_CLEAR, KEY_SEOL, TRUE);                                             \
+  XX(WHICH_HELP, KEY_SHELP, TRUE);                                             \
+  XX(WHICH_HOME, KEY_SHOME, TRUE);                                             \
+  XX(WHICH_INSERT, KEY_SIC, TRUE);                                             \
+  XX(WHICH_LEFT, KEY_SLEFT, TRUE);                                             \
+  XX(WHICH_NEXT, KEY_SNEXT, TRUE);                                             \
+  XX(WHICH_PRIOR, KEY_SPREVIOUS, TRUE);                                        \
+  XX(WHICH_PRINT, KEY_SPRINT, TRUE);                                           \
+  XX(WHICH_RIGHT, KEY_SRIGHT, TRUE)
+
 // unixy data structure
 struct ttyu_data_s {
   WINDOW *win;
@@ -18,7 +82,17 @@ struct ttyu_data_s {
   bool closing;
 };
 
+// key-which structure
+typedef struct ttyu_unix_kw_s ttyu_unix_kw_t;
+struct ttyu_unix_kw_s {
+  int which;
+  int key;
+  bool shift;
+  ttyu_unix_kw_t *next;
+};
+
 void ttyu_unix_clrscr(ttyu_data_t *data, int x, int y, int width, int height);
-char ttyu_unix_key(int which, int ctrl);
+int ttyu_unix_key(int which);
+int ttyu_unix_which(int key);
 
 #endif // TTYU_UNIX_H_

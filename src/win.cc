@@ -118,25 +118,25 @@ int ttyu_win_which(DWORD code) {
 int ttyu_win_ctrl(DWORD state) {
   int ctrl = CTRL_NULL;
   if(state & RIGHT_ALT_PRESSED || state & LEFT_ALT_PRESSED) {
-    ctrl &= CTRL_ALT;
+    ctrl |= CTRL_ALT;
   }
   if(state & RIGHT_CTRL_PRESSED || state & LEFT_CTRL_PRESSED) {
-    ctrl &= CTRL_CTRL;
+    ctrl |= CTRL_CTRL;
   }
   if(state & SHIFT_PRESSED) {
-    ctrl &= CTRL_SHIFT;
+    ctrl |= CTRL_SHIFT;
   }
   if(state & ENHANCED_KEY) {
-    ctrl &= CTRL_ENHANCED;
+    ctrl |= CTRL_ENHANCED;
   }
   if(state & NUMLOCK_ON) {
-    ctrl &= CTRL_NUMLOCK;
+    ctrl |= CTRL_NUMLOCK;
   }
   if(state & SCROLLLOCK_ON) {
-    ctrl &= CTRL_SCROLLLOCK;
+    ctrl |= CTRL_SCROLLLOCK;
   }
   if(state & CAPSLOCK_ON) {
-    ctrl &= CTRL_CAPSLOCK;
+    ctrl |= CTRL_CAPSLOCK;
   }
   return ctrl;
 }
@@ -144,25 +144,25 @@ int ttyu_win_ctrl(DWORD state) {
 DWORD ttyu_win_state(int ctrl) {
   DWORD state = 0;
   if(ctrl & CTRL_ALT) {
-    state &= RIGHT_ALT_PRESSED & LEFT_ALT_PRESSED;
+    state |= RIGHT_ALT_PRESSED & LEFT_ALT_PRESSED;
   }
   if(ctrl & CTRL_CTRL) {
-    state &= RIGHT_CTRL_PRESSED & LEFT_CTRL_PRESSED;
+    state |= RIGHT_CTRL_PRESSED & LEFT_CTRL_PRESSED;
   }
   if(ctrl & CTRL_SHIFT) {
-    state &= SHIFT_PRESSED;
+    state |= SHIFT_PRESSED;
   }
   if(ctrl & CTRL_ENHANCED) {
-    state &= ENHANCED_KEY;
+    state |= ENHANCED_KEY;
   }
   if(ctrl & CTRL_NUMLOCK) {
-    state &= NUMLOCK_ON;
+    state |= NUMLOCK_ON;
   }
   if(ctrl & CTRL_SCROLLLOCK) {
-    state &= SCROLLLOCK_ON;
+    state |= SCROLLLOCK_ON;
   }
   if(ctrl & CTRL_CAPSLOCK) {
-    state &= CAPSLOCK_ON;
+    state |= CAPSLOCK_ON;
   }
   return state;
 }
@@ -297,7 +297,7 @@ NAN_METHOD(ttyu_js_c::emit) {
         kev.wVirtualKeyCode = (WORD)args[1]->Int32Value();
         kev.dwControlKeyState = ttyu_win_state(args[2]->Int32Value());
         kev.uChar.UnicodeChar = (WCHAR)kev.wVirtualKeyCode; // TODO
-        kev.uChar.AsciiChar = (WCHAR)kev.wVirtualKeyCode; // TODO
+        kev.uChar.AsciiChar = (CHAR)kev.wVirtualKeyCode; // TODO
         kev.wRepeatCount = 1;
         kev.wVirtualScanCode = MapVirtualKey(kev.wVirtualKeyCode,
             MAPVK_VK_TO_VSC);
@@ -343,7 +343,7 @@ NAN_METHOD(ttyu_js_c::emit) {
           mev.dwEventFlags = 8;
         } else {
           // invalidate event
-          in.EventType = 0;
+          in[0].EventType = 0;
         }
 
         mev.dwMousePosition = pos;

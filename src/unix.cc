@@ -130,7 +130,7 @@ bool ttyu_worker_c::execute(const ttyu_worker_c::ttyu_progress_c& progress,
     } else if(c == KEY_COMMAND) {
       ctrl |= CTRL_CMD;
     } else if(c == KEY_SCOMMAND) {
-      ctrl |= CTRL_CMD | CTRL_CTRL;
+      ctrl |= CTRL_CMD | CTRL_SHIFT;
     } else {
       which = ttyu_unix_which(c);
       if(ch[0] == '^') {

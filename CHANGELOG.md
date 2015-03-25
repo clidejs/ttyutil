@@ -1,5 +1,14 @@
 # ttyutil changelog
 
+## 0.2.0
+ - added `.pause()` function
+ - renamed `.stop()` to `.destroy()`
+ - all functions will throw now when the object is not started or already
+ destroyed
+ - added `.emit()` function
+ - added tests
+ - small bug fixes
+
 ## 0.1.2
  - fixed infinite loop in helper method `util_rgb2term()`
  - added `EVENT.SIGNAL` events to handle low-level signals like `SIGINT`

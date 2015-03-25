@@ -6,10 +6,11 @@ void ttyu_js_c::init(v8::Handle<v8::Object> target) {
   v8::Local<v8::FunctionTemplate> tpl =
       NanNew<v8::FunctionTemplate>(new_instance);
   tpl->SetClassName(NanNew<v8::String>("TTYUtil"));
-  tpl->InstanceTemplate()->SetInternalFieldCount(18);
+  tpl->InstanceTemplate()->SetInternalFieldCount(19);
 
   EXPORT_PROTOTYPE_METHOD(tpl, "start", start);
-  EXPORT_PROTOTYPE_METHOD(tpl, "stop", stop);
+  EXPORT_PROTOTYPE_METHOD(tpl, "pause", pause);
+  EXPORT_PROTOTYPE_METHOD(tpl, "destroy", destroy);
   EXPORT_PROTOTYPE_METHOD_HIDDEN(tpl, "__on__", on);
   EXPORT_PROTOTYPE_METHOD_HIDDEN(tpl, "__off__", off);
   EXPORT_PROTOTYPE_METHOD_HIDDEN(tpl, "__emit__", emit);
@@ -33,7 +34,9 @@ void ttyu_js_c::init(v8::Handle<v8::Object> target) {
 }
 
 ttyu_js_c::ttyu_js_c() {
-  running_ = FALSE;
+  running = FALSE;
+  paused = FALSE;
+  destroyed_ = FALSE;
 
   data = (ttyu_data_t *)malloc(sizeof(ttyu_data_t));
   ttyu_data_init(data);
@@ -47,6 +50,9 @@ ttyu_js_c::~ttyu_js_c() {
 }
 
 void ttyu_js_c::destroy() {
+  running = FALSE;
+  paused = FALSE;
+  destroyed_ = TRUE;
   if(data) {
     ttyu_data_destroy(data);
     free(data);
@@ -56,6 +62,7 @@ void ttyu_js_c::destroy() {
 NAN_METHOD(ttyu_js_c::new_instance) {
   NanScope();
   ttyu_js_c *obj = new ttyu_js_c();
+  obj->throw_ = args[0]->IsBoolean() ? args[1]->BooleanValue() : TRUE;
   obj->Wrap(args.This());
   NanReturnThis();
 }
@@ -63,22 +70,35 @@ NAN_METHOD(ttyu_js_c::new_instance) {
 NAN_METHOD(ttyu_js_c::start) {
   NanScope();
   ttyu_js_c *obj = ObjectWrap::Unwrap<ttyu_js_c>(args.This());
-  if(!obj->running_) {
-    obj->running_ = TRUE;
+  TTYU_THROW_IF_DESTROYED(obj);
+  if(!obj->running) {
+    obj->running = TRUE;
 
     ttyu_worker_c *w = new ttyu_worker_c(obj);
     NanAsyncQueueWorker(w);
     obj->worker_ = w;
+  } else if(obj->paused) {
+    obj->paused = FALSE;
   }
   NanReturnThis();
 }
 
-NAN_METHOD(ttyu_js_c::stop) {
+NAN_METHOD(ttyu_js_c::pause) {
   NanScope();
   ttyu_js_c *obj = ObjectWrap::Unwrap<ttyu_js_c>(args.This());
-  if(obj->running_) {
+  TTYU_THROW_IF_DESTROYED(obj);
+  if(obj->running && !obj->paused) {
+    obj->paused = TRUE;
+  }
+  NanReturnThis();
+}
+
+NAN_METHOD(ttyu_js_c::destroy) {
+  NanScope();
+  ttyu_js_c *obj = ObjectWrap::Unwrap<ttyu_js_c>(args.This());
+  TTYU_THROW_IF_DESTROYED(obj);
+  if(obj->running) {
     obj->destroy();
-    obj->running_ = FALSE;
   }
   NanReturnThis();
 }
@@ -86,12 +106,13 @@ NAN_METHOD(ttyu_js_c::stop) {
 NAN_GETTER(ttyu_js_c::is_running) {
   NanScope();
   ttyu_js_c *obj = ObjectWrap::Unwrap<ttyu_js_c>(args.This());
-  NanReturnValue(NanNew<v8::Boolean>(obj->running_));
+  NanReturnValue(NanNew<v8::Boolean>(obj->running && !obj->paused));
 }
 
 NAN_METHOD(ttyu_js_c::on) {
   NanScope();
   ttyu_js_c *obj = ObjectWrap::Unwrap<ttyu_js_c>(args.This());
+  TTYU_THROW_IF_DESTROYED(obj);
   ee_on(obj->emitter, args[0]->Int32Value(),
       new NanCallback(v8::Local<v8::Function>::Cast(args[1])));
   NanReturnThis();
@@ -100,6 +121,7 @@ NAN_METHOD(ttyu_js_c::on) {
 NAN_METHOD(ttyu_js_c::off) {
   NanScope();
   ttyu_js_c *obj = ObjectWrap::Unwrap<ttyu_js_c>(args.This());
+  TTYU_THROW_IF_DESTROYED(obj);
   ee_off(obj->emitter, args[0]->Int32Value(),
       new NanCallback(v8::Local<v8::Function>::Cast(args[1])));
   NanReturnThis();

@@ -82,6 +82,21 @@ void ttyu_event_create_mouse(ttyu_event_t *event, int type, int button, int x,
     int y, int ctrl);
 void ttyu_event_destroy(ttyu_event_t *event);
 
+// helper functions for exception throwing
+#define TTYU_THROW_IF_DESTROYED(obj) do {                                      \
+  if(obj->throw_ && obj->destroyed_) {                                         \
+    NanThrowError("TTYUtil object was already destroyed");                     \
+    return;                                                                    \
+  }                                                                            \
+} while(0)
+#define TTYU_THROW_IF_NOT_RUNNING(obj) do {                                    \
+  TTYU_THROW_IF_DESTROYED(obj);                                                \
+  if(obj->throw_ && !obj->running) {                                          \
+    NanThrowError("TTYUtil object was not started");                           \
+    return;                                                                    \
+  }                                                                            \
+} while(0)
+
 // definition of the node module class
 class ttyu_js_c : public node::ObjectWrap {
 public:
@@ -91,12 +106,15 @@ public:
 
   ttyu_data_t *data;
   ee_emitter_t *emitter;
+  bool running;
+  bool paused;
 private:
   ~ttyu_js_c();
 
   static NAN_METHOD(new_instance);
   static NAN_METHOD(start);
-  static NAN_METHOD(stop);
+  static NAN_METHOD(pause);
+  static NAN_METHOD(destroy);
   static NAN_METHOD(on);
   static NAN_METHOD(off);
   static NAN_METHOD(emit);
@@ -118,7 +136,8 @@ private:
 
   static v8::Persistent<v8::Function> constructor;
 
-  bool running_;
+  bool throw_;
+  bool destroyed_;
   ttyu_worker_c *worker_;
 };
 

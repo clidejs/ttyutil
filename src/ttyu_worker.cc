@@ -36,7 +36,8 @@ void ttyu_worker_c::progress() {
 }
 
 void ttyu_worker_c::handle(ttyu_event_t *event) {
-  if(ee_count(obj_->emitter, event->type) == 0) {
+  if(ee_count(obj_->emitter, event->type) == 0 || obj_->paused ||
+      !obj_->running) {
     return;
   }
   v8::Local<v8::Value> arg;

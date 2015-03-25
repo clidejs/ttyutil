@@ -189,7 +189,8 @@ int ttyu_unix_which(int key) {
 NAN_METHOD(ttyu_js_c::emit) {
   NanScope();
   ttyu_js_c *obj = ObjectWrap::Unwrap<ttyu_js_c>(args.This());
-  if(obj->running_) {
+  TTYU_THROW_IF_NOT_RUNNING(obj);
+  if(obj->running) {
     int ev = args[0]->Int32Value();
 
     switch(ev) {
@@ -274,58 +275,72 @@ NAN_METHOD(ttyu_js_c::emit) {
 
 NAN_GETTER(ttyu_js_c::get_width) {
   NanScope();
+  ttyu_js_c *obj = ObjectWrap::Unwrap<ttyu_js_c>(args.This());
+  TTYU_THROW_IF_NOT_RUNNING(obj);
   NanReturnValue(NanNew<v8::Number>(COLS));
 }
 
 NAN_GETTER(ttyu_js_c::get_height) {
   NanScope();
+  ttyu_js_c *obj = ObjectWrap::Unwrap<ttyu_js_c>(args.This());
+  TTYU_THROW_IF_NOT_RUNNING(obj);
   NanReturnValue(NanNew<v8::Number>(LINES));
 }
 
 NAN_GETTER(ttyu_js_c::get_mode) {
   NanScope();
   ttyu_js_c *obj = ObjectWrap::Unwrap<ttyu_js_c>(args.This());
+  TTYU_THROW_IF_NOT_RUNNING(obj);
   NanReturnValue(NanNew<v8::Number>(obj->data->mode));
 }
 
 NAN_GETTER(ttyu_js_c::get_colors) {
   NanScope();
+  ttyu_js_c *obj = ObjectWrap::Unwrap<ttyu_js_c>(args.This());
+  TTYU_THROW_IF_NOT_RUNNING(obj);
   NanReturnValue(NanNew<v8::Number>(COLORS));
 }
 
 NAN_GETTER(ttyu_js_c::getx) {
   NanScope();
   ttyu_js_c *obj = ObjectWrap::Unwrap<ttyu_js_c>(args.This());
+  TTYU_THROW_IF_NOT_RUNNING(obj);
   NanReturnValue(NanNew<v8::Number>(obj->data->win->_curx));
 }
 
 NAN_SETTER(ttyu_js_c::setx) {
   NanScope();
   ttyu_js_c *obj = ObjectWrap::Unwrap<ttyu_js_c>(args.This());
+  TTYU_THROW_IF_NOT_RUNNING(obj);
   obj->data->win->_curx = args.Data()->Int32Value();
 }
 
 NAN_GETTER(ttyu_js_c::gety) {
   NanScope();
   ttyu_js_c *obj = ObjectWrap::Unwrap<ttyu_js_c>(args.This());
+  TTYU_THROW_IF_NOT_RUNNING(obj);
   NanReturnValue(NanNew<v8::Number>(obj->data->win->_cury));
 }
 
 NAN_SETTER(ttyu_js_c::sety) {
   NanScope();
   ttyu_js_c *obj = ObjectWrap::Unwrap<ttyu_js_c>(args.This());
+  TTYU_THROW_IF_NOT_RUNNING(obj);
   obj->data->win->_cury = args.Data()->Int32Value();
 }
 
 NAN_METHOD(ttyu_js_c::gotoxy) {
   NanScope();
   ttyu_js_c *obj = ObjectWrap::Unwrap<ttyu_js_c>(args.This());
+  TTYU_THROW_IF_NOT_RUNNING(obj);
   wmove(obj->data->win, args[1]->Int32Value(), args[0]->Int32Value());
   NanReturnThis();
 }
 
 NAN_METHOD(ttyu_js_c::write) {
   NanScope();
+  ttyu_js_c *obj = ObjectWrap::Unwrap<ttyu_js_c>(args.This());
+  TTYU_THROW_IF_NOT_RUNNING(obj);
   v8::String::Utf8Value *ch = new v8::String::Utf8Value(args[0]->ToString());
   int fg = args[1]->IsNumber() ? args[1]->Int32Value() : (
       args[1]->IsString() ? util_color(
@@ -340,6 +355,8 @@ NAN_METHOD(ttyu_js_c::write) {
 
 NAN_METHOD(ttyu_js_c::beep) {
   NanScope();
+  ttyu_js_c *obj = ObjectWrap::Unwrap<ttyu_js_c>(args.This());
+  TTYU_THROW_IF_NOT_RUNNING(obj);
   ::beep();
   NanReturnThis();
 }
@@ -347,6 +364,7 @@ NAN_METHOD(ttyu_js_c::beep) {
 NAN_METHOD(ttyu_js_c::clear) {
   NanScope();
   ttyu_js_c *obj = ObjectWrap::Unwrap<ttyu_js_c>(args.This());
+  TTYU_THROW_IF_NOT_RUNNING(obj);
 
   if(args[0]->IsNumber() && args[1]->IsNumber() && args[2]->IsNumber() &&
       args[3]->IsNumber()) {
@@ -363,6 +381,8 @@ NAN_METHOD(ttyu_js_c::clear) {
 
 NAN_METHOD(ttyu_js_c::prepare) {
   NanScope();
+  ttyu_js_c *obj = ObjectWrap::Unwrap<ttyu_js_c>(args.This());
+  TTYU_THROW_IF_NOT_RUNNING(obj);
   v8::String::Utf8Value *ch = new v8::String::Utf8Value(args[0]->ToString());
   int fg = args[1]->IsNumber() ? args[1]->Int32Value() : (
       args[1]->IsString() ? util_color(
@@ -375,6 +395,8 @@ NAN_METHOD(ttyu_js_c::prepare) {
 
 NAN_METHOD(ttyu_js_c::color) {
   NanScope();
+  ttyu_js_c *obj = ObjectWrap::Unwrap<ttyu_js_c>(args.This());
+  TTYU_THROW_IF_NOT_RUNNING(obj);
   v8::String::Utf8Value *ch = new v8::String::Utf8Value(args[0]->ToString());
   NanReturnValue(NanNew<v8::Integer>(util_color(ch->operator*())));
 }

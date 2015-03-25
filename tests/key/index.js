@@ -4,8 +4,9 @@ var path = require("path");
 
 var which = [];
 
-for(var i = 1; i < 5; ++i) {
-    which.push(i);
+for(var i = 1; i < 256; ++i) {
+    if(i != 19) // the pause_key kills windows
+        which.push(i);
 }
 
 module.exports = function(TTYUtil, expect) {

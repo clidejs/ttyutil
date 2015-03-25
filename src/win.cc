@@ -282,7 +282,8 @@ bool ttyu_win_clrscr(ttyu_data_t *data, int x, int y, int width, int height) {
 NAN_METHOD(ttyu_js_c::emit) {
   NanScope();
   ttyu_js_c *obj = ObjectWrap::Unwrap<ttyu_js_c>(args.This());
-  if(obj->running_) {
+  TTYU_THROW_IF_NOT_RUNNING(obj);
+  if(obj->running) {
     int ev = args[0]->Int32Value();
     INPUT_RECORD in[1];
     DWORD w;
@@ -364,28 +365,35 @@ NAN_METHOD(ttyu_js_c::emit) {
 NAN_GETTER(ttyu_js_c::get_width) {
   NanScope();
   ttyu_js_c *obj = ObjectWrap::Unwrap<ttyu_js_c>(args.This());
+  TTYU_THROW_IF_NOT_RUNNING(obj);
   NanReturnValue(NanNew<v8::Integer>(obj->data->width));
 }
 
 NAN_GETTER(ttyu_js_c::get_height) {
   NanScope();
   ttyu_js_c *obj = ObjectWrap::Unwrap<ttyu_js_c>(args.This());
+  TTYU_THROW_IF_NOT_RUNNING(obj);
   NanReturnValue(NanNew<v8::Integer>(obj->data->height));
 }
 
 NAN_GETTER(ttyu_js_c::get_mode) {
   NanScope();
+  ttyu_js_c *obj = ObjectWrap::Unwrap<ttyu_js_c>(args.This());
+  TTYU_THROW_IF_NOT_RUNNING(obj);
   NanReturnValue(NanNew<v8::Integer>(MODE_CMD));
 }
 
 NAN_GETTER(ttyu_js_c::get_colors) {
   NanScope();
+  ttyu_js_c *obj = ObjectWrap::Unwrap<ttyu_js_c>(args.This());
+  TTYU_THROW_IF_NOT_RUNNING(obj);
   NanReturnValue(NanNew<v8::Integer>(WIN_COLORS));
 }
 
 NAN_GETTER(ttyu_js_c::getx) {
   NanScope();
   ttyu_js_c *obj = ObjectWrap::Unwrap<ttyu_js_c>(args.This());
+  TTYU_THROW_IF_NOT_RUNNING(obj);
   ttyu_win_scr_update(obj->data);
   NanReturnValue(NanNew<v8::Integer>(obj->data->curx));
 }
@@ -393,6 +401,7 @@ NAN_GETTER(ttyu_js_c::getx) {
 NAN_SETTER(ttyu_js_c::setx) {
   NanScope();
   ttyu_js_c *obj = ObjectWrap::Unwrap<ttyu_js_c>(args.This());
+  TTYU_THROW_IF_NOT_RUNNING(obj);
   obj->data->curx = args.Data()->Int32Value();
 
   CONSOLE_SCREEN_BUFFER_INFOEX con_info;
@@ -409,6 +418,7 @@ NAN_SETTER(ttyu_js_c::setx) {
 NAN_GETTER(ttyu_js_c::gety) {
   NanScope();
   ttyu_js_c *obj = ObjectWrap::Unwrap<ttyu_js_c>(args.This());
+  TTYU_THROW_IF_NOT_RUNNING(obj);
   ttyu_win_scr_update(obj->data);
   NanReturnValue(NanNew<v8::Integer>(obj->data->cury));
 }
@@ -416,6 +426,7 @@ NAN_GETTER(ttyu_js_c::gety) {
 NAN_SETTER(ttyu_js_c::sety) {
   NanScope();
   ttyu_js_c *obj = ObjectWrap::Unwrap<ttyu_js_c>(args.This());
+  TTYU_THROW_IF_NOT_RUNNING(obj);
   obj->data->cury = args.Data()->Int32Value();
 
   CONSOLE_SCREEN_BUFFER_INFOEX con_info;
@@ -432,6 +443,7 @@ NAN_SETTER(ttyu_js_c::sety) {
 NAN_METHOD(ttyu_js_c::gotoxy) {
   NanScope();
   ttyu_js_c *obj = ObjectWrap::Unwrap<ttyu_js_c>(args.This());
+  TTYU_THROW_IF_NOT_RUNNING(obj);
   obj->data->curx = args[0]->Int32Value();
   obj->data->cury = args[1]->Int32Value();
 
@@ -451,6 +463,7 @@ NAN_METHOD(ttyu_js_c::gotoxy) {
 NAN_METHOD(ttyu_js_c::write) {
   NanScope();
   ttyu_js_c *obj = ObjectWrap::Unwrap<ttyu_js_c>(args.This());
+  TTYU_THROW_IF_NOT_RUNNING(obj);
   v8::String::Utf8Value *ch = new v8::String::Utf8Value(args[0]->ToString());
   int fg = args[1]->IsNumber() ? args[1]->Int32Value() : (
       args[1]->IsString() ? util_color(
@@ -464,6 +477,8 @@ NAN_METHOD(ttyu_js_c::write) {
 
 NAN_METHOD(ttyu_js_c::beep) {
   NanScope();
+  ttyu_js_c *obj = ObjectWrap::Unwrap<ttyu_js_c>(args.This());
+  TTYU_THROW_IF_NOT_RUNNING(obj);
   Beep(750, 300);
   NanReturnThis();
 }
@@ -471,6 +486,7 @@ NAN_METHOD(ttyu_js_c::beep) {
 NAN_METHOD(ttyu_js_c::clear) {
   NanScope();
   ttyu_js_c *obj = ObjectWrap::Unwrap<ttyu_js_c>(args.This());
+  TTYU_THROW_IF_NOT_RUNNING(obj);
   int x = 0;
   int y = 0;
   int width = obj->data->width;
@@ -491,6 +507,7 @@ NAN_METHOD(ttyu_js_c::clear) {
 NAN_METHOD(ttyu_js_c::prepare) {
   NanScope();
   ttyu_js_c *obj = ObjectWrap::Unwrap<ttyu_js_c>(args.This());
+  TTYU_THROW_IF_NOT_RUNNING(obj);
   v8::String::Utf8Value *ch = new v8::String::Utf8Value(args[0]->ToString());
   int fg = args[1]->IsNumber() ? args[1]->Int32Value() : (
       args[1]->IsString() ? util_color(
@@ -504,6 +521,7 @@ NAN_METHOD(ttyu_js_c::prepare) {
 NAN_METHOD(ttyu_js_c::color) {
   NanScope();
   ttyu_js_c *obj = ObjectWrap::Unwrap<ttyu_js_c>(args.This());
+  TTYU_THROW_IF_NOT_RUNNING(obj);
   v8::String::Utf8Value *ch = new v8::String::Utf8Value(args[0]->ToString());
   NanReturnValue(NanNew<v8::Integer>(util_color(ch->operator*())));
 }

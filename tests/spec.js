@@ -6,8 +6,8 @@ module.exports = function(TTYUtil, expect) {
         describe("TTYUtil.prototype", function() {
             var keys = Object.keys(TTYUtil.prototype);
 
-            it("should have 12 enumerable properties", function() {
-                expect(keys.length).to.be.equal(12);
+            it("should have 13 enumerable properties", function() {
+                expect(keys.length).to.be.equal(13);
             });
 
             it("#on() should be an enumerable function", function() {
@@ -41,9 +41,15 @@ module.exports = function(TTYUtil, expect) {
                         .to.be.equal("Function");
             });
 
-            it("#stop() should be an enumerable function", function() {
-                expect(keys.indexOf("stop")).to.be.not.equal(-1);
-                is.expect.type.of(TTYUtil.prototype.stop)
+            it("#pause() should be an enumerable function", function() {
+                expect(keys.indexOf("pause")).to.be.not.equal(-1);
+                is.expect.type.of(TTYUtil.prototype.pause)
+                        .to.be.equal("Function");
+            });
+
+            it("#destroy() should be an enumerable function", function() {
+                expect(keys.indexOf("destroy")).to.be.not.equal(-1);
+                is.expect.type.of(TTYUtil.prototype.destroy)
                         .to.be.equal("Function");
             });
 

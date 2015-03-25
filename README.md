@@ -74,9 +74,14 @@ be added soon.
 Start emitting input events (mouse, key and resize events) to the listeners
 attached by `tty.on(event, listener)`.
 
-#### `ttyu.stop()`
+#### `ttyu.pause()`
 
-Stops emitting input events.
+Pause emitting input events.
+
+#### `ttyu.destroy()`
+
+Destroy the object and release all resources. You wont be able to use any more
+functions or restart.
 
 #### `ttyu.running`
 

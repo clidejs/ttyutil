@@ -86,14 +86,14 @@ void ttyu_event_destroy(ttyu_event_t *event);
 #define TTYU_THROW_IF_DESTROYED(obj) do {                                      \
   if(obj->throw_ && obj->destroyed_) {                                         \
     NanThrowError("TTYUtil object was already destroyed");                     \
-    return;                                                                    \
+    NanReturnUndefined();                                                      \
   }                                                                            \
 } while(0)
 #define TTYU_THROW_IF_NOT_RUNNING(obj) do {                                    \
   TTYU_THROW_IF_DESTROYED(obj);                                                \
-  if(obj->throw_ && !obj->running) {                                          \
+  if(obj->throw_ && !obj->running) {                                           \
     NanThrowError("TTYUtil object was not started");                           \
-    return;                                                                    \
+    NanReturnUndefined();                                                      \
   }                                                                            \
 } while(0)
 

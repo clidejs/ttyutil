@@ -4,3 +4,9 @@ npm-debug.log
 .DS_Store
 
 TODO.md
+
+.gitignore
+.travis.yml
+appveyor.yml
+tests/
+examples/

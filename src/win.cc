@@ -401,7 +401,7 @@ NAN_GETTER(ttyu_js_c::getx) {
 NAN_SETTER(ttyu_js_c::setx) {
   NanScope();
   ttyu_js_c *obj = ObjectWrap::Unwrap<ttyu_js_c>(args.This());
-  TTYU_THROW_IF_NOT_RUNNING(obj);
+  TTYU_THROW_IF_NOT_RUNNING_VOID(obj);
   obj->data->curx = args.Data()->Int32Value();
 
   CONSOLE_SCREEN_BUFFER_INFOEX con_info;
@@ -426,7 +426,7 @@ NAN_GETTER(ttyu_js_c::gety) {
 NAN_SETTER(ttyu_js_c::sety) {
   NanScope();
   ttyu_js_c *obj = ObjectWrap::Unwrap<ttyu_js_c>(args.This());
-  TTYU_THROW_IF_NOT_RUNNING(obj);
+  TTYU_THROW_IF_NOT_RUNNING_VOID(obj);
   obj->data->cury = args.Data()->Int32Value();
 
   CONSOLE_SCREEN_BUFFER_INFOEX con_info;

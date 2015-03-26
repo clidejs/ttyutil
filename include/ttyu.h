@@ -96,6 +96,16 @@ void ttyu_event_destroy(ttyu_event_t *event);
     NanReturnUndefined();                                                      \
   }                                                                            \
 } while(0)
+#define TTYU_THROW_IF_NOT_RUNNING_VOID(obj) do {                               \
+  if(obj->throw_ && obj->destroyed_) {                                         \
+    NanThrowError("TTYUtil object was already destroyed");                     \
+    return;                                                                    \
+  }                                                                            \
+  if(obj->throw_ && !obj->running) {                                           \
+    NanThrowError("TTYUtil object was not started");                           \
+    return;                                                                    \
+  }                                                                            \
+} while(0)
 
 // definition of the node module class
 class ttyu_js_c : public node::ObjectWrap {

@@ -8,4 +8,6 @@ ttyu.on(TTYUtil.EVENT.KEY, function(ev) {
 
 ttyu.start();
 
-ttyu.emit(TTYUtil.EVENT.KEY, 65, 4);
+setTimeout(function() {
+    ttyu.emit(TTYUtil.EVENT.KEY, 65, 4);
+}, 10);

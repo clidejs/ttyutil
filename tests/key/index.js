@@ -16,7 +16,7 @@ module.exports = function(TTYUtil, expect) {
             it.each(which, "should recognize character #%s", ['element'],
                     function(element, next) {
                 var cp = fork(path.join(__dirname, "key.js"));
-                this.timeout(2000); // since appveyor & travis-ci are slow
+                this.timeout(5000); // since appveyor & travis-ci are slow
                 var testa = function(e) {
                     is.expect.type.of(e).to.be.equal("Object");
                     expect(e.which).to.be.equal(element);

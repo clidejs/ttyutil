@@ -26,7 +26,12 @@ module.exports = function(ttyu) {
             this.__emit__(Const.Event[ev], arg1, arg2, arg3, arg4);
         }
         return this;
-    }
+    };
+    ttyu.TTYUtil.prototype.start = function() {
+        this.__start__();
+        // flush input, so .emit() can be caught directly after .start()
+        process.stdin.write("");
+    };
 
     ttyu.TTYUtil.EVENT = {
         ERROR: "error",
@@ -44,7 +49,7 @@ module.exports = function(ttyu) {
         SIGTERM: "SIGTERM",
         SIGPIPE: "SIGPIPE",
         SIGHUP: "SIGHUP"
-    }
+    };
     ttyu.TTYUtil.MOUSE = Const.Mouse;
     ttyu.TTYUtil.WHICH = Const.Which;
     ttyu.TTYUtil.CTRL = Const.Ctrl;

@@ -1,13 +1,24 @@
 #include <ttyu.h>
 
-ttyu_unix_kw_t *root = (ttyu_unix_kw_t *)std::malloc(sizeof(ttyu_unix_kw_t));
-void ttyu_unix_assign(int which, int key, bool shift) {
+ttyu_unix_kw_t *mroot = (ttyu_unix_kw_t *)std::malloc(sizeof(ttyu_unix_kw_t));
+ttyu_unix_kw_t *troot = (ttyu_unix_kw_t *)std::malloc(sizeof(ttyu_unix_kw_t));
+
+void ttyu_unix_massign(int which, int key, bool shift) {
   ttyu_unix_kw_t *n = (ttyu_unix_kw_t *)std::malloc(sizeof(ttyu_unix_kw_t));
-  n->next = root->next;
+  n->next = mroot->next;
   n->which = which;
   n->key = key;
   n->shift = shift;
-  root->next = n;
+  mroot->next = n;
+}
+
+void ttyu_unix_tassign(int which, int key, bool shift) {
+  ttyu_unix_kw_t *n = (ttyu_unix_kw_t *)std::malloc(sizeof(ttyu_unix_kw_t));
+  n->next = troot->next;
+  n->which = which;
+  n->key = key;
+  n->shift = shift;
+  troot->next = n;
 }
 
 void ttyu_data_init(ttyu_data_t *data) {
@@ -15,7 +26,7 @@ void ttyu_data_init(ttyu_data_t *data) {
   data->closing = false;
   data->mode = MODE_VT100;
 
-  TTYU_UNIX_KW(ttyu_unix_assign);
+  TTYU_UNIX_KW(ttyu_unix_massign);
 
   noecho();
   cbreak();
@@ -34,6 +45,10 @@ void ttyu_data_destroy(ttyu_data_t *data) {
 
 bool ttyu_worker_c::execute(const ttyu_worker_c::ttyu_progress_c& progress,
     ttyu_data_t *data) {
+  if(!troot) {
+    TTYU_UNIX_KW(ttyu_unix_tassign);
+  }
+
   int c = getch();
 
   if(c == TTYU_EXIT) { return FALSE; }
@@ -163,7 +178,7 @@ void ttyu_unix_clrscr(ttyu_data_t *data, int x, int y, int width, int height) {
 }
 
 int ttyu_unix_key(int which) {
-  ttyu_unix_kw_t *c = root->next;
+  ttyu_unix_kw_t *c = mroot->next;
   if(c) {
     do {
       if(c->which == which) {
@@ -175,7 +190,7 @@ int ttyu_unix_key(int which) {
 }
 
 int ttyu_unix_which(int key) {
-  ttyu_unix_kw_t *c = root->next;
+  ttyu_unix_kw_t *c = troot->next;
   if(c) {
     do {
       if(c->key == key) {

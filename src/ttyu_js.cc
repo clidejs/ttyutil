@@ -8,9 +8,9 @@ void ttyu_js_c::init(v8::Handle<v8::Object> target) {
   tpl->SetClassName(NanNew<v8::String>("TTYUtil"));
   tpl->InstanceTemplate()->SetInternalFieldCount(19);
 
-  EXPORT_PROTOTYPE_METHOD(tpl, "start", start);
   EXPORT_PROTOTYPE_METHOD(tpl, "pause", pause);
   EXPORT_PROTOTYPE_METHOD(tpl, "destroy", destroy);
+  EXPORT_PROTOTYPE_METHOD_HIDDEN(tpl, "__start__", start);
   EXPORT_PROTOTYPE_METHOD_HIDDEN(tpl, "__on__", on);
   EXPORT_PROTOTYPE_METHOD_HIDDEN(tpl, "__off__", off);
   EXPORT_PROTOTYPE_METHOD_HIDDEN(tpl, "__emit__", emit);

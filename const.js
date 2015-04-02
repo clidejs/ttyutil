@@ -23,14 +23,6 @@ module.exports = {
 
     Which: {
         UNKNOWN: -1,
-    // the windows key codes
-    // TODO remove unnecessary
-        LBUTTON: 0x01,
-        RBUTTON: 0x02,
-        CANCEL: 0x03,
-        MBUTTON: 0x04,
-        XBUTTON1: 0x05,
-        XBUTTON2: 0x06,
 
         BACK: 0x08, BACKSPACE: 0x08,
         TAB: 0x09,

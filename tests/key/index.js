@@ -7,7 +7,7 @@ var Const = require("../../const");
 var which = [];
 
 var keys = Object.keys(Const.Which);
-for(var i = 0; i < 1; ++i) {
+for(var i = 0; i < keys.length; ++i) {
     c = Const.Which[keys[i]];
     if(c != 19 && c != -1 && which.indexOf(c) === -1)
         which.push(c);
@@ -20,7 +20,7 @@ module.exports = function(TTYUtil, expect) {
 
             it.each(which, "should recognize character #%s", ['element'],
                     function(element, next) {
-                this.timeout(500); // since appveyor & travis-ci are slow
+                this.timeout(500);
                 var testa = function(x,e) {
                     is.expect.type.of(e).to.be.equal("Object");
                     expect(e.which).to.be.equal(element);

@@ -227,8 +227,8 @@ Every event emits one parameter to the callbacks:
 
 - `error`-Event emits an error-object containing information about the error
 - `signal`-Event emits an object containing the raised signal (see
-[`TTYUtil.SIGNAL`](#__signal)) in the `signal` property __work in progress__
-(e.g. `{ signal: "SIGINT" }`)
+[`TTYUtil.SIGNAL`](#__signal)) in the `signal` property
+(e.g. `{ signal: "SIGINT" }`) __(work in progress)__
 - `key`-Event emits an object containing following properties:
     - `ctrl` {`Integer`} the control characters currently pressed
     (see [`TTYUtil.CTRL`](#__ctrl))

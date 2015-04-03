@@ -1,4 +1,4 @@
-/* ttyutil - ttyu.h
+/* ttyutil - ttyu.h - main header file
  * https://github.com/clidejs/ttyutil
  *
  * Copyright Bernhard Bücherl <bernhard.buecherl@gmail.com>

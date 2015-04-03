@@ -8,7 +8,12 @@
  - added `.emit()` function
  - added tests
  - small bug fixes
+
+### TODO
+
  - iojs support
+ - reenable signal events
+ - fix segfault on unix
 
 ## 0.1.2
  - fixed infinite loop in helper method `util_rgb2term()`

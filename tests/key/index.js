@@ -1,8 +1,8 @@
 require("it-each")({ testPerIteration: true});
 var is = require("node-is");
 var path = require("path");
-var fork = require("child_process").fork;
 var Const = require("../../const");
+var TTYUtil = require("../../export")(require("../../build/Release/ttyu"));
 
 var which = [];
 
@@ -16,21 +16,34 @@ for(var i = 0; i < keys.length; ++i) {
 module.exports = function(TTYUtil, expect) {
     describe("TTYUtil `key` event handling", function() {
         describe(".which", function() {
-            var cp = fork(path.join(__dirname, "key.js"));
+            var ttyu;
+
+            before(function() {
+                ttyu = new TTYUtil();
+                ttyu.start();
+            });
 
             it.each(which, "should recognize character #%s", ['element'],
                     function(element, next) {
                 this.timeout(500);
-                var testa = function(x,e) {
-                    is.expect.type.of(e).to.be.equal("Object");
-                    expect(e.which).to.be.equal(element);
-                    cp.removeListener("message", testa);
-                    next();
-                    cp.kill();
-                };
-                cp.on("message", testa);
-                cp.send({ which: element, ctrl: 0 });
+                ttyu.on(TTYUtil.EVENT.KEY, createTest(element, next));
+                ttyu.emit(TTYUtil.EVENT.KEY, element, 0);
             });
+
+            after(function() {
+                ttyu.destroy();
+            });
+
+            function createTest(element, callback) {
+                var test = function(ev) {
+                    is.expect.type.of(ev).to.be.equal("Object");
+                    expect(ev.which).to.be.equal(element);
+                    ttyu.removeListener(TTYUtil.EVENT.KEY, test);
+                    callback();
+                };
+
+                return test;
+            }
         });
     });
 };

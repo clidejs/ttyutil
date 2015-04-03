@@ -29,8 +29,12 @@ module.exports = function(ttyu) {
     };
     ttyu.TTYUtil.prototype.start = function() {
         this.__start__();
-        // flush input, so .emit() can be caught directly after .start()
-        process.stdin.write("");
+        if(process.platform !== "win32") {
+            try {
+                // flush input, so .emit() can be caught directly after .start()
+                process.stdin.write("");
+            } catch(e) {}
+        }
     };
 
     ttyu.TTYUtil.EVENT = {

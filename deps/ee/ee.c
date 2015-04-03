@@ -34,9 +34,11 @@ extern "C" {
 
 // initialize empty emitter
 void ee_init(ee_emitter_t *emitter,
-    int (*emit)(ee__listener_t *, EE_DATA_TYPE)) {
+    int (*emit)(ee__listener_t *, EE_DATA_TYPE),
+    int (*compare)(EE_CB_ARG(cb1), EE_CB_ARG(cb2))) {
   emitter->root = 0;
   emitter->emit = emit;
+  emitter->compare = compare;
 }
 
 void ee_on(ee_emitter_t *emitter, int event, EE_CB_ARG(cb)) {
@@ -67,12 +69,13 @@ void ee_off(ee_emitter_t *emitter, int event, EE_CB_ARG(cb)) {
   }
   if(ev->root == 0) {
     return;
-  } else if(ev->root->cb == cb) {
+  } else if((emitter->compare && emitter->compare(ev->root->cb, cb)) ||
+      ev->root->cb == cb) {
     ee__listener_t *old = ev->root;
     ev->root = old->next;
     ee__listener_destroy(old);
   } else {
-    ee__listener_remove(ev->root, cb);
+    ee__listener_remove(emitter, ev->root, cb);
   }
 }
 
@@ -143,14 +146,16 @@ ee__listener_t *ee__listener_add(ee__listener_t *listener, EE_CB_ARG(cb)) {
   }
 }
 
-void ee__listener_remove(ee__listener_t *listener, EE_CB_ARG(cb)) {
+void ee__listener_remove(ee_emitter_t *emitter, ee__listener_t *listener,
+    EE_CB_ARG(cb)) {
   if(listener->next != 0) {
-    if(listener->next->cb == cb) {
+    if((emitter->compare && emitter->compare(listener->next->cb, cb)) ||
+        listener->next->cb == cb) {
       ee__listener_t *old = listener->next;
       listener->next = old->next;
       ee__listener_destroy(old);
     } else {
-      ee__listener_remove(listener->next, cb);
+      ee__listener_remove(emitter, listener->next, cb);
     }
   }
 }

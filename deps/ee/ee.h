@@ -37,6 +37,10 @@ extern "C" {
 #define EE_DATA_ARG(name) EE_DATA_TYPE name
 #endif
 
+#ifndef EE_CB_TYPE
+#define EE_CB_TYPE void(*) (EE_DATA_TYPE)
+#endif
+
 #ifndef EE_CB_ARG
 #define EE_CB_ARG(name) void(*name)(EE_DATA_TYPE)
 #endif
@@ -59,10 +63,12 @@ struct ee__listener_s {
 struct ee_emitter_s {
   ee__event_t *root;
   int (*emit)(ee__listener_t *, EE_DATA_TYPE);
+  int (*compare)(EE_CB_TYPE, EE_CB_TYPE);
 };
 
 void ee_init(ee_emitter_t *emitter,
-    int (*emit)(ee__listener_t *, EE_DATA_TYPE));
+    int (*emit)(ee__listener_t *, EE_DATA_TYPE),
+    int (*compare)(EE_CB_TYPE, EE_CB_TYPE));
 void ee_on(ee_emitter_t *emitter, int event, EE_CB_ARG(cb));
 void ee_off(ee_emitter_t *emitter, int event, EE_CB_ARG(cb));
 int ee_emit(ee_emitter_t *emitter, int event, EE_DATA_ARG(data));
@@ -71,7 +77,8 @@ void ee_destroy(ee_emitter_t *emitter);
 
 ee__listener_t *ee__listener_new(EE_CB_ARG(cb));
 ee__listener_t *ee__listener_add(ee__listener_t *listener, EE_CB_ARG(cb));
-void ee__listener_remove(ee__listener_t *listener, EE_CB_ARG(cb));
+void ee__listener_remove(ee_emitter_t *emitter, ee__listener_t *listener,
+    EE_CB_ARG(cb));
 void ee__listener_destroy(ee__listener_t *listener);
 
 ee__event_t *ee__event_new(int event);

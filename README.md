@@ -227,7 +227,7 @@ Every event emits one parameter to the callbacks:
 
 - `error`-Event emits an error-object containing information about the error
 - `signal`-Event emits an object containing the raised signal (see
-[`TTYUtil.SIGNAL`](#__signal)) in the `signal` property
+[`TTYUtil.SIGNAL`](#__signal)) in the `signal` property __work in progress__
 (e.g. `{ signal: "SIGINT" }`)
 - `key`-Event emits an object containing following properties:
     - `ctrl` {`Integer`} the control characters currently pressed
@@ -252,6 +252,17 @@ run the tests using `npm test`. check out /tests for test cases.
 ## Example
 
 see the /examples folder
+
+## TODOs
+
+ - mouse selection
+ - fullscreen detection
+ - improve examples
+ - add pixel rendering (e.g. for pngs) functions
+ - rework goto/write functionality
+ - add X11 implementations to remove curses where possible
+ - rework unix mouse event implementation
+
 
 ## License: MIT
 

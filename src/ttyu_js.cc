@@ -42,7 +42,7 @@ ttyu_js_c::ttyu_js_c() {
   ttyu_data_init(data);
 
   emitter = (ee_emitter_t *)malloc(sizeof(ee_emitter_t));
-  ee_init(emitter, ttyu_ee_cb_call);
+  ee_init(emitter, ttyu_ee_cb_call, ttyu_ee_compare);
 }
 
 ttyu_js_c::~ttyu_js_c() {

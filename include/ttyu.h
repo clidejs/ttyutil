@@ -37,11 +37,14 @@
 // predefine event data and callbacks for ee.c
 #define EE_DATA_TYPE v8::Local<v8::Value>
 #define EE_DATA_ARG(name) v8::Local<v8::Value> name
+#define EE_CB_TYPE NanCallback *
 #define EE_CB_ARG(name) NanCallback *name
 #include <ee.h>
 
 // callback call function for the event emitter
-int ttyu_ee_cb_call(ee__listener_t *l, v8::Local<v8::Value> data);
+int ttyu_ee_cb_call(ee__listener_t *l, EE_DATA_ARG(data));
+// callback compare function for the event emitter
+int ttyu_ee_compare(EE_CB_ARG(cb1), EE_CB_ARG(cb2));
 
 // predefine classes
 class ttyu_js_c;

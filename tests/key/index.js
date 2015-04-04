@@ -9,9 +9,12 @@ var which = [];
 var keys = Object.keys(Const.Which);
 for(var i = 0; i < keys.length; ++i) {
     c = Const.Which[keys[i]];
-    if(c != 19 && c != -1 && which.indexOf(c) === -1)
+    if(c != 19 && c != -1 && which.indexOf(c) === -1) {
         which.push(c);
+    }
 }
+
+var current = [];
 
 module.exports = function(TTYUtil, expect) {
     describe("TTYUtil `key` event handling", function() {
@@ -30,6 +33,13 @@ module.exports = function(TTYUtil, expect) {
                 ttyu.emit(TTYUtil.EVENT.KEY, element, 0);
             });
 
+            afterEach(function() {
+                var el;
+                while((el = current.pop())) {
+                    ttyu.removeListener(TTYUtil.EVENT.KEY, el);
+                }
+            })
+
             after(function() {
                 ttyu.destroy();
             });
@@ -38,9 +48,9 @@ module.exports = function(TTYUtil, expect) {
                 var test = function(ev) {
                     is.expect.type.of(ev).to.be.equal("Object");
                     expect(ev.which).to.be.equal(element);
-                    ttyu.removeListener(TTYUtil.EVENT.KEY, test);
                     callback();
                 };
+                current.push(test);
 
                 return test;
             }

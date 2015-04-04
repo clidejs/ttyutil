@@ -23,33 +23,10 @@
  */
 #include <ttyu.h>
 
-ttyu_unix_kw_t *mroot = (ttyu_unix_kw_t *)std::malloc(sizeof(ttyu_unix_kw_t));
-ttyu_unix_kw_t *troot = (ttyu_unix_kw_t *)std::malloc(sizeof(ttyu_unix_kw_t));
-
-void ttyu_unix_massign(int which, int key, bool shift) {
-  ttyu_unix_kw_t *n = (ttyu_unix_kw_t *)std::malloc(sizeof(ttyu_unix_kw_t));
-  n->next = mroot->next;
-  n->which = which;
-  n->key = key;
-  n->shift = shift;
-  mroot->next = n;
-}
-
-void ttyu_unix_tassign(int which, int key, bool shift) {
-  ttyu_unix_kw_t *n = (ttyu_unix_kw_t *)std::malloc(sizeof(ttyu_unix_kw_t));
-  n->next = troot->next;
-  n->which = which;
-  n->key = key;
-  n->shift = shift;
-  troot->next = n;
-}
-
 void ttyu_data_init(ttyu_data_t *data) {
   data->win = initscr();
   data->closing = false;
   data->mode = MODE_VT100;
-
-  TTYU_UNIX_KW(ttyu_unix_massign);
 
   noecho();
   cbreak();
@@ -68,10 +45,6 @@ void ttyu_data_destroy(ttyu_data_t *data) {
 
 bool ttyu_worker_c::execute(const ttyu_worker_c::ttyu_progress_c& progress,
     ttyu_data_t *data) {
-  if(!troot) {
-    TTYU_UNIX_KW(ttyu_unix_tassign);
-  }
-
   int c = getch();
 
   if(c == TTYU_EXIT) { return FALSE; }
@@ -201,27 +174,19 @@ void ttyu_unix_clrscr(ttyu_data_t *data, int x, int y, int width, int height) {
 }
 
 int ttyu_unix_key(int which) {
-  ttyu_unix_kw_t *c = mroot->next;
-  if(c) {
-    do {
-      if(c->which == which) {
-        return c->key;
-      }
-    } while((c = c->next));
+  #define XXKEY(w, key, shift) if(w == which) {                                \
+    return key;                                                                \
   }
-  return which;
+  TTYU_UNIX_KW(XXKEY);
+  return WHICH_UNKNOWN;
 }
 
 int ttyu_unix_which(int key) {
-  ttyu_unix_kw_t *c = troot->next;
-  if(c) {
-    do {
-      if(c->key == key) {
-        return c->which;
-      }
-    } while((c = c->next));
+  #define XXWHICH(which, k, shift) if(k == key) {                              \
+    return which;                                                              \
   }
-  return key;
+  TTYU_UNIX_KW(XXWHICH);
+  return WHICH_UNKNOWN;
 }
 
 NAN_METHOD(ttyu_js_c::emit) {
@@ -247,7 +212,9 @@ NAN_METHOD(ttyu_js_c::emit) {
         } else {
           c = ttyu_unix_key(which);
         }
-        ungetch(c);
+        if(c >= 0) {
+          ungetch(c);
+        }
         } break;
       case EVENT_MOUSEDOWN:
       case EVENT_MOUSEUP:

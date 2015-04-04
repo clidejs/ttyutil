@@ -106,15 +106,6 @@ struct ttyu_data_s {
   bool closing;
 };
 
-// key-which structure
-typedef struct ttyu_unix_kw_s ttyu_unix_kw_t;
-struct ttyu_unix_kw_s {
-  int which;
-  int key;
-  bool shift;
-  ttyu_unix_kw_t *next;
-};
-
 void ttyu_unix_clrscr(ttyu_data_t *data, int x, int y, int width, int height);
 int ttyu_unix_key(int which);
 int ttyu_unix_which(int key);

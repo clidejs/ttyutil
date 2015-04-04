@@ -25,7 +25,7 @@ module.exports = function(TTYUtil, expect) {
 
             it.each(which, "should recognize character #%s", ['element'],
                     function(element, next) {
-                this.timeout(500);
+                this.timeout(5000);
                 ttyu.on(TTYUtil.EVENT.KEY, createTest(element, next));
                 ttyu.emit(TTYUtil.EVENT.KEY, element, 0);
             });

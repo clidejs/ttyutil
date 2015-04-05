@@ -96,7 +96,9 @@
   XX(WHICH_NEXT, KEY_SNEXT, TRUE);                                             \
   XX(WHICH_PRIOR, KEY_SPREVIOUS, TRUE);                                        \
   XX(WHICH_PRINT, KEY_SPRINT, TRUE);                                           \
-  XX(WHICH_RIGHT, KEY_SRIGHT, TRUE)
+  XX(WHICH_RIGHT, KEY_SRIGHT, TRUE);                                           \
+                                                                               \
+  XX(WHICH_SHIFT, 0, TRUE)
 
 // unixy data structure
 struct ttyu_data_s {

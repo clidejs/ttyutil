@@ -27,6 +27,10 @@
 
 #define NCURSES_OPAQUE FALSE
 #include <curses.h>
+#include <unistd.h>
+#include <queue>
+
+typedef std::queue<int> ttyu_stack_t;
 
 #define ERROR_UNIX_UNDEF "unknown error occured while reading input"
 #define ERROR_UNIX_MOUSEBAD "skipping unreadable mouse event"
@@ -106,6 +110,8 @@ struct ttyu_data_s {
   mmask_t old_mouse_mask;
   int mode;
   bool closing;
+
+  ttyu_stack_t *ungetch_stack;
 };
 
 void ttyu_unix_clrscr(ttyu_data_t *data, int x, int y, int width, int height);

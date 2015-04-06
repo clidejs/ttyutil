@@ -28,7 +28,7 @@ module.exports = function(TTYUtil, expect) {
 
             it.each(which, "should recognize character #%s", ['element'],
                     function(element, next) {
-                this.timeout(500);
+                this.timeout(100);
                 ttyu.on(TTYUtil.EVENT.KEY, createTest(element, next));
                 ttyu.emit(TTYUtil.EVENT.KEY, element, 0);
             });
@@ -40,8 +40,14 @@ module.exports = function(TTYUtil, expect) {
                 }
             })
 
-            after(function() {
-                ttyu.destroy();
+            after(function(done) {
+                var el;
+                while((el = current.pop())) {
+                    ttyu.removeListener(TTYUtil.EVENT.KEY, el);
+                }
+                setTimeout(function() {
+                    ttyu.destroy();
+                }, 100);
             });
 
             function createTest(element, callback) {

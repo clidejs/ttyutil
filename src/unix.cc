@@ -25,8 +25,10 @@
 
 void ttyu_data_init(ttyu_data_t *data) {
   data->win = initscr();
-  data->closing = false;
+  data->closing = FALSE;
   data->mode = MODE_VT100;
+
+  data->ungetch_stack = new ttyu_stack_t;
 
   noecho();
   cbreak();
@@ -37,9 +39,10 @@ void ttyu_data_init(ttyu_data_t *data) {
 }
 
 void ttyu_data_destroy(ttyu_data_t *data) {
-  data->closing = true;
+  data->closing = TRUE;
   echo();
-  ungetch(TTYU_EXIT);
+  while(!data->ungetch_stack->empty()) data->ungetch_stack->pop();
+  data->ungetch_stack->push(TTYU_EXIT);
   endwin();
 }
 
@@ -49,7 +52,18 @@ bool ttyu_worker_c::execute(const ttyu_worker_c::ttyu_progress_c& progress,
 
   if(c == TTYU_EXIT) { return FALSE; }
   if(data->closing) { return FALSE; }
-  if(c == ERR) { return TRUE; }
+
+  if(c == ERR) {
+    if(data->ungetch_stack->empty()) {
+      usleep(500); // no hurry ;)
+      return TRUE;
+    } else {
+      // work on the stack
+      ungetch(data->ungetch_stack->front());
+      data->ungetch_stack->pop();
+      return TRUE;
+    }
+  }
 
   MEVENT mev;
   ttyu_event_t *event = (ttyu_event_t *)malloc(sizeof(ttyu_event_t));
@@ -144,9 +158,9 @@ bool ttyu_worker_c::execute(const ttyu_worker_c::ttyu_progress_c& progress,
       ctrl |= CTRL_CMD | CTRL_SHIFT;
     } else {
       which = ttyu_unix_which(c);
-      if(ch[0] == '^') {
-        ctrl |= CTRL_CTRL;
-      }
+      //if(ch[0] == '^') {
+      //  ctrl |= CTRL_CTRL;
+      //}
     }
 
     ttyu_event_create_key(event, ctrl, ch, c, which);
@@ -213,7 +227,7 @@ NAN_METHOD(ttyu_js_c::emit) {
           c = ttyu_unix_key(which);
         }
         if(c >= 0) {
-          ungetch(c);
+          obj->data->ungetch_stack->push(c);
         }
         } break;
       case EVENT_MOUSEDOWN:

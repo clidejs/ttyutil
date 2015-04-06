@@ -59,8 +59,9 @@ bool ttyu_worker_c::execute(const ttyu_worker_c::ttyu_progress_c& progress,
       return TRUE;
     } else {
       // work on the stack
-      ungetch(data->ungetch_stack->front());
+      c = data->ungetch_stack->front();
       data->ungetch_stack->pop();
+      ungetch(c == -1 ? 1 : c);
       return TRUE;
     }
   }
@@ -147,7 +148,9 @@ bool ttyu_worker_c::execute(const ttyu_worker_c::ttyu_progress_c& progress,
     int ctrl = CTRL_NULL;
     int which = WHICH_UNKNOWN;
 
-    if(c >= 65 && c <= 90) {
+    if(c >= 48 && c <= 57) {
+      which = c; // WHICH_CHAR0 to WHICH_CHAR9
+    } else if(c >= 65 && c <= 90) {
       ctrl |= CTRL_SHIFT;
       which = c; // WHICH_CHARA to WHICH_CHARZ
     } else if(c >= 97 && c <= 122) {
@@ -212,23 +215,23 @@ NAN_METHOD(ttyu_js_c::emit) {
 
     switch(ev) {
       case EVENT_KEY: {
-        int c = 0;
+        int c = -1;
         int which = args[1]->Int32Value();
         int ctrl = args[2]->Int32Value();
         if(ctrl & CTRL_CMD) {
           c = KEY_COMMAND;
         } else if(which >= 65 && which <= 90) {
           if(ctrl & CTRL_SHIFT) {
-            c = which;
+            c = which; // A-Z
           } else {
-            c = which + 32;
+            c = which + 32; // a-z
           }
+        } else if(which >= 48 && which <= 57) {
+          c = which; // 0 - 9
         } else {
           c = ttyu_unix_key(which);
         }
-        if(c >= 0) {
-          obj->data->ungetch_stack->push(c);
-        }
+        obj->data->ungetch_stack->push(c);
         } break;
       case EVENT_MOUSEDOWN:
       case EVENT_MOUSEUP:

@@ -36,7 +36,8 @@ typedef std::queue<int> ttyu_stack_t;
 #define ERROR_UNIX_MOUSEBAD "skipping unreadable mouse event"
 #define ERROR_UNIX_MOUSEUNCAUGHT "skipping unknown mouse event"
 
-#define TTYU_EXIT 1337
+#define TTYU_EXIT 2
+#define TTYU_UNKNOWN 1
 
 #define TTYU_UNIX_KW(XX)                                                       \
   XX(WHICH_DOWN, KEY_DOWN, FALSE);                                             \
@@ -82,6 +83,7 @@ typedef std::queue<int> ttyu_stack_t;
   XX(WHICH_CLEAR, KEY_EOL, FALSE);                                             \
   XX(WHICH_NEXT, KEY_NPAGE, FALSE);                                            \
   XX(WHICH_PRIOR, KEY_PPAGE, FALSE);                                           \
+  XX(WHICH_SPACE, 32, FALSE);                                                  \
   XX(WHICH_TAB, KEY_STAB, FALSE);                                              \
   XX(WHICH_ENTER, KEY_ENTER, FALSE);                                           \
   XX(WHICH_PRINT, KEY_PRINT, FALSE);                                           \

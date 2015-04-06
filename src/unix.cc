@@ -28,7 +28,8 @@ void ttyu_data_init(ttyu_data_t *data) {
   data->closing = FALSE;
   data->mode = MODE_VT100;
 
-  data->ungetch_stack = new ttyu_stack_t;
+  data->ungetch_stack = new std::queue<int>;
+  data->ungetmouse_stack = new std::queue<MEVENT>;
 
   noecho();
   cbreak();
@@ -42,6 +43,7 @@ void ttyu_data_destroy(ttyu_data_t *data) {
   data->closing = TRUE;
   echo();
   while(!data->ungetch_stack->empty()) data->ungetch_stack->pop();
+  while(!data->ungetmouse_stack->empty()) data->ungetmouse_stack->pop();
   data->ungetch_stack->push(TTYU_EXIT);
   endwin();
 }
@@ -55,13 +57,20 @@ bool ttyu_worker_c::execute(const ttyu_worker_c::ttyu_progress_c& progress,
 
   if(c == ERR) {
     if(data->ungetch_stack->empty()) {
-      usleep(500); // no hurry ;)
-      return TRUE;
+      if(data->ungetmouse_stack->empty()) {
+        usleep(500); // no hurry ;)
+        return TRUE;
+      } else {
+        // work on mouse stack
+        ungetmouse(&(data->ungetmouse_stack->front()));
+        data->ungetmouse_stack->pop();
+        return TRUE;
+      }
     } else {
-      // work on the stack
+      // work on the char stack
       c = data->ungetch_stack->front();
       data->ungetch_stack->pop();
-      ungetch(c == -1 ? 1 : c);
+      ungetch(c == -1 ? TTYU_UNKNOWN : c);
       return TRUE;
     }
   }
@@ -244,47 +253,47 @@ NAN_METHOD(ttyu_js_c::emit) {
         mev.y = (short)args[3]->Int32Value();
         mev.bstate = 0;
 
-        if(ctrl & CTRL_ALT) { mev.bstate &= BUTTON_ALT; }
-        if(ctrl & CTRL_CTRL) { mev.bstate &= BUTTON_CTRL; }
-        if(ctrl & CTRL_SHIFT) { mev.bstate &= BUTTON_SHIFT; }
+        if(ctrl & CTRL_ALT) { mev.bstate |= BUTTON_ALT; }
+        if(ctrl & CTRL_CTRL) { mev.bstate |= BUTTON_CTRL; }
+        if(ctrl & CTRL_SHIFT) { mev.bstate |= BUTTON_SHIFT; }
 
         if(ev == EVENT_MOUSEMOVE) {
-          mev.bstate &= REPORT_MOUSE_POSITION;
+          mev.bstate |= REPORT_MOUSE_POSITION;
         } else if(ev == EVENT_MOUSEUP) {
           if(b == MOUSE_LEFT) {
-            mev.bstate &= BUTTON1_RELEASED;
+            mev.bstate |= BUTTON1_RELEASED;
           } else if(b == MOUSE_LEFT2) {
-            mev.bstate &= BUTTON2_RELEASED;
+            mev.bstate |= BUTTON2_RELEASED;
           } else if(b == MOUSE_LEFT3) {
-            mev.bstate &= BUTTON3_RELEASED;
+            mev.bstate |= BUTTON3_RELEASED;
           } else if(b == MOUSE_LEFT4) {
-            mev.bstate &= BUTTON4_RELEASED;
+            mev.bstate |= BUTTON4_RELEASED;
           } else if(b == MOUSE_RIGHT) {
 #if NCURSES_MOUSE_VERSION > 1
-            mev.bstate &= BUTTON5_RELEASED;
+            mev.bstate |= BUTTON5_RELEASED;
 #else
-            mev.bstate &= BUTTON4_RELEASED;
+            mev.bstate |= BUTTON4_RELEASED;
 #endif
           }
         } else if(ev == EVENT_MOUSEDOWN) {
           if(b == MOUSE_LEFT) {
-            mev.bstate &= BUTTON1_PRESSED;
+            mev.bstate |= BUTTON1_PRESSED;
           } else if(b == MOUSE_LEFT2) {
-            mev.bstate &= BUTTON2_PRESSED;
+            mev.bstate |= BUTTON2_PRESSED;
           } else if(b == MOUSE_LEFT3) {
-            mev.bstate &= BUTTON3_PRESSED;
+            mev.bstate |= BUTTON3_PRESSED;
           } else if(b == MOUSE_LEFT4) {
-            mev.bstate &= BUTTON4_PRESSED;
+            mev.bstate |= BUTTON4_PRESSED;
           } else if(b == MOUSE_RIGHT) {
 #if NCURSES_MOUSE_VERSION > 1
-            mev.bstate &= BUTTON5_PRESSED;
+            mev.bstate |= BUTTON5_PRESSED;
 #else
-            mev.bstate &= BUTTON4_PRESSED;
+            mev.bstate |= BUTTON4_PRESSED;
 #endif
           }
         }
 
-        ungetmouse(&mev);
+        obj->data->ungetmouse_stack->push(mev);
         } break;
       default: // EVENT_ERROR, EVENT_SIGNAL, EVENT_RESIZE, EVENT_MOUSEWHEEL,
                // EVENT_MOUSEHWHEEL

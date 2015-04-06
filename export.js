@@ -27,9 +27,6 @@ module.exports = function(ttyu) {
         }
         return this;
     };
-    ttyu.TTYUtil.prototype.start = function() {
-        this.__start__();
-    };
 
     ttyu.TTYUtil.EVENT = {
         ERROR: "error",

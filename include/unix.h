@@ -30,8 +30,6 @@
 #include <unistd.h>
 #include <queue>
 
-typedef std::queue<int> ttyu_stack_t;
-
 #define ERROR_UNIX_UNDEF "unknown error occured while reading input"
 #define ERROR_UNIX_MOUSEBAD "skipping unreadable mouse event"
 #define ERROR_UNIX_MOUSEUNCAUGHT "skipping unknown mouse event"
@@ -113,7 +111,8 @@ struct ttyu_data_s {
   int mode;
   bool closing;
 
-  ttyu_stack_t *ungetch_stack;
+  std::queue<int> *ungetch_stack;
+  std::queue<MEVENT> *ungetmouse_stack;
 };
 
 void ttyu_unix_clrscr(ttyu_data_t *data, int x, int y, int width, int height);

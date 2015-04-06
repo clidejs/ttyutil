@@ -6,7 +6,7 @@ require("./spec")(TTYUtil, expect);
 
 // test input listeners
 require("./key")(TTYUtil, expect);
-//require("./mouse")(TTYUtil, expect);
+require("./mouse")(TTYUtil, expect);
 //require("./signal")(TTYUtil, expect);
 
 // test output functions

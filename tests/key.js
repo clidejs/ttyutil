@@ -1,8 +1,7 @@
 require("it-each")({ testPerIteration: true});
 var is = require("node-is");
-var path = require("path");
-var Const = require("../../const");
-var TTYUtil = require("../../export")(require("../../build/Release/ttyu"));
+var Const = require("../const");
+var TTYUtil = require("../export")(require("../build/Release/ttyu"));
 
 var which = [];
 
@@ -151,5 +150,7 @@ module.exports = function(TTYUtil, expect) {
                 return test;
             }
         });
+
+        // TODO (@bbuecherl) add tests for .ctrl
     });
 };

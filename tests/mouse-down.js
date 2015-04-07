@@ -1,12 +1,11 @@
 require("it-each")({ testPerIteration: true});
 var is = require("node-is");
 var Const = require("../const");
-var mouse = Object.keys(Const.Mouse);
-var event = [Const.Mouse.LEFT, Math.round(Math.random() * 60),
-        Math.round(Math.random() * 15), 0];
+var mouse = [Const.Mouse.LEFT, Const.Mouse.LEFT2,
+        Const.Mouse.LEFT3, Const.Mouse.RIGHT];
 
 function makeEvent() {
-    return [Const.Mouse[mouse[Math.floor(Math.random() * mouse.length)]],
+    return [mouse[Math.floor(Math.random() * mouse.length)],
             Math.round(Math.random() * 60), Math.round(Math.random() * 15), 0];
 }
 

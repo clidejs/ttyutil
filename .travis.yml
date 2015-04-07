@@ -8,8 +8,6 @@ node_js:
   - "0.12"
   - "iojs-v1.6.4"
 install:
-  - node --version
-  - npm --version
   - npm install
-  - if [[ ${NODE_VERSION} == "0.8" ]]; then node_modules/.bin/node-gyp rebuild; else node_modules/.bin/pangyp rebuild; fi
-script: mocha tests/run
+script:
+  - mocha tests/run

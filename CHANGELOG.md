@@ -1,5 +1,14 @@
 # ttyutil changelog
 
+## 1.0.0 TODOs
+
+ - mouse selection
+ - fullscreen detection
+ - improve examples
+ - add pixel rendering (e.g. for pngs) functions
+ - rework goto/write functionality
+ - add X11 implementations to remove curses where possible
+
 ## 0.2.0 (WIP)
  - added `.pause()` function
  - renamed `.stop()` to `.destroy()`

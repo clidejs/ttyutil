@@ -108,7 +108,7 @@ void ttyu_worker_c::handle(ttyu_event_t *event) {
       event->type = EVENT_ERROR;
       break;
   }
-  ee_emit(obj_->emitter, event->type, v8::Local<v8::Value>::Cast(obj));
+  ee_emit(obj_->emitter, event->type, obj);
 }
 
 void ttyu_worker_c::Destroy() {

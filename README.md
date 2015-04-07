@@ -230,7 +230,7 @@ property which is one of [`TTYUtil.EVENT`](#__event), to identify the event.
 `error` property
 - `SIGNAL`-Event emits an object containing the raised signal (see
 [`TTYUtil.SIGNAL`](#__signal)) in the `signal` property
-(e.g. `{ signal: "SIGINT" }`) __(work in progress)__
+(e.g. `{ signal: "SIGINT" }`)
 - `KEY`-Event emits an object containing following properties:
     - `ctrl` {`Integer`} the control characters currently pressed
     (see [`TTYUtil.CTRL`](#__ctrl))
@@ -254,17 +254,6 @@ run the tests using `npm test`. check out /tests for test cases.
 ## Example
 
 see the /examples folder
-
-## TODOs
-
- - mouse selection
- - fullscreen detection
- - improve examples
- - add pixel rendering (e.g. for pngs) functions
- - rework goto/write functionality
- - add X11 implementations to remove curses where possible
- - rework unix mouse event implementation
-
 
 ## License: MIT
 

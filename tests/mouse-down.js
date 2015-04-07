@@ -30,8 +30,8 @@ module.exports = function(TTYUtil, expect) {
                 function(element, next) {
             this.timeout(500);
             ttyu.on(TTYUtil.EVENT.MOUSEDOWN, createTest(element, next));
-            ttyu.emit(TTYUtil.EVENT.MOUSEDOWN, element[0], element[1],
-                    element[2], element[3]);
+            ttyu.emit(TTYUtil.MouseEvent(TTYUtil.EVENT.MOUSEDOWN, element[0],
+                    element[1], element[2], element[3]));
         });
 
         afterEach(function() {

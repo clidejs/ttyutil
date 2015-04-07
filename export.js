@@ -19,36 +19,63 @@ module.exports = function(ttyu) {
         }
         return this;
     };
-    ttyu.TTYUtil.prototype.emit = function(ev, arg1, arg2, arg3, arg4) {
-        if(ev === ttyu.TTYUtil.EVENT.SIGNAL) {
-            signal.emit(arg1);
-        } else if(ev in Const.Event && ev !== ttyu.TTYUtil.EVENT.ERROR) {
-            this.__emit__(Const.Event[ev], arg1, arg2, arg3, arg4);
+    ttyu.TTYUtil.prototype.emit = function(ev) {
+        switch(ev.type) {
+            case ttyu.TTYUtil.EVENT.SIGNAL:
+                signal.emit(ev.signal);
+                break;
+            case ttyu.TTYUtil.EVENT.KEY:
+                this.__emit__(Const.Event[ev.type], ev.which, ev.ctrl);
+                break;
+            case ttyu.TTYUtil.EVENT.MOUSEDOWN:
+            case ttyu.TTYUtil.EVENT.MOUSEUP:
+            case ttyu.TTYUtil.EVENT.MOUSEMOVE:
+            case ttyu.TTYUtil.EVENT.MOUSEWHEEL:
+            case ttyu.TTYUtil.EVENT.MOUSEHWHEEL:
+                this.__emit__(Const.Event[ev.type], ev.button, ev.x, ev.y,
+                    ev.ctrl);
+                break;
+            default:
+                // ERROR, RESIZE
+                break;
         }
-        return this;
     };
 
-    ttyu.TTYUtil.EVENT = {
-        ERROR: "error",
-        SIGNAL: "signal",
-        KEY: "key",
-        RESIZE: "resize",
-        MOUSEDOWN: "mousedown",
-        MOUSEUP: "mouseup",
-        MOUSEMOVE: "mousemove",
-        MOUSEWHEEL: "mousewheel",
-        MOUSEHWHEEL: "mousehwheel"
-    };
     ttyu.TTYUtil.SIGNAL = {
         SIGINT: "SIGINT",
         SIGTERM: "SIGTERM",
         SIGPIPE: "SIGPIPE",
         SIGHUP: "SIGHUP"
     };
+    ttyu.TTYUtil.EVENT = Const.EventString;
     ttyu.TTYUtil.MOUSE = Const.Mouse;
     ttyu.TTYUtil.WHICH = Const.Which;
     ttyu.TTYUtil.CTRL = Const.Ctrl;
     ttyu.TTYUtil.MODE = Const.Mode;
+
+    // event constructors
+    ttyu.TTYUtil.KeyEvent = function(which, ctrl) {
+        return {
+            type: ttyu.TTYUtil.EVENT.KEY,
+            which: which,
+            ctrl: ctrl
+        };
+    };
+    ttyu.TTYUtil.MouseEvent = function(type, button, x, y, ctrl) {
+        return {
+            type: type,
+            button: button,
+            x: x,
+            y: y,
+            ctrl: ctrl
+        };
+    };
+    ttyu.TTYUtil.SignalEvent = function(signal) {
+        return {
+            type: ttyu.TTYUtil.EVENT.SIGNAL,
+            signal: signal
+        };
+    };
 
     return ttyu.TTYUtil;
 };

@@ -27,7 +27,6 @@
 
 #define NCURSES_OPAQUE FALSE
 #include <curses.h>
-#include <unistd.h>
 #include <queue>
 
 #define ERROR_UNIX_UNDEF "unknown error occured while reading input"

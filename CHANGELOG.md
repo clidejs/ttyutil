@@ -8,11 +8,11 @@
  - added `.emit()` function
  - added tests
  - small bug fixes
+ - added `.type` property to event objects
 
 ### TODO
 
  - iojs support
- - reenable signal events
  - fix segfault on unix
 
 ## 0.1.2

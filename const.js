@@ -2,15 +2,27 @@
 // they are included in js via require and in c++ using "node build"
 module.exports = {
     Event: {
-        error: 0,
-        signal: 1,
-        resize: 2,
-        key: 3,
-        mouseup: 4,
-        mousedown: 5,
-        mousemove: 6,
-        mousewheel: 7,
-        mousehwheel: 8
+        ERROR: 0,
+        SIGNAL: 1,
+        RESIZE: 2,
+        KEY: 3,
+        MOUSEUP: 4,
+        MOUSEDOWN: 5,
+        MOUSEMOVE: 6,
+        MOUSEWHEEL: 7,
+        MOUSEHWHEEL: 8
+    },
+
+    EventString: {
+        ERROR: "ERROR",
+        SIGNAL: "SIGNAL",
+        RESIZE: "RESIZE",
+        KEY: "KEY",
+        MOUSEUP: "MOUSEUP",
+        MOUSEDOWN: "MOUSEDOWN",
+        MOUSEMOVE: "MOUSEMOVE",
+        MOUSEWHEEL: "MOUSEWHEEL",
+        MOUSEHWHEEL: "MOUSEHWHEEL"
     },
 
     Mouse: {

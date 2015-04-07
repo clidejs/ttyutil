@@ -63,14 +63,14 @@ void ttyu_worker_c::handle(ttyu_event_t *event) {
       !obj_->running) {
     return;
   }
-  v8::Local<v8::Value> arg;
-  v8::Local<v8::Object> obj;
+
+  v8::Local<v8::Object> obj = NanNew<v8::Object>();
   switch(event->type) {
     case EVENT_RESIZE:
-      arg = NanUndefined();
+      obj->Set(NanNew<v8::String>("type"), EVENTSTRING_RESIZE);
       break;
     case EVENT_KEY:
-      obj = NanNew<v8::Object>();
+      obj->Set(NanNew<v8::String>("type"), EVENTSTRING_KEY);
       obj->Set(NanNew<v8::String>("ctrl"),
           NanNew<v8::Integer>(event->key->ctrl));
       obj->Set(NanNew<v8::String>("char"), NanNew<v8::String>(event->key->c));
@@ -78,28 +78,37 @@ void ttyu_worker_c::handle(ttyu_event_t *event) {
           NanNew<v8::Integer>(event->key->code));
       obj->Set(NanNew<v8::String>("which"),
           NanNew<v8::Integer>(event->key->which));
-      arg = obj;
       break;
     case EVENT_MOUSEDOWN:
     case EVENT_MOUSEUP:
     case EVENT_MOUSEMOVE:
     case EVENT_MOUSEWHEEL:
     case EVENT_MOUSEHWHEEL:
-      obj = NanNew<v8::Object>();
+      if(event->type == EVENT_MOUSEDOWN) {
+        obj->Set(NanNew<v8::String>("type"), EVENTSTRING_MOUSEDOWN);
+      } else if(event->type == EVENT_MOUSEUP) {
+        obj->Set(NanNew<v8::String>("type"), EVENTSTRING_MOUSEUP);
+      } else if(event->type == EVENT_MOUSEMOVE) {
+        obj->Set(NanNew<v8::String>("type"), EVENTSTRING_MOUSEMOVE);
+      } else if(event->type == EVENT_MOUSEWHEEL) {
+        obj->Set(NanNew<v8::String>("type"), EVENTSTRING_MOUSEWHEEL);
+      } else if(event->type == EVENT_MOUSEHWHEEL) {
+        obj->Set(NanNew<v8::String>("type"), EVENTSTRING_MOUSEHWHEEL);
+      }
       obj->Set(NanNew<v8::String>("button"),
           NanNew<v8::Integer>(event->mouse->button));
       obj->Set(NanNew<v8::String>("x"), NanNew<v8::Integer>(event->mouse->x));
       obj->Set(NanNew<v8::String>("y"), NanNew<v8::Integer>(event->mouse->y));
       obj->Set(NanNew<v8::String>("ctrl"),
           NanNew<v8::Integer>(event->mouse->ctrl));
-      arg = obj;
       break;
     default: // EVENT_ERROR, EVENT_SIGNAL
-      arg = NanError(event->err);
+      obj->Set(NanNew<v8::String>("type"), EVENTSTRING_RESIZE);
+      obj->Set(NanNew<v8::String>("error"), NanError(event->err));
       event->type = EVENT_ERROR;
       break;
   }
-  ee_emit(obj_->emitter, event->type, arg);
+  ee_emit(obj_->emitter, event->type, v8::Local<v8::Value>::Cast(obj));
 }
 
 void ttyu_worker_c::Destroy() {

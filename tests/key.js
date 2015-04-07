@@ -111,7 +111,7 @@ module.exports = function(TTYUtil, expect) {
                     function(element, next) {
                 this.timeout(100);
                 ttyu.on(TTYUtil.EVENT.KEY, createTest(element, next));
-                ttyu.emit(TTYUtil.EVENT.KEY, element, 0);
+                ttyu.emit(TTYUtil.KeyEvent(element, 0));
             });
 
             afterEach(function() {

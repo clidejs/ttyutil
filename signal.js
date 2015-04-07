@@ -7,7 +7,7 @@ var signal = module.exports = {
             // add signal listeners
             for(var sig in ttyu.TTYUtil.SIGNAL) {
                 process.on(sig, (that.__siglisten__[sig] =
-                        signal.listen(sig, that)));
+                        signal.listen(ttyu, sig, that)));
             }
         }
         that.__siglisten__.push(listener);
@@ -35,9 +35,10 @@ var signal = module.exports = {
         process.emit(sig);
     },
 
-    listen: function(sig, that) {
+    listen: function(ttyu, sig, that) {
         return function() {
             var ev = {
+                type: ttyu.TTYUtil.EVENT.SIGNAL,
                 signal: sig
             };
             for(var i = 0; i < that.__siglisten__.length; ++i) {

@@ -1,5 +1,6 @@
 var fs = require("fs");
 var path = require("path");
+var is = require("node-is");
 
 var Const = require("./const");
 var pkg = require("./package.json");
@@ -17,7 +18,7 @@ var cont = "/**\n" +
 for(var name in Const) {
     for(var sub in Const[name]) {
         cont += "#define " + name.toUpperCase() + "_" + sub.toUpperCase() +
-                " " + Const[name][sub] + "\n";
+                " " + toCpp(Const[name][sub]) + "\n";
     }
     cont += "\n";
 }
@@ -25,5 +26,13 @@ for(var name in Const) {
 cont += "#endif // TTYU_GENERATED_H_\n";
 
 fs.writeFile(generated, cont, console.log);
+
+function toCpp(v) {
+    if(is.String(v)) {
+        return "NanNew<v8::String>(\"" + v + "\")";
+    } else {
+        return v;
+    }
+}
 
 // TODO node-gyp rebuild

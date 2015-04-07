@@ -64,9 +64,9 @@ Remove the event `listener` callback from the `event` (see
 
 Shortcut for `ttyu.removeListener(event, listener)`.
 
-#### `ttyu.emit(event, arg1, arg2, arg3, arg4)`
+#### `ttyu.emit(event)`
 
-Emit an event programmatically, see /examples/emit.js. more documentation will
+Emit an event programmatically, see /tests/key.js. more documentation will
 be added soon.
 
 #### `ttyu.start()`
@@ -152,20 +152,20 @@ Function to get the terminal color code from `str`, a hexadecimal string
 
 This object wraps all input events as constants:
 
-- `TTYUtil.EVENT.ERROR` {`String`}: `error` identifier for error events
-- `TTYUtil.EVENT.SIGNAL` {`String`}: `signal` identifier for process signal
+- `TTYUtil.EVENT.ERROR` {`String`}: `ERROR` identifier for error events
+- `TTYUtil.EVENT.SIGNAL` {`String`}: `SIGNAL` identifier for process signal
 events
-- `TTYUtil.EVENT.KEY` {`String`}: `key` identifier for key events
-- `TTYUtil.EVENT.RESIZE` {`String`}: `resize` identifier for resize events
-- `TTYUtil.EVENT.MOUSEDOWN` {`String`}: `mousedown` identifier for mousedown
+- `TTYUtil.EVENT.KEY` {`String`}: `KEY` identifier for key events
+- `TTYUtil.EVENT.RESIZE` {`String`}: `RESIZE` identifier for resize events
+- `TTYUtil.EVENT.MOUSEDOWN` {`String`}: `MOUSEDOWN` identifier for mousedown
 events (mouse button pressed)
-- `TTYUtil.EVENT.MOUSEUP` {`String`}: `mouseup` identifier for mouse up events
+- `TTYUtil.EVENT.MOUSEUP` {`String`}: `MOUSEUP` identifier for mouse up events
 (mouse button released)
-- `TTYUtil.EVENT.MOUSEMOVE` {`String`}: `mousemove` identifier for mouse move
+- `TTYUtil.EVENT.MOUSEMOVE` {`String`}: `MOUSEMOVE` identifier for mouse move
 events
-- `TTYUtil.EVENT.MOUSEWHEEL` {`String`}: `mousewheel` identifier for mouse
+- `TTYUtil.EVENT.MOUSEWHEEL` {`String`}: `MOUSEWHEEL` identifier for mouse
 wheel events (vertical scroll events)
-- `TTYUtil.EVENT.MOUSEHWHEEL` {`String`}: `mousehwheel` identifier for the
+- `TTYUtil.EVENT.MOUSEHWHEEL` {`String`}: `MOUSEHWHEEL` identifier for the
 mouse hwheel events (horizontal scroll events)
 
 <a id="__mode" name="__mode"> </a>
@@ -223,22 +223,24 @@ This object wraps all key codes as constants.
 
 ### TTYUtil event callback parameter
 
-Every event emits one parameter to the callbacks:
+Every event emits one object to the callbacks. Every object contains a `type`
+property which is one of [`TTYUtil.EVENT`](#__event), to identify the event.
 
-- `error`-Event emits an error-object containing information about the error
-- `signal`-Event emits an object containing the raised signal (see
+- `ERROR`-Event emits an object containing information about the error in the
+`error` property
+- `SIGNAL`-Event emits an object containing the raised signal (see
 [`TTYUtil.SIGNAL`](#__signal)) in the `signal` property
 (e.g. `{ signal: "SIGINT" }`) __(work in progress)__
-- `key`-Event emits an object containing following properties:
+- `KEY`-Event emits an object containing following properties:
     - `ctrl` {`Integer`} the control characters currently pressed
     (see [`TTYUtil.CTRL`](#__ctrl))
     - `char` {`String`} the string representation of the pressed key
     - `code` {`Integer`} the ascii key-code of the pressed key
     - `which` {`Integer`} unique identifier for the pressed key
     (see[`TTYUtil.WHICH`](#__which))
-- `resize`-Event emits no parameter, use `ttyu.width`/`ttyu.height` to get the
-new window size
-- `mouse...`-Events emit an object containing following properties:
+- `RESIZE`-Event emits an object with only the event type parameter,
+use `ttyu.width`/`ttyu.height` to get the new window size
+- `MOUSE...`-Events emit an object containing following properties:
     - `button` {`Integer`} the button pressed (see [`TTYUtil.MOUSE`](#__mouse))
     - `x` {`Integer`} x-coordinate in the terminal, the event occured in
     - `y` {`Integer`} x-coordinate in the terminal, the event occured in

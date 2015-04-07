@@ -103,7 +103,7 @@ void ttyu_worker_c::handle(ttyu_event_t *event) {
           NanNew<v8::Integer>(event->mouse->ctrl));
       break;
     default: // EVENT_ERROR, EVENT_SIGNAL
-      obj->Set(NanNew<v8::String>("type"), EVENTSTRING_RESIZE);
+      obj->Set(NanNew<v8::String>("type"), EVENTSTRING_ERROR);
       obj->Set(NanNew<v8::String>("error"), NanError(event->err));
       event->type = EVENT_ERROR;
       break;

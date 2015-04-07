@@ -2,7 +2,23 @@ language: node_js
 os:
   - linux
   - osx
+env:
+  - NODE_VERSION="0.8"
+  - NODE_VERSION="0.10.38"
+  - NODE_VERSION="0.12.2"
+  - NODE_VERSION="iojs-v1.6.4"
 node_js:
-  - "0.8"
   - "0.10"
-  - "0.12"
+before_install:
+  - npm install npm
+  - mv node_modules npm
+  - npm/.bin/npm --version
+  - npm/.bin/npm install
+  - rm -rf ~/.nvm
+  - git clone https://github.com/creationix/nvm.git ~/.nvm
+  - source ~/.nvm/nvm.sh
+  - nvm install $NODE_VERSION
+  - node --version
+  - if [[ ${NODE_VERSION} == "0.8" ]]; then node_modules/.bin/node-gyp rebuild --directory test; else node_modules/.bin/pangyp rebuild --directory test; fi
+install:
+script: mocha tests/run

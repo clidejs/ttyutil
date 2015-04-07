@@ -10,6 +10,7 @@
  - add X11 implementations to remove curses where possible
 
 ## 0.2.0 (WIP)
+
  - added `.pause()` function
  - renamed `.stop()` to `.destroy()`
  - all functions will throw now when the object was not started or already
@@ -18,13 +19,14 @@
  - added tests
  - small bug fixes
  - added `.type` property to event objects
+ - iojs support
 
 ### TODO
 
- - iojs support
  - fix segfault on unix
 
 ## 0.1.2
+
  - fixed infinite loop in helper method `util_rgb2term()`
  - added `EVENT.SIGNAL` events to handle low-level signals like `SIGINT`
  - fixed cleanup after `.stop()`

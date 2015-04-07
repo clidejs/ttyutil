@@ -9,5 +9,5 @@ node_js:
   - "iojs-v1.6.4"
 install:
   - node --version
-  - if [[ ${NODE_VERSION} == "0.8" ]]; then node_modules/.bin/node-gyp rebuild --directory test; else node_modules/.bin/pangyp rebuild --directory test; fi
+  - if [[ ${NODE_VERSION} == "0.8" ]]; then node_modules/.bin/node-gyp rebuild; else node_modules/.bin/pangyp rebuild; fi
 script: mocha tests/run

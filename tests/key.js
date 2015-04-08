@@ -1,7 +1,6 @@
 require("it-each")({ testPerIteration: true});
 var is = require("node-is");
 var Const = require("../const");
-var TTYUtil = require("../export")(require("../build/Release/ttyu"));
 
 var which = [];
 

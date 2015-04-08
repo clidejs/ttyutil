@@ -4,8 +4,7 @@
   "description": "cross-platform terminal utilities",
   "main": "index.js",
   "scripts": {
-    "test": "./node_modules/.bin/mocha tests/run",
-    "start": "node build && node-gyp rebuild"
+    "test": "./node_modules/.bin/mocha tests/run"
   },
   "repository": {
     "type": "git",

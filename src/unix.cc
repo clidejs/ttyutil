@@ -28,8 +28,10 @@ void ttyu_data_init(ttyu_data_t *data) {
   data->closing = FALSE;
   data->mode = MODE_VT100;
 
-  data->ungetch_stack = new std::queue<int>;
-  data->ungetmouse_stack = new std::queue<MEVENT>;
+  data->ungetch_stack = new std::queue<int, std::list<int>>;
+  data->ungetmouse_stack = new std::queue<MEVENT, std::list<MEVENT>>;
+
+  uv_rwlock_init(&(data->numlock));
 
   noecho();
   cbreak();
@@ -52,27 +54,25 @@ bool ttyu_worker_c::execute(const ttyu_worker_c::ttyu_progress_c& progress,
     ttyu_data_t *data) {
   int c = getch();
 
-  if(c == TTYU_EXIT) { return FALSE; }
-  if(data->closing) { return FALSE; }
+  if(c == TTYU_EXIT) { uv_rwlock_destroy(&(data->numlock)); return FALSE; }
+  if(data->closing) { uv_rwlock_destroy(&(data->numlock)); return FALSE; }
 
   if(c == ERR) {
+    uv_rwlock_rdlock(&(data->numlock));
     if(data->ungetch_stack->empty()) {
-      if(data->ungetmouse_stack->empty()) {
-        usleep(500); // no hurry ;)
-        return TRUE;
-      } else {
+      if(!(data->ungetmouse_stack->empty())) {
         // work on mouse stack
         ungetmouse(&(data->ungetmouse_stack->front()));
         data->ungetmouse_stack->pop();
-        return TRUE;
       }
     } else {
       // work on the char stack
       c = data->ungetch_stack->front();
       data->ungetch_stack->pop();
       ungetch(c == -1 ? TTYU_UNKNOWN : c);
-      return TRUE;
     }
+    uv_rwlock_rdunlock(&(data->numlock));
+    return true;
   }
 
   MEVENT mev;
@@ -240,7 +240,9 @@ NAN_METHOD(ttyu_js_c::emit) {
         } else {
           c = ttyu_unix_key(which);
         }
+        uv_rwlock_wrlock(&(obj->data->numlock));
         obj->data->ungetch_stack->push(c);
+        uv_rwlock_wrunlock(&(obj->data->numlock));
         } break;
       case EVENT_MOUSEDOWN:
       case EVENT_MOUSEUP:
@@ -293,7 +295,9 @@ NAN_METHOD(ttyu_js_c::emit) {
           }
         }
 
+        uv_rwlock_wrlock(&(obj->data->numlock));
         obj->data->ungetmouse_stack->push(mev);
+        uv_rwlock_wrunlock(&(obj->data->numlock));
         } break;
       default: // EVENT_ERROR, EVENT_SIGNAL, EVENT_RESIZE, EVENT_MOUSEWHEEL,
                // EVENT_MOUSEHWHEEL

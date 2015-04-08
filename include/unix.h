@@ -27,6 +27,7 @@
 
 #define NCURSES_OPAQUE FALSE
 #include <curses.h>
+#include <list>
 #include <queue>
 
 #define ERROR_UNIX_UNDEF "unknown error occured while reading input"
@@ -110,8 +111,9 @@ struct ttyu_data_s {
   int mode;
   bool closing;
 
-  std::queue<int> *ungetch_stack;
-  std::queue<MEVENT> *ungetmouse_stack;
+  std::queue<int, std::list<int>> *ungetch_stack;
+  std::queue<MEVENT, std::list<MEVENT>> *ungetmouse_stack;
+  uv_rwlock_t numlock;
 };
 
 void ttyu_unix_clrscr(ttyu_data_t *data, int x, int y, int width, int height);

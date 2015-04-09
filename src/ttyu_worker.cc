@@ -117,6 +117,9 @@ void ttyu_worker_c::Destroy() {
 
 void ttyu_worker_c::Execute() {
   ttyu_progress_c progress(this);
+#ifndef PLATFORM_WINDOWS
+  uv_barrier_wait(&(obj_->barrier));
+#endif
   // loop execute until it returns false (error)
   while(execute(progress, obj_->data));
 }

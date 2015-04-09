@@ -111,9 +111,8 @@ struct ttyu_data_s {
   int mode;
   bool closing;
 
-  std::queue<int, std::list<int>> *ungetch_stack;
-  std::queue<MEVENT, std::list<MEVENT>> *ungetmouse_stack;
-  uv_rwlock_t numlock;
+  std::queue< int, std::list<int> > *ungetch_stack;
+  std::queue< MEVENT, std::list<MEVENT> > *ungetmouse_stack;
 };
 
 void ttyu_unix_clrscr(ttyu_data_t *data, int x, int y, int width, int height);

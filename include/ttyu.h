@@ -41,6 +41,14 @@
 #define EE_CB_ARG(name) NanCallback *name
 #include <ee.h>
 
+// define TRUE & FALSE
+#ifndef TRUE
+# define TRUE 1
+#endif
+#ifndef FALSE
+# define FALSE 0
+#endif
+
 // callback call function for the event emitter
 int ttyu_ee_cb_call(ee__listener_t *l, EE_DATA_ARG(data));
 // callback compare function for the event emitter
@@ -121,6 +129,9 @@ public:
   ee_emitter_t *emitter;
   bool running;
   bool paused;
+#ifndef PLATFORM_WINDOWS
+  uv_barrier_t barrier;
+#endif
 private:
   ~ttyu_js_c();
 

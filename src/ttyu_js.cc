@@ -96,10 +96,17 @@ NAN_METHOD(ttyu_js_c::start) {
   TTYU_THROW_IF_DESTROYED(obj);
   if(!obj->running) {
     obj->running = TRUE;
-
+#ifndef PLATFORM_WINDOWS
+    uv_barrier_init(&(obj->barrier), 2);
+#endif
     ttyu_worker_c *w = new ttyu_worker_c(obj);
     NanAsyncQueueWorker(w);
     obj->worker_ = w;
+
+#ifndef PLATFORM_WINDOWS
+    uv_barrier_wait(&(obj->barrier));
+    uv_barrier_destroy(&(obj->barrier));
+#endif
   } else if(obj->paused) {
     obj->paused = FALSE;
   }

@@ -27,7 +27,6 @@
 
 #define NCURSES_OPAQUE FALSE
 #include <curses.h>
-#include <list>
 #include <queue>
 
 #define ERROR_UNIX_UNDEF "unknown error occured while reading input"
@@ -104,6 +103,65 @@
                                                                                \
   XX(WHICH_SHIFT, 0, TRUE)
 
+// thread save queue
+template<class T> struct ttyu_queue_data_s;
+template<class T> class ttyu_queue_c {
+public:
+  ttyu_queue_c() : size_(0) {
+    uv_mutex_init(&mutex_);
+  }
+
+  virtual ~ttyu_queue_c() {
+    uv_mutex_destroy(&mutex_);
+  }
+
+  void push(T val) {
+    DBG("push has started");
+    uv_mutex_lock(&mutex_);
+    queue_.push(&val);
+    uv_mutex_unlock(&mutex_);
+    DBG("push has finished");
+  }
+
+  T *pop() {
+    DBG("pop acquiring rdlock");
+    uv_mutex_lock(&mutex_);
+    DBG("pop acquired rdlock");
+    T *front = queue_.front();
+    queue_.pop();
+    uv_mutex_unlock(&mutex_);
+    DBG("pop released rdlock");
+    return front;
+  }
+
+  int size() {
+    DBG("size has sarted");
+    if(uv_mutex_trylock(&mutex_) == 0) {
+    DBG("size acquired rdlock");
+      size_ = queue_.size();
+      uv_mutex_unlock(&mutex_);
+    DBG("size released rdlock");
+    }
+    return size_;
+  }
+
+  bool empty() {
+    DBG("empty has sarted");
+    if(uv_mutex_trylock(&mutex_) == 0) {
+    DBG("empty acquired rdlock");
+      size_ = queue_.size();
+      uv_mutex_unlock(&mutex_);
+    DBG("empty released rdlock");
+    }
+    return (size_ == 0);
+  }
+
+private:
+  std::queue<T *> queue_;
+  uv_mutex_t mutex_;
+  int size_;
+};
+
 // unixy data structure
 struct ttyu_data_s {
   WINDOW *win;
@@ -111,8 +169,8 @@ struct ttyu_data_s {
   int mode;
   bool closing;
 
-  std::queue< int, std::list<int> > *ungetch_stack;
-  std::queue< MEVENT, std::list<MEVENT> > *ungetmouse_stack;
+  ttyu_queue_c<int> ungetch_stack;
+  ttyu_queue_c<MEVENT> ungetmouse_stack;
 };
 
 void ttyu_unix_clrscr(ttyu_data_t *data, int x, int y, int width, int height);

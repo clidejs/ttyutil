@@ -208,6 +208,9 @@ private:
   ttyu_js_c *obj_;
 };
 
+template<class T> class ttyu_queue_c;
+template<class T> struct ttyu_queue_data_s;
+
 // include platform dependent headers
 #ifdef PLATFORM_WINDOWS
 # include <win.h>

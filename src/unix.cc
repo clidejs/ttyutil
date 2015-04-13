@@ -28,8 +28,8 @@ void ttyu_data_init(ttyu_data_t *data) {
   data->closing = FALSE;
   data->mode = MODE_VT100;
 
-  data->ungetch_stack = new std::queue< int, std::list<int> >;
-  data->ungetmouse_stack = new std::queue< MEVENT, std::list<MEVENT> >;
+//  data->ungetch_stack = new std::queue< int, std::list<int> >;
+//  data->ungetmouse_stack = new std::queue< MEVENT, std::list<MEVENT> >;
 
   noecho();
   cbreak();
@@ -42,9 +42,9 @@ void ttyu_data_init(ttyu_data_t *data) {
 void ttyu_data_destroy(ttyu_data_t *data) {
   data->closing = TRUE;
   echo();
-  while(!data->ungetch_stack->empty()) data->ungetch_stack->pop();
-  while(!data->ungetmouse_stack->empty()) data->ungetmouse_stack->pop();
-  data->ungetch_stack->push(TTYU_EXIT);
+  while(!data->ungetch_stack.empty()) data->ungetch_stack.pop();
+  while(!data->ungetmouse_stack.empty()) data->ungetmouse_stack.pop();
+  data->ungetch_stack.push(TTYU_EXIT);
   endwin();
 }
 
@@ -56,16 +56,14 @@ bool ttyu_worker_c::execute(const ttyu_worker_c::ttyu_progress_c& progress,
   if(data->closing) { return FALSE; }
 
   if(c == ERR) {
-    if(data->ungetch_stack->empty()) {
-      if(!(data->ungetmouse_stack->empty())) {
+    if(data->ungetch_stack.empty()) {
+      if(!(data->ungetmouse_stack.empty())) {
         // work on mouse stack
-        ungetmouse(&(data->ungetmouse_stack->front()));
-        data->ungetmouse_stack->pop();
+        //ungetmouse(&(data->ungetmouse_stack->pop()));
       }
     } else {
       // work on the char stack
-      c = data->ungetch_stack->front();
-      data->ungetch_stack->pop();
+      c = *data->ungetch_stack.pop();
       ungetch(c == -1 ? TTYU_UNKNOWN : c);
     }
     return TRUE;
@@ -236,7 +234,7 @@ NAN_METHOD(ttyu_js_c::emit) {
         } else {
           c = ttyu_unix_key(which);
         }
-        obj->data->ungetch_stack->push(c);
+        obj->data->ungetch_stack.push(c);
         } break;
       case EVENT_MOUSEDOWN:
       case EVENT_MOUSEUP:
@@ -289,7 +287,7 @@ NAN_METHOD(ttyu_js_c::emit) {
           }
         }
 
-        obj->data->ungetmouse_stack->push(mev);
+        obj->data->ungetmouse_stack.push(mev);
         } break;
       default: // EVENT_ERROR, EVENT_SIGNAL, EVENT_RESIZE, EVENT_MOUSEWHEEL,
                // EVENT_MOUSEHWHEEL

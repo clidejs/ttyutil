@@ -1,3 +1,5 @@
+src_old/
+include_old/
 build/
 node_modules/
 npm-debug.log

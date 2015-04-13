@@ -21,18 +21,16 @@
  * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
  * IN THE SOFTWARE.
  */
-
 #ifndef TTYU_H_
 #define TTYU_H_
 
-#include <cstdlib>
-#include <signal.h>
+#include <vector>
 
 #include <uv.h>
 #include <node.h>
 #include <nan.h>
 #include <generated.h>
-#include "util.h"
+#include <utils.h>
 
 // predefine event data and callbacks for ee.c
 #define EE_DATA_TYPE v8::Local<v8::Value>
@@ -50,19 +48,9 @@
 #endif
 
 // callback call function for the event emitter
-int ttyu_ee_cb_call(ee__listener_t *l, EE_DATA_ARG(data));
+TTYU_INLINE int ttyu_ee_cb_call(ee__listener_t *l, EE_DATA_ARG(data));
 // callback compare function for the event emitter
-int ttyu_ee_compare(EE_CB_ARG(cb1), EE_CB_ARG(cb2));
-
-// predefine classes
-class ttyu_js_c;
-class ttyu_worker_c;
-
-// data structure for caching platform-dependent terminal handles
-// these are defined in platform-dependent source and header files
-typedef struct ttyu_data_s ttyu_data_t;
-void ttyu_data_init(ttyu_data_t *data);
-void ttyu_data_destroy(ttyu_data_t *data);
+TTYU_INLINE int ttyu_ee_compare(EE_CB_ARG(cb1), EE_CB_ARG(cb2));
 
 // key event structure
 typedef struct ttyu_key_s {
@@ -85,131 +73,83 @@ typedef struct ttyu_event_s {
   ttyu_key_t *key;
   ttyu_mouse_t *mouse;
 } ttyu_event_t;
-void ttyu_event_create_error(ttyu_event_t *event, const char *err);
-void ttyu_event_create_resize(ttyu_event_t *event);
-void ttyu_event_create_key(ttyu_event_t *event, int ctrl, char *c, int code,
-    int which);
-void ttyu_event_create_mouse(ttyu_event_t *event, int type, int button, int x,
-    int y, int ctrl);
-void ttyu_event_destroy(ttyu_event_t *event);
+TTYU_INLINE void ttyu_event_create_error(ttyu_event_t *event, const char *err);
+TTYU_INLINE void ttyu_event_create_resize(ttyu_event_t *event);
+TTYU_INLINE void ttyu_event_create_key(ttyu_event_t *event, int ctrl, char *c,
+    int code, int which);
+TTYU_INLINE void ttyu_event_create_mouse(ttyu_event_t *event, int type,
+    int button, int x, int y, int ctrl);
+TTYU_INLINE void ttyu_event_destroy(ttyu_event_t *event);
 
-// helper functions for exception throwing
-#define TTYU_THROW_IF_DESTROYED(obj) do {                                      \
-  if(obj->throw_ && obj->destroyed_) {                                         \
-    NanThrowError("TTYUtil object was already destroyed");                     \
-    NanReturnUndefined();                                                      \
-  }                                                                            \
-} while(0)
-#define TTYU_THROW_IF_NOT_RUNNING(obj) do {                                    \
-  TTYU_THROW_IF_DESTROYED(obj);                                                \
-  if(obj->throw_ && !obj->running) {                                           \
-    NanThrowError("TTYUtil object was not started");                           \
-    NanReturnUndefined();                                                      \
-  }                                                                            \
-} while(0)
-#define TTYU_THROW_IF_NOT_RUNNING_VOID(obj) do {                               \
-  if(obj->throw_ && obj->destroyed_) {                                         \
-    NanThrowError("TTYUtil object was already destroyed");                     \
-    return;                                                                    \
-  }                                                                            \
-  if(obj->throw_ && !obj->running) {                                           \
-    NanThrowError("TTYUtil object was not started");                           \
-    return;                                                                    \
-  }                                                                            \
-} while(0)
-
-// definition of the node module class
-class ttyu_js_c : public node::ObjectWrap {
-public:
-  static void init(v8::Handle<v8::Object> target);
-  explicit ttyu_js_c();
-  void destroy();
-
-  ttyu_data_t *data;
-  ee_emitter_t *emitter;
+// data structure for caching platform-dependent terminal handles
+// these are defined in platform-dependent source and header files
+typedef struct ttyu_data_s {
+  ttyu_pi_t *pi;
+  uv_thread_t *thread;
+  uv_mutex_t *mutex;
+  uv_cond_t *cv;
   bool running;
-  bool paused;
-#ifndef PLATFORM_WINDOWS
-  uv_barrier_t barrier;
-#endif
-private:
-  ~ttyu_js_c();
+  bool stop;
+  std::vector<ttyu_event_t *> *work;
+  ee_emitter_t *emitter;
+} ttyu_data_t;
 
-  static NAN_METHOD(new_instance);
-  static NAN_METHOD(start);
-  static NAN_METHOD(pause);
-  static NAN_METHOD(destroy);
-  static NAN_METHOD(on);
-  static NAN_METHOD(off);
-  static NAN_METHOD(emit);
-  static NAN_GETTER(is_running);
-  static NAN_GETTER(get_width);
-  static NAN_GETTER(get_height);
-  static NAN_GETTER(get_mode);
-  static NAN_GETTER(get_colors);
-  static NAN_GETTER(getx);
-  static NAN_SETTER(setx);
-  static NAN_GETTER(gety);
-  static NAN_SETTER(sety);
-  static NAN_METHOD(gotoxy);
-  static NAN_METHOD(write);
-  static NAN_METHOD(beep);
-  static NAN_METHOD(clear);
-  static NAN_METHOD(prepare);
-  static NAN_METHOD(color);
+// global data variable
+ttyu_data_t *_data;
 
-  static v8::Persistent<v8::Function> constructor;
+// event loop function
+void loop(void *that);
+// event checker function
+ttyu_event_t *getinput(ttyu_data_t *data);
+// event handler function
+TTYU_INLINE void handle(ttyu_event_t *event);
 
-  bool throw_;
-  bool destroyed_;
-  ttyu_worker_c *worker_;
-};
+// define export methods for javascript
+TTYU_INLINE NAN_METHOD(js_start);
+TTYU_INLINE NAN_METHOD(js_stop);
+TTYU_INLINE NAN_METHOD(js_on);
+TTYU_INLINE NAN_METHOD(js_off);
+TTYU_INLINE NAN_METHOD(js_emit);
+TTYU_INLINE NAN_METHOD(js_running);
+/*
+TTYU_INLINE NAN_METHOD(js_width);
+TTYU_INLINE NAN_METHOD(js_height);
+TTYU_INLINE NAN_METHOD(js_mode);
+TTYU_INLINE NAN_METHOD(js_colors);
+TTYU_INLINE NAN_METHOD(js_getx);
+TTYU_INLINE NAN_METHOD(js_setx);
+TTYU_INLINE NAN_METHOD(js_gety);
+TTYU_INLINE NAN_METHOD(js_sety);
+TTYU_INLINE NAN_METHOD(js_goto);
+TTYU_INLINE NAN_METHOD(js_color);
+TTYU_INLINE NAN_METHOD(js_beep);
+TTYU_INLINE NAN_METHOD(js_clear);
+TTYU_INLINE NAN_METHOD(js_prepare);
+TTYU_INLINE NAN_METHOD(js_write);*/
 
-// definition of the terminal input listener class
-class ttyu_worker_c : public NanAsyncWorker {
-public:
-  class ttyu_progress_c {
-    friend class ttyu_worker_c;
-  public:
-    void send(const ttyu_event_t *event) const;
-  private:
-    explicit ttyu_progress_c(ttyu_worker_c *that);
-    // prevent movement
-    ttyu_progress_c(const ttyu_progress_c&);
-    void operator=(const ttyu_progress_c&);
-#if __cplusplus >= 201103L
-    ttyu_progress_c(const ttyu_progress_c&&) V8_DELETE;
-    void operator=(const ttyu_progress_c&&) V8_DELETE;
-#endif
-    ttyu_worker_c *const that_;
-  };
-
-  ttyu_worker_c(ttyu_js_c *obj);
-  virtual ~ttyu_worker_c();
-
-  void progress();
-
-  bool execute(const ttyu_progress_c& progress, ttyu_data_t *data);
-  void handle(ttyu_event_t *event);
-
-  virtual void Destroy();
-
-  void Execute();
-  virtual void WorkComplete();
-private:
-  void send_(const ttyu_event_t *event);
-
-  static NAUV_WORK_CB(async_progress_);
-  static void async_close_(uv_handle_t *handle);
-
-  uv_async_t *async;
-  uv_mutex_t *async_lock;
-  ttyu_event_t *asyncdata_;
-  ttyu_js_c *obj_;
-};
-
-template<class T> class ttyu_queue_c;
-template<class T> struct ttyu_queue_data_s;
+// initialize node module
+void init(v8::Handle<v8::Object> exports) {
+  EXPORT_METHOD(exports, "start", js_start);
+  EXPORT_METHOD(exports, "stop", js_stop);
+  EXPORT_METHOD(exports, "on", js_on);
+  EXPORT_METHOD(exports, "off", js_off);
+  EXPORT_METHOD(exports, "emit", js_emit);
+/*
+  EXPORT_GET(exports, "running", js_running);
+  EXPORT_GET(exports, "width", js_width);
+  EXPORT_GET(exports, "height", js_height);
+  EXPORT_GET(exports, "mode", js_mode);
+  EXPORT_GET(exports, "colors", js_colors);
+  EXPORT_GETSET(exports, "x", js_getx, js_setx);
+  EXPORT_GETSET(exports, "y", js_gety, js_sety);
+  EXPORT_METHOD(exports, "goto", js_goto);
+  EXPORT_METHOD(exports, "color", js_color);
+  EXPORT_METHOD(exports, "beep", js_beep);
+  EXPORT_METHOD(exports, "clear", js_clear);
+  EXPORT_METHOD(exports, "prepare", js_prepare);
+  EXPORT_METHOD(exports, "write", js_write);*/
+}
+NODE_MODULE(ttyu, init);
 
 // include platform dependent headers
 #ifdef PLATFORM_WINDOWS

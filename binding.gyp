@@ -10,10 +10,9 @@
             "sources": [
                 "deps/ee/ee.c",
                 "src/ttyu_event.cc",
-                "src/ttyu_worker.cc",
                 "src/ttyu_js.cc",
                 "src/ttyu.cc",
-                "src/util.cc"
+                "src/utils.cc"
             ],
             "conditions": [
                 ["OS=='win'", {

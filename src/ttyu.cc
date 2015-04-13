@@ -23,7 +23,7 @@
  */
 #include <ttyu.h>
 
-int ttyu_ee_cb_call(ee__listener_t *l, v8::Local<v8::Value> data) {
+TTYU_INLINE int ttyu_ee_cb_call(ee__listener_t *l, v8::Local<v8::Value> data) {
   v8::Local<v8::Value> args[] = {
     data
   };
@@ -37,6 +37,60 @@ int ttyu_ee_cb_call(ee__listener_t *l, v8::Local<v8::Value> data) {
   return count;
 }
 
-int ttyu_ee_compare(EE_CB_ARG(cb1), EE_CB_ARG(cb2)) {
+TTYU_INLINE int ttyu_ee_compare(EE_CB_ARG(cb1), EE_CB_ARG(cb2)) {
   return (int)(cb1->GetFunction() == cb2->GetFunction());
+}
+
+TTYU_INLINE void handle(ttyu_event_t *event) {
+  NanScope();
+  if(ee_count(obj_->emitter, event->type) == 0 || obj_->paused ||
+      !obj_->running) {
+    return;
+  }
+
+  v8::Local<v8::Object> obj = NanNew<v8::Object>();
+  switch(event->type) {
+    case EVENT_RESIZE:
+      obj->Set(NanNew<v8::String>("type"), EVENTSTRING_RESIZE);
+      break;
+    case EVENT_KEY:
+      obj->Set(NanNew<v8::String>("type"), EVENTSTRING_KEY);
+      obj->Set(NanNew<v8::String>("ctrl"),
+          NanNew<v8::Integer>(event->key->ctrl));
+      obj->Set(NanNew<v8::String>("char"), NanNew<v8::String>(event->key->c));
+      obj->Set(NanNew<v8::String>("code"),
+          NanNew<v8::Integer>(event->key->code));
+      obj->Set(NanNew<v8::String>("which"),
+          NanNew<v8::Integer>(event->key->which));
+      break;
+    case EVENT_MOUSEDOWN:
+    case EVENT_MOUSEUP:
+    case EVENT_MOUSEMOVE:
+    case EVENT_MOUSEWHEEL:
+    case EVENT_MOUSEHWHEEL:
+      if(event->type == EVENT_MOUSEDOWN) {
+        obj->Set(NanNew<v8::String>("type"), EVENTSTRING_MOUSEDOWN);
+      } else if(event->type == EVENT_MOUSEUP) {
+        obj->Set(NanNew<v8::String>("type"), EVENTSTRING_MOUSEUP);
+      } else if(event->type == EVENT_MOUSEMOVE) {
+        obj->Set(NanNew<v8::String>("type"), EVENTSTRING_MOUSEMOVE);
+      } else if(event->type == EVENT_MOUSEWHEEL) {
+        obj->Set(NanNew<v8::String>("type"), EVENTSTRING_MOUSEWHEEL);
+      } else if(event->type == EVENT_MOUSEHWHEEL) {
+        obj->Set(NanNew<v8::String>("type"), EVENTSTRING_MOUSEHWHEEL);
+      }
+      obj->Set(NanNew<v8::String>("button"),
+          NanNew<v8::Integer>(event->mouse->button));
+      obj->Set(NanNew<v8::String>("x"), NanNew<v8::Integer>(event->mouse->x));
+      obj->Set(NanNew<v8::String>("y"), NanNew<v8::Integer>(event->mouse->y));
+      obj->Set(NanNew<v8::String>("ctrl"),
+          NanNew<v8::Integer>(event->mouse->ctrl));
+      break;
+    default: // EVENT_ERROR, EVENT_SIGNAL
+      obj->Set(NanNew<v8::String>("type"), EVENTSTRING_ERROR);
+      obj->Set(NanNew<v8::String>("error"), NanError(event->err));
+      event->type = EVENT_ERROR;
+      break;
+  }
+  ee_emit(obj_->emitter, event->type, obj);
 }

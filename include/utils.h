@@ -22,24 +22,30 @@
  * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
  * IN THE SOFTWARE.
  */
-#ifndef TTYU_UTIL_H_
-#define TTYU_UTIL_H_
+#ifndef TTYU_UTILS_H_
+#define TTYU_UTILS_H_
 
 #include <string.h>
 #include <iostream>
 
-#define EXPORT_PROTOTYPE_METHOD NODE_SET_PROTOTYPE_METHOD
-#define EXPORT_PROTOTYPE_METHOD_HIDDEN(tpl, name, cb) do {                     \
+#define EXPORT_METHOD(e, name, cb) do {                                        \
   v8::Local<v8::FunctionTemplate> t = NanNew<v8::FunctionTemplate>(cb);        \
-  tpl->InstanceTemplate()->Set(                                                \
-      NanNew<v8::String>(name), t->GetFunction(), v8::ReadOnly);               \
+  e->Set(NanNew<v8::String>(name), t->GetFunction(), v8::ReadOnly);            \
 } while(0)
 
-#define EXPORT_PROTOTYPE_GET(tpl, name, fn)                                    \
-    tpl->InstanceTemplate()->SetAccessor(NanNew<v8::String>(name), (fn))
+#define EXPORT_GET(tpl, name, fn)                                              \
+    tpl->SetAccessor(NanNew<v8::String>(name), (fn))
 
-#define EXPORT_PROTOTYPE_GETSET(tpl, name, get, set)                           \
-    tpl->InstanceTemplate()->SetAccessor(NanNew<v8::String>(name), (get), (set))
+#define EXPORT_GETSET(tpl, name, get, set)                                     \
+    tpl->SetAccessor(NanNew<v8::String>(name), (get), (set))
+
+#if defined(__GNUC__) && !(defined(DEBUG) && DEBUG)
+# define TTYU_INLINE inline __attribute__((always_inline))
+#elif defined(_MSC_VER) && !(defined(DEBUG) && DEBUG)
+# define TTYU_INLINE __forceinline
+#else
+# define TTYU_INLINE inline
+#endif
 
 #define WIN_COLORS 16
 
@@ -59,6 +65,8 @@ char *util_error(char *name, int id);
 
 #undef ERROR
 #define ERROR(name, id) util_error(name, id)
-#define DBG(a) std::cout << (a) << "\r\n"
+#ifdef DEBUG
+# define DBG(msg) std::cout << (msg) << "\r\n"
+#endif
 
-#endif // TTYUTIL_UTIL_H_
+#endif // TTYU_UTILS_H_

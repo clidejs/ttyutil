@@ -27,7 +27,6 @@
 #include <stdio.h>
 #include <vector>
 //include <chrono>
-#include <queue>
 
 #include <uv.h>
 #include <node.h>
@@ -91,6 +90,8 @@ TTYU_INLINE void ttyu_event_destroy(ttyu_event_t *event);
 // data structure for caching platform-dependent terminal handles
 // these are defined in platform-dependent source and header files
 typedef struct ttyu_pi_s ttyu_pi_t;
+TTYU_INLINE void ttyu_pi_init(ttyu_pi_t *pi);
+TTYU_INLINE void ttyu_pi_destroy(ttyu_pi_t *pi);
 
 // data structure for inter-thread communications
 typedef struct ttyu_data_s {
@@ -104,22 +105,19 @@ typedef struct ttyu_data_s {
   bool running;
   bool stop;
   std::vector<ttyu_event_t *> *work;
-  std::queue<ttyu_event_t *> *unget;
+  std::vector<ttyu_event_t *> *unget;
   ee_emitter_t *emitter;
 } ttyu_data_t;
-
-// global data variable
-ttyu_data_t *_data;
 
 // event loop functions
 void emitter(void *that);
 void handler(void *that);
 
 // event get & unget functions and a platform dependent generator
-TTYU_INLINE ttyu_event_t *getevent(ttyu_data_t *data, ttyu_event_t *event);
+TTYU_INLINE void getevent(ttyu_data_t *data, ttyu_event_t *event);
 TTYU_INLINE void ungetevent(ttyu_data_t *data, ttyu_event_t *event);
-TTYU_INLINE void event_generate(ttyu_event_t *event, int arg0, int arg1,
-    int arg2, int arg3, int arg4);
+TTYU_INLINE void event_generate(ttyu_data_t *data, ttyu_event_t *event,
+    int arg0, int arg1, int arg2, int arg3, int arg3)
 
 // define export methods for javascript
 TTYU_INLINE NAN_METHOD(js_start);
@@ -143,30 +141,6 @@ TTYU_INLINE NAN_METHOD(js_beep);
 TTYU_INLINE NAN_METHOD(js_clear);
 TTYU_INLINE NAN_METHOD(js_prepare);
 TTYU_INLINE NAN_METHOD(js_write);*/
-
-// initialize node module
-void init(v8::Handle<v8::Object> exports) {
-  EXPORT_METHOD(exports, "start", js_start);
-  EXPORT_METHOD(exports, "stop", js_stop);
-  EXPORT_METHOD(exports, "on", js_on);
-  EXPORT_METHOD(exports, "off", js_off);
-  EXPORT_METHOD(exports, "emit", js_emit);
-/*
-  EXPORT_GET(exports, "running", js_running);
-  EXPORT_GET(exports, "width", js_width);
-  EXPORT_GET(exports, "height", js_height);
-  EXPORT_GET(exports, "mode", js_mode);
-  EXPORT_GET(exports, "colors", js_colors);
-  EXPORT_GETSET(exports, "x", js_getx, js_setx);
-  EXPORT_GETSET(exports, "y", js_gety, js_sety);
-  EXPORT_METHOD(exports, "goto", js_goto);
-  EXPORT_METHOD(exports, "color", js_color);
-  EXPORT_METHOD(exports, "beep", js_beep);
-  EXPORT_METHOD(exports, "clear", js_clear);
-  EXPORT_METHOD(exports, "prepare", js_prepare);
-  EXPORT_METHOD(exports, "write", js_write);*/
-}
-NODE_MODULE(ttyu, init);
 
 // include platform dependent headers
 #ifdef PLATFORM_WINDOWS

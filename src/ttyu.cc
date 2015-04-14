@@ -122,6 +122,7 @@ void emitter(void *that) {
 void handler(void *that) {
   ttyu_data_t *data = static_cast<ttyu_data_t *>(that);
   std::vector<ttyu_event_t *> unget;
+  int i = 0;
 //  std::chrono::milliseconds last = std::chrono::system_clock::now();
 //  std::chrono::milliseconds delta = 0;
 
@@ -142,16 +143,16 @@ void handler(void *that) {
 //        delta = 0;
 //      }
 
-      if(unget->size() == 0) {
-        event = *unget->front();
-        unget->pop();
+      if(unget.size() < i) {
+        ungetevent(data, unget[i++]);
+      } else {
+        unget.clear();
+        i = 0;
       }
-    }
-
-    if(event.type != EVENT_NONE) {
+    } else {
       uv_mutex_lock(data->emitter_mutex);
-      work->push(&event);
-      uv_cond_wait(data->cv);
+      data->work->push_back(&event);
+      uv_cond_signal(data->cv);
       uv_mutex_unlock(data->emitter_mutex);
     }
   }

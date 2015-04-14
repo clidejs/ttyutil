@@ -4,11 +4,11 @@
             "target_name": "ttyu",
             "include_dirs" : [
                 "<!(node -e \"require('nan')\")",
-                "deps/ee/",
+                "deps/ee.c/",
                 "include/"
             ],
             "sources": [
-                "deps/ee/ee.c",
+                "deps/ee.c/ee.c",
                 "src/ttyu_event.cc",
                 "src/ttyu_js.cc",
                 "src/ttyu.cc",

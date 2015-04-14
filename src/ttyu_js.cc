@@ -27,9 +27,12 @@ TTYU_INLINE NAN_METHOD(js_start) {
   NanScope();
   _data->running = TRUE;
   _data->stop = FALSE;
-  uv_mutex_init(_data->mutex);
+  uv_mutex_init(_data->emitter_mutex);
+  uv_mutex_init(_data->emit_mutex);
+  uv_mutex_init(_data->handler_mutex);
   uv_cond_init(_data->cv);
-  uv_thread_create(_data->thread, loop, &_data);
+  uv_thread_create(_data->emitter_thread, emitter, &_data);
+  uv_thread_create(_data->handler_thread, handler, &_data);
   NanReturnUndefined();
 }
 
@@ -37,29 +40,41 @@ TTYU_INLINE NAN_METHOD(js_stop) {
   NanScope();
   _data->running = FALSE;
   _data->stop = TRUE;
-  uv_thread_join(_data->thread);
-  uv_mutex_destroy(_data->mutex);
+  uv_thread_join(_data->emitter_thread);
+  uv_thread_join(_data->handler_thread);
+  uv_mutex_destroy(_data->emitter_mutex);
+  uv_mutex_destroy(_data->emit_mutex);
+  uv_mutex_destroy(_data->handler_mutex);
   uv_cond_destroy(_data->cv);
   NanReturnUndefined();
 }
 
 TTYU_INLINE NAN_METHOD(js_on) {
   NanScope();
+  uv_mutex_lock(_data->emit_mutex);
   ee_on(_data->emitter, args[0]->Int32Value(),
       new NanCallback(v8::Local<v8::Function>::Cast(args[1])));
+  uv_mutex_unlock(_data->emit_mutex);
   NanReturnUndefined();
 }
 
 TTYU_INLINE NAN_METHOD(js_off) {
   NanScope();
+  uv_mutex_lock(_data->emit_mutex);
   ee_off(_data->emitter, args[0]->Int32Value(),
       new NanCallback(v8::Local<v8::Function>::Cast(args[1])));
+  uv_mutex_unlock(_data->emit_mutex);
   NanReturnUndefined();
 }
 
 TTYU_INLINE NAN_METHOD(js_emit) {
   NanScope();
-
+  ttyu_event_t event;
+  event_generate(&event, args[0]->Int32Value(), args[1]->Int32Value(),
+      args[2]->Int32Value(), args[3]->Int32Value(), args[4]->Int32Value());
+  uv_mutex_lock(_data->handler_mutex);
+  _data->unget->push(&event);
+  uv_mutex_unlock(_data->handler_mutex);
   NanReturnUndefined();
 }
 

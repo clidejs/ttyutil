@@ -24,7 +24,10 @@
 #ifndef TTYU_H_
 #define TTYU_H_
 
+#include <stdio.h>
 #include <vector>
+//include <chrono>
+#include <queue>
 
 #include <uv.h>
 #include <node.h>
@@ -46,6 +49,10 @@
 #ifndef FALSE
 # define FALSE 0
 #endif
+
+// more defines (extending <generated.h>)
+#define EVENT_NONE -1
+#define EMIT_INTERVAL 20
 
 // callback call function for the event emitter
 TTYU_INLINE int ttyu_ee_cb_call(ee__listener_t *l, EE_DATA_ARG(data));
@@ -83,26 +90,36 @@ TTYU_INLINE void ttyu_event_destroy(ttyu_event_t *event);
 
 // data structure for caching platform-dependent terminal handles
 // these are defined in platform-dependent source and header files
+typedef struct ttyu_pi_s ttyu_pi_t;
+
+// data structure for inter-thread communications
 typedef struct ttyu_data_s {
   ttyu_pi_t *pi;
-  uv_thread_t *thread;
-  uv_mutex_t *mutex;
+  uv_thread_t *emitter_thread;
+  uv_thread_t *handler_thread;
+  uv_mutex_t *emitter_mutex;
+  uv_mutex_t *emit_mutex;
+  uv_mutex_t *handler_mutex;
   uv_cond_t *cv;
   bool running;
   bool stop;
   std::vector<ttyu_event_t *> *work;
+  std::queue<ttyu_event_t *> *unget;
   ee_emitter_t *emitter;
 } ttyu_data_t;
 
 // global data variable
 ttyu_data_t *_data;
 
-// event loop function
-void loop(void *that);
-// event checker function
-ttyu_event_t *getinput(ttyu_data_t *data);
-// event handler function
-TTYU_INLINE void handle(ttyu_event_t *event);
+// event loop functions
+void emitter(void *that);
+void handler(void *that);
+
+// event get & unget functions and a platform dependent generator
+TTYU_INLINE ttyu_event_t *getevent(ttyu_data_t *data, ttyu_event_t *event);
+TTYU_INLINE void ungetevent(ttyu_data_t *data, ttyu_event_t *event);
+TTYU_INLINE void event_generate(ttyu_event_t *event, int arg0, int arg1,
+    int arg2, int arg3, int arg4);
 
 // define export methods for javascript
 TTYU_INLINE NAN_METHOD(js_start);

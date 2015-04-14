@@ -79,34 +79,41 @@ typedef struct ttyu_event_s {
   ttyu_key_t *key;
   ttyu_mouse_t *mouse;
 } ttyu_event_t;
-TTYU_INLINE void ttyu_event_create_error(ttyu_event_t *event, const char *err);
-TTYU_INLINE void ttyu_event_create_resize(ttyu_event_t *event);
-TTYU_INLINE void ttyu_event_create_key(ttyu_event_t *event, int ctrl, char *c,
-    int code, int which);
-TTYU_INLINE void ttyu_event_create_mouse(ttyu_event_t *event, int type,
-    int button, int x, int y, int ctrl);
-TTYU_INLINE void ttyu_event_destroy(ttyu_event_t *event);
+void ttyu_event_create_error(ttyu_event_t *event, const char *err);
+void ttyu_event_create_resize(ttyu_event_t *event);
+void ttyu_event_create_key(ttyu_event_t *event, int ctrl, char *c, int code,
+    int which);
+void ttyu_event_create_mouse(ttyu_event_t *event, int type, int button, int x,
+    int y, int ctrl);
+void ttyu_event_destroy(ttyu_event_t *event);
 
 // data structure for caching platform-dependent terminal handles
 // these are defined in platform-dependent source and header files
 typedef struct ttyu_pi_s ttyu_pi_t;
-TTYU_INLINE void ttyu_pi_init(ttyu_pi_t *pi);
-TTYU_INLINE void ttyu_pi_destroy(ttyu_pi_t *pi);
+void ttyu_pi_init(ttyu_pi_t *pi);
+void ttyu_pi_destroy(ttyu_pi_t *pi);
+
+// include platform dependent headers
+#ifdef PLATFORM_WINDOWS
+# include <win.h>
+#else
+# include <unix.h>
+#endif
 
 // data structure for inter-thread communications
 typedef struct ttyu_data_s {
-  ttyu_pi_t *pi;
-  uv_thread_t *emitter_thread;
-  uv_thread_t *handler_thread;
-  uv_mutex_t *emitter_mutex;
-  uv_mutex_t *emit_mutex;
-  uv_mutex_t *handler_mutex;
-  uv_cond_t *cv;
+  ttyu_pi_t pi;
+  uv_thread_t emitter_thread;
+  uv_thread_t handler_thread;
+  uv_mutex_t emitter_mutex;
+  uv_mutex_t emit_mutex;
+  uv_mutex_t handler_mutex;
+  uv_cond_t cv;
   bool running;
   bool stop;
-  std::vector<ttyu_event_t *> *work;
-  std::vector<ttyu_event_t *> *unget;
-  ee_emitter_t *emitter;
+  std::vector<ttyu_event_t *> work;
+  std::vector<ttyu_event_t *> unget;
+  ee_emitter_t emitter;
 } ttyu_data_t;
 
 // event loop functions
@@ -114,10 +121,10 @@ void emitter(void *that);
 void handler(void *that);
 
 // event get & unget functions and a platform dependent generator
-TTYU_INLINE void getevent(ttyu_data_t *data, ttyu_event_t *event);
-TTYU_INLINE void ungetevent(ttyu_data_t *data, ttyu_event_t *event);
-TTYU_INLINE void event_generate(ttyu_data_t *data, ttyu_event_t *event,
-    int arg0, int arg1, int arg2, int arg3, int arg3)
+void getevent(ttyu_data_t *data, ttyu_event_t *event);
+bool ungetevent(ttyu_data_t *data, ttyu_event_t *event);
+void event_generate(ttyu_data_t *data, ttyu_event_t *event, int arg0, int arg1,
+    int arg2, int arg3, int arg4);
 
 // define export methods for javascript
 TTYU_INLINE NAN_METHOD(js_start);
@@ -126,6 +133,8 @@ TTYU_INLINE NAN_METHOD(js_on);
 TTYU_INLINE NAN_METHOD(js_off);
 TTYU_INLINE NAN_METHOD(js_emit);
 TTYU_INLINE NAN_METHOD(js_running);
+
+TTYU_INLINE NAN_METHOD(js_write);
 /*
 TTYU_INLINE NAN_METHOD(js_width);
 TTYU_INLINE NAN_METHOD(js_height);
@@ -140,13 +149,6 @@ TTYU_INLINE NAN_METHOD(js_color);
 TTYU_INLINE NAN_METHOD(js_beep);
 TTYU_INLINE NAN_METHOD(js_clear);
 TTYU_INLINE NAN_METHOD(js_prepare);
-TTYU_INLINE NAN_METHOD(js_write);*/
-
-// include platform dependent headers
-#ifdef PLATFORM_WINDOWS
-# include <win.h>
-#else
-# include <unix.h>
-#endif
+*/
 
 #endif // TTYU_H_

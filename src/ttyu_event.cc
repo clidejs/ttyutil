@@ -54,8 +54,8 @@ void ttyu_event_create_key(ttyu_event_t *event, int ctrl, char *c,
   event->key->which = which;
 }
 
-void ttyu_event_create_mouse(ttyu_event_t *event, int type, int button,
-    int x, int y, int ctrl) {
+void ttyu_event_create_mouse(ttyu_event_t *event, int type, int button, int x,
+    int y, int ctrl) {
   event->type = type;
   event->err = NULL;
   event->key = NULL;

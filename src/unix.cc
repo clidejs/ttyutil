@@ -23,49 +23,151 @@
  */
 #include <ttyu.h>
 
-TTYU_INLINE void getevent(ttyu_data_t *data, ttyu_event_t *event) {
+void getevent(ttyu_data_t *data, ttyu_event_t *event) {
+  event->type = EVENT_NONE;
+  int c = getch();
+  MEVENT mev;
 
+  if(c == ERR) {
+    return;
+  } else if(c == KEY_RESIZE) {
+    ttyu_event_create_resize(event);
+  } else if(c == KEY_MOUSE) {
+    if(getmouse(&mev) == OK) {
+      ttyu_event_create_mouse(event, EVENT_ERROR, 0, mev.x, mev.y, 0);
+
+      // add button control key sequences if possible
+      if(mev.bstate & BUTTON_SHIFT) { event->mouse->ctrl |= CTRL_SHIFT; }
+      if(mev.bstate & BUTTON_CTRL) { event->mouse->ctrl |= CTRL_CTRL; }
+      if(mev.bstate & BUTTON_ALT) { event->mouse->ctrl |= CTRL_ALT; }
+
+      // convert button codes and mev type
+      if(mev.bstate & REPORT_MOUSE_POSITION) {
+        event->type = EVENT_MOUSEMOVE;
+      } else if(mev.bstate & BUTTON1_RELEASED) {
+        event->mouse->button = MOUSE_LEFT;
+        event->type = EVENT_MOUSEUP;
+      } else if(mev.bstate & BUTTON1_PRESSED) {
+        event->mouse->button = MOUSE_LEFT;
+        event->type = EVENT_MOUSEDOWN;
+      } else if(mev.bstate & BUTTON2_RELEASED) {
+        event->mouse->button = MOUSE_LEFT2;
+        event->type = EVENT_MOUSEUP;
+      } else if(mev.bstate & BUTTON2_PRESSED) {
+        event->mouse->button = MOUSE_LEFT2;
+        event->type = EVENT_MOUSEDOWN;
+      } else if(mev.bstate & BUTTON3_RELEASED) {
+        event->mouse->button = MOUSE_LEFT3;
+        event->type = EVENT_MOUSEUP;
+      } else if(mev.bstate & BUTTON3_PRESSED) {
+        event->mouse->button = MOUSE_LEFT3;
+        event->type = EVENT_MOUSEDOWN;
+      } else
+#if NCURSES_MOUSE_VERSION > 1
+      if(mev.bstate & BUTTON4_RELEASED) {
+        event->mouse->button = MOUSE_LEFT4;
+        event->type = EVENT_MOUSEUP;
+      } else if(mev.bstate & BUTTON4_PRESSED) {
+        event->mouse->button = MOUSE_LEFT4;
+        event->type = EVENT_MOUSEDOWN;
+      } else if(mev.bstate & BUTTON5_RELEASED) {
+        event->mouse->button = MOUSE_RIGHT;
+        event->type = EVENT_MOUSEUP;
+      } else if(mev.bstate & BUTTON5_PRESSED) {
+        event->mouse->button = MOUSE_RIGHT;
+        event->type = EVENT_MOUSEDOWN;
+      }
+#else
+      if(mev.bstate & BUTTON4_RELEASED) {
+        event->mouse->button = MOUSE_RIGHT;
+        event->type = EVENT_MOUSEUP;
+      } else if(mev.bstate & BUTTON4_PRESSED) {
+        event->mouse->button = MOUSE_RIGHT;
+        event->type = EVENT_MOUSEDOWN;
+      }
+#endif
+      if(event->type == EVENT_ERROR) {
+        // uncaught mouse event
+        ttyu_event_destroy(event);
+      } else {
+        // its VT102
+        data->pi.mode = MODE_VT102;
+      }
+    } else {
+      // bad mouse event
+    }
+  } else {
+    char *ch = const_cast<char *>(keyname(c));
+    int ctrl = CTRL_NULL;
+    int which = WHICH_UNKNOWN;
+
+    if(c >= 48 && c <= 57) {
+      which = c; // WHICH_CHAR0 to WHICH_CHAR9
+    } else if(c >= 65 && c <= 90) {
+      ctrl |= CTRL_SHIFT;
+      which = c; // WHICH_CHARA to WHICH_CHARZ
+    } else if(c >= 97 && c <= 122) {
+      which = c - 32; // WHICH_CHARA to WHICH_CHARZ
+    } else if(c == KEY_COMMAND) {
+      ctrl |= CTRL_CMD;
+    } else if(c == KEY_SCOMMAND) {
+      ctrl |= CTRL_CMD | CTRL_SHIFT;
+    } else {
+      which = ttyu_unix_which(c);
+      //if(ch[0] == '^') {
+      //  ctrl |= CTRL_CTRL;
+      //}
+    }
+    ttyu_event_create_key(event, ctrl, ch, c, which);
+  }
 }
 
-TTYU_INLINE void ungetevent(ttyu_data_t *data, ttyu_event_t *event) {
+bool ungetevent(ttyu_data_t *data, ttyu_event_t *event) {
+  switch(event->type) {
+    case EVENT_KEY:
+      ungetch(event->key->code);
+      return TRUE;
+      break;
+    case EVENT_MOUSEUP:
+    case EVENT_MOUSEDOWN:
+    case EVENT_MOUSEMOVE:
       MEVENT mev;
-
-      mev.x = (short)arg2->Int32Value();
-      mev.y = (short)arg3->Int32Value();
+      mev.x = event->mouse->x;
+      mev.y = event->mouse->y;
       mev.bstate = 0;
 
-      if(arg4 & CTRL_ALT) { mev.bstate |= BUTTON_ALT; }
-      if(arg4 & CTRL_CTRL) { mev.bstate |= BUTTON_CTRL; }
-      if(arg4 & CTRL_SHIFT) { mev.bstate |= BUTTON_SHIFT; }
+      if(event->mouse->ctrl & CTRL_ALT) { mev.bstate |= BUTTON_ALT; }
+      if(event->mouse->ctrl & CTRL_CTRL) { mev.bstate |= BUTTON_CTRL; }
+      if(event->mouse->ctrl & CTRL_SHIFT) { mev.bstate |= BUTTON_SHIFT; }
 
-      if(arg0 == EVENT_MOUSEMOVE) {
+      if(event->type == EVENT_MOUSEMOVE) {
         mev.bstate |= REPORT_MOUSE_POSITION;
-      } else if(arg0 == EVENT_MOUSEUP) {
-        if(arg1 == MOUSE_LEFT) {
+      } else if(event->type == EVENT_MOUSEUP) {
+        if(event->mouse->button == MOUSE_LEFT) {
           mev.bstate |= BUTTON1_RELEASED;
-        } else if(arg1 == MOUSE_LEFT2) {
+        } else if(event->mouse->button == MOUSE_LEFT2) {
           mev.bstate |= BUTTON2_RELEASED;
-        } else if(arg1 == MOUSE_LEFT3) {
+        } else if(event->mouse->button == MOUSE_LEFT3) {
           mev.bstate |= BUTTON3_RELEASED;
-        } else if(arg1 == MOUSE_LEFT4) {
+        } else if(event->mouse->button == MOUSE_LEFT4) {
           mev.bstate |= BUTTON4_RELEASED;
-        } else if(arg1 == MOUSE_RIGHT) {
+        } else if(event->mouse->button == MOUSE_RIGHT) {
 #if NCURSES_MOUSE_VERSION > 1
           mev.bstate |= BUTTON5_RELEASED;
 #else
           mev.bstate |= BUTTON4_RELEASED;
 #endif
         }
-      } else if(arg0 == EVENT_MOUSEDOWN) {
-        if(arg1 == MOUSE_LEFT) {
+      } else if(event->type == EVENT_MOUSEDOWN) {
+        if(event->mouse->button == MOUSE_LEFT) {
           mev.bstate |= BUTTON1_PRESSED;
-        } else if(arg1 == MOUSE_LEFT2) {
+        } else if(event->mouse->button == MOUSE_LEFT2) {
           mev.bstate |= BUTTON2_PRESSED;
-        } else if(arg1 == MOUSE_LEFT3) {
+        } else if(event->mouse->button == MOUSE_LEFT3) {
           mev.bstate |= BUTTON3_PRESSED;
-        } else if(arg1 == MOUSE_LEFT4) {
+        } else if(event->mouse->button == MOUSE_LEFT4) {
           mev.bstate |= BUTTON4_PRESSED;
-        } else if(arg1 == MOUSE_RIGHT) {
+        } else if(event->mouse->button == MOUSE_RIGHT) {
 #if NCURSES_MOUSE_VERSION > 1
           mev.bstate |= BUTTON5_PRESSED;
 #else
@@ -73,13 +175,21 @@ TTYU_INLINE void ungetevent(ttyu_data_t *data, ttyu_event_t *event) {
 #endif
         }
       }
-
+      ungetmouse(&mev);
+      return TRUE;
+      break;
+    default:
+      // EVENT_NONE, EVENT_ERROR, EVENT_SIGNAL, EVENT_RESIZE, EVENT_MOUSEWHEEL,
+      // EVENT_MOUSEHWHEEL
+      return FALSE;
+      break;
+  }
 }
 
-TTYU_INLINE void event_generate(ttyu_data_t *data, ttyu_event_t *event,
-    int arg0 , int arg1, int arg2, int arg3, int arg3) {
+void event_generate(ttyu_data_t *data, ttyu_event_t *event,
+    int arg0 , int arg1, int arg2, int arg3, int arg4) {
   switch(arg0) {
-    case EVENT_KEY:
+    case EVENT_KEY: {
       int c = -1;
       if(arg2 & CTRL_CMD) {
         c = KEY_COMMAND;
@@ -93,14 +203,14 @@ TTYU_INLINE void event_generate(ttyu_data_t *data, ttyu_event_t *event,
         c = arg1; // 0 - 9
       } else {
         c = ttyu_unix_key(arg1);
-      }
-      ttyu_event_create_key(event, arg2, (char)c, c, arg1);
-      break;
+      }                         // TODO   v
+      ttyu_event_create_key(event, arg2, " ", c, arg1);
+      } break;
     case EVENT_MOUSEDOWN:
     case EVENT_MOUSEUP:
-    case EVENT_MOUSEMOVE:
+    case EVENT_MOUSEMOVE: {
       ttyu_event_create_mouse(event, arg0, arg1, arg2, arg3, arg4);
-      break;
+      } break;
     default:
       // EVENT_NONE, EVENT_ERROR, EVENT_SIGNAL, EVENT_RESIZE, EVENT_MOUSEWHEEL,
       // EVENT_MOUSEHWHEEL
@@ -113,7 +223,6 @@ TTYU_INLINE int ttyu_unix_key(int which) {
   #define XXKEY(w, key, shift) if(w == which) {                                \
     return key;                                                                \
   }
-  #undef XXKEY
   TTYU_UNIX_KW(XXKEY);
   return WHICH_UNKNOWN;
 }
@@ -122,15 +231,14 @@ TTYU_INLINE int ttyu_unix_which(int key) {
   #define XXWHICH(which, k, shift) if(k == key) {                              \
     return which;                                                              \
   }
-  #undef XXWHICH
   TTYU_UNIX_KW(XXWHICH);
   return WHICH_UNKNOWN;
 }
 
-TTYU_INLINE void ttyu_pi_init(ttyu_pi_t *pi) {
+void ttyu_pi_init(ttyu_pi_t *pi) {
   pi->win = initscr();
   pi->mode = MODE_VT100;
-
+  DBG("a");
   noecho();
   cbreak();
   keypad(pi->win, TRUE);
@@ -139,7 +247,8 @@ TTYU_INLINE void ttyu_pi_init(ttyu_pi_t *pi) {
   nodelay(pi->win, TRUE);
 }
 
-TTYU_INLINE void ttyu_pi_destroy(ttyu_pi_t *pi) {
+void ttyu_pi_destroy(ttyu_pi_t *pi) {
   echo();
-  endwin(pi->win);
+  endwin();
 }
+

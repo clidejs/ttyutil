@@ -47,20 +47,20 @@ void emitter(void *that) {
   v8::Local<v8::Object> obj;
   while(!data->stop) {
     // collect events
-    uv_mutex_lock(data->emitter_mutex);
-    while(data->work->size() == 0) {
-      uv_cond_wait(data->cv, data->emitter_mutex);
+    uv_mutex_lock(&data->emitter_mutex);
+    while(data->work.size() == 0) {
+      uv_cond_wait(&data->cv, &data->emitter_mutex);
     }
-    std::copy(data->work->begin(), data->work->end(),
+    std::copy(data->work.begin(), data->work.end(),
         std::back_inserter(work));
-    data->work->clear();
-    uv_mutex_unlock(data->emitter_mutex);
+    data->work.clear();
+    uv_mutex_unlock(&data->emitter_mutex);
 
     // emit events
     for(std::vector<ttyu_event_t *>::iterator it = work.begin();
         it != work.end(); ++it) {
       ttyu_event_t *event = *it;
-      if(ee_count(data->emitter, event->type) == 0) {
+      if(ee_count(&data->emitter, event->type) == 0) {
         return;
       }
 
@@ -111,9 +111,9 @@ void emitter(void *that) {
           event->type = EVENT_ERROR;
           break;
       }
-      uv_mutex_lock(data->emit_mutex);
-      ee_emit(data->emitter, event->type, obj);
-      uv_mutex_unlock(data->emit_mutex);
+      uv_mutex_lock(&data->emit_mutex);
+      ee_emit(&data->emitter, event->type, obj);
+      uv_mutex_unlock(&data->emit_mutex);
     }
     work.clear();
   }
@@ -122,7 +122,7 @@ void emitter(void *that) {
 void handler(void *that) {
   ttyu_data_t *data = static_cast<ttyu_data_t *>(that);
   std::vector<ttyu_event_t *> unget;
-  int i = 0;
+  unsigned long i = 0;
 //  std::chrono::milliseconds last = std::chrono::system_clock::now();
 //  std::chrono::milliseconds delta = 0;
 
@@ -133,27 +133,26 @@ void handler(void *that) {
 
     if(event.type == EVENT_NONE) {
 //      if(delta > EMIT_INTERVAL) {
-        uv_mutex_lock(data->handler_mutex);
-        if(data->unget->size() == 0) {
-          std::copy(data->unget->begin(), data->unget->end(),
+        uv_mutex_lock(&data->handler_mutex);
+        if(data->unget.size() == 0) {
+          std::copy(data->unget.begin(), data->unget.end(),
               std::back_inserter(unget));
-          data->unget->clear();
+          data->unget.clear();
         }
-        uv_mutex_unlock(data->handler_mutex);
+        uv_mutex_unlock(&data->handler_mutex);
 //        delta = 0;
 //      }
 
-      if(unget.size() < i) {
-        ungetevent(data, unget[i++]);
-      } else {
+      while(unget.size() < i && !ungetevent(data, unget[i++]));
+      if(unget.size() >= i) {
         unget.clear();
         i = 0;
       }
     } else {
-      uv_mutex_lock(data->emitter_mutex);
-      data->work->push_back(&event);
-      uv_cond_signal(data->cv);
-      uv_mutex_unlock(data->emitter_mutex);
+      uv_mutex_lock(&data->emitter_mutex);
+      data->work.push_back(&event);
+      uv_cond_signal(&data->cv);
+      uv_mutex_unlock(&data->emitter_mutex);
     }
   }
 }

@@ -23,104 +23,136 @@
  */
 #include <ttyu.h>
 
-// global data variable
-ttyu_data_t _data;
+ttyu_js_c::ttyu_js_c() {
+  running = FALSE;
+  stop = TRUE;
+}
 
-TTYU_INLINE NAN_METHOD(js_start) {
+ttyu_js_c::~ttyu_js_c() {
+  running = FALSE;
+  stop = TRUE;
+}
+
+TTYU_INLINE NAN_METHOD(ttyu_js_c::js_new) {
   NanScope();
-  ttyu_pi_init(&_data.pi);
+  ttyu_js_c *obj = new ttyu_js_c();
+  obj->Wrap(args.This());
+  NanReturnThis();
+}
+
+TTYU_INLINE NAN_METHOD(ttyu_js_c::js_start) {
+  NanScope();
+  ttyu_js_c *obj = ObjectWrap::Unwrap<ttyu_js_c>(args.This());
+  ttyu_pi_init(&obj->pi);
   DBG("asdf");
-  _data.running = TRUE;
-  _data.stop = FALSE;
-  uv_mutex_init(&_data.emitter_mutex);
-  uv_mutex_init(&_data.emit_mutex);
-  uv_mutex_init(&_data.handler_mutex);
-  uv_cond_init(&_data.cv);
+  obj->running = TRUE;
+  obj->stop = FALSE;
+  uv_barrier_init(&obj->barrier, 3);
+  uv_mutex_init(&obj->emitter_mutex);
+  uv_mutex_init(&obj->emit_mutex);
+  uv_mutex_init(&obj->handler_mutex);
+  uv_cond_init(&obj->cv);
   DBG("started threads");
-  uv_thread_create(&_data.emitter_thread, emitter, &_data);
-  uv_thread_create(&_data.handler_thread, handler, &_data);
-  NanReturnUndefined();
+  uv_thread_create(&obj->emitter_thread, emitter_thread_func, obj);
+  uv_thread_create(&obj->handler_thread, handler_thread_func, obj);
+
+  if(uv_barrier_wait(&obj->barrier) > 0)
+      uv_barrier_destroy(&obj->barrier);
+
+  NanReturnThis();
 }
 
-TTYU_INLINE NAN_METHOD(js_stop) {
+TTYU_INLINE NAN_METHOD(ttyu_js_c::js_stop) {
   NanScope();
-  _data.running = FALSE;
-  _data.stop = TRUE;
-  uv_thread_join(&_data.emitter_thread);
-  uv_thread_join(&_data.handler_thread);
-  uv_mutex_destroy(&_data.emitter_mutex);
-  uv_mutex_destroy(&_data.emit_mutex);
-  uv_mutex_destroy(&_data.handler_mutex);
-  uv_cond_destroy(&_data.cv);
-  // TODO destroy _data.pi
-  // TODO destroy _data
-  NanReturnUndefined();
+  ttyu_js_c *obj = ObjectWrap::Unwrap<ttyu_js_c>(args.This());
+  obj->running = FALSE;
+  obj->stop = TRUE;
+  uv_thread_join(&obj->emitter_thread);
+  uv_thread_join(&obj->handler_thread);
+  uv_mutex_destroy(&obj->emitter_mutex);
+  uv_mutex_destroy(&obj->emit_mutex);
+  uv_mutex_destroy(&obj->handler_mutex);
+  uv_cond_destroy(&obj->cv);
+  // TODO destroy obj->pi
+  NanReturnThis();
 }
 
-TTYU_INLINE NAN_METHOD(js_on) {
+TTYU_INLINE NAN_METHOD(ttyu_js_c::js_on) {
   NanScope();
-  uv_mutex_lock(&_data.emit_mutex);
-  ee_on(&_data.emitter, args[0]->Int32Value(),
+  ttyu_js_c *obj = ObjectWrap::Unwrap<ttyu_js_c>(args.This());
+  uv_mutex_lock(&obj->emit_mutex);
+  ee_on(&obj->emitter, args[0]->Int32Value(),
       new NanCallback(v8::Local<v8::Function>::Cast(args[1])));
-  uv_mutex_unlock(&_data.emit_mutex);
-  NanReturnUndefined();
+  uv_mutex_unlock(&obj->emit_mutex);
+  NanReturnThis();
 }
 
-TTYU_INLINE NAN_METHOD(js_off) {
+TTYU_INLINE NAN_METHOD(ttyu_js_c::js_off) {
   NanScope();
-  uv_mutex_lock(&_data.emit_mutex);
-  ee_off(&_data.emitter, args[0]->Int32Value(),
+  ttyu_js_c *obj = ObjectWrap::Unwrap<ttyu_js_c>(args.This());
+  uv_mutex_lock(&obj->emit_mutex);
+  ee_off(&obj->emitter, args[0]->Int32Value(),
       new NanCallback(v8::Local<v8::Function>::Cast(args[1])));
-  uv_mutex_unlock(&_data.emit_mutex);
-  NanReturnUndefined();
+  uv_mutex_unlock(&obj->emit_mutex);
+  NanReturnThis();
 }
 
-TTYU_INLINE NAN_METHOD(js_emit) {
+TTYU_INLINE NAN_METHOD(ttyu_js_c::js_emit) {
   NanScope();
+  ttyu_js_c *obj = ObjectWrap::Unwrap<ttyu_js_c>(args.This());
   ttyu_event_t event;
   DBG(".emit()");
-  event_generate(&_data, &event, args[0]->Int32Value(), args[1]->Int32Value(),
+  event_generate(obj, &event, args[0]->Int32Value(), args[1]->Int32Value(),
       args[2]->Int32Value(), args[3]->Int32Value(), args[4]->Int32Value());
-  uv_mutex_lock(&_data.handler_mutex);
-  _data.unget.push_back(&event);
-  uv_mutex_unlock(&_data.handler_mutex);
-  NanReturnUndefined();
+  uv_mutex_lock(&obj->handler_mutex);
+  obj->unget.push_back(&event);
+  uv_mutex_unlock(&obj->handler_mutex);
+  NanReturnThis();
 }
 
-TTYU_INLINE NAN_METHOD(js_running) {
+TTYU_INLINE NAN_METHOD(ttyu_js_c::js_running) {
   NanScope();
-  NanReturnValue(NanNew<v8::Boolean>(&_data.running));
+  ttyu_js_c *obj = ObjectWrap::Unwrap<ttyu_js_c>(args.This());
+  NanReturnValue(NanNew<v8::Boolean>(&obj->running));
 }
 
-TTYU_INLINE NAN_METHOD(js_write) {
+TTYU_INLINE NAN_METHOD(ttyu_js_c::js_write) {
   NanScope();
+  //ttyu_js_c *obj = ObjectWrap::Unwrap<ttyu_js_c>(args.This());
   // TODO
   printf("%s\r\n",
       (new v8::String::Utf8Value(args[0]->ToString()))->operator*());
-  NanReturnUndefined();
+  NanReturnThis();
 }
 
 // initialize node module
-void init(v8::Handle<v8::Object> exports) {
-  EXPORT_METHOD(exports, "start", js_start);
-  EXPORT_METHOD(exports, "stop", js_stop);
-  EXPORT_METHOD(exports, "__on__", js_on);
-  EXPORT_METHOD(exports, "__off__", js_off);
-  EXPORT_METHOD(exports, "__emit__", js_emit);
+TTYU_INLINE void ttyu_js_c::init(v8::Handle<v8::Object> exports,
+    v8::Handle<v8::Object> module) {
+  v8::Local<v8::FunctionTemplate> tpl =
+      NanNew<v8::FunctionTemplate>(js_new);
+  tpl->SetClassName(NanNew<v8::String>("ttyu_js_c"));
+  tpl->InstanceTemplate()->SetInternalFieldCount(19);
 
-  EXPORT_METHOD(exports, "write", js_write);
+  EXPORT_METHOD(tpl, "start", js_start);
+  EXPORT_METHOD(tpl, "stop", js_stop);
+  EXPORT_METHOD(tpl, "on", js_on);
+  EXPORT_METHOD(tpl, "off", js_off);
+  EXPORT_METHOD(tpl, "emit", js_emit);
+
+  EXPORT_METHOD(tpl, "write", js_write);
+  module->Set(NanNew<v8::String>("exports"), tpl->GetFunction());
 /*
-  EXPORT_GET(exports, "running", js_running);
-  EXPORT_GET(exports, "width", js_width);
-  EXPORT_GET(exports, "height", js_height);
-  EXPORT_GET(exports, "mode", js_mode);
-  EXPORT_GET(exports, "colors", js_colors);
-  EXPORT_GETSET(exports, "x", js_getx, js_setx);
-  EXPORT_GETSET(exports, "y", js_gety, js_sety);
-  EXPORT_METHOD(exports, "goto", js_goto);
-  EXPORT_METHOD(exports, "color", js_color);
-  EXPORT_METHOD(exports, "beep", js_beep);
-  EXPORT_METHOD(exports, "clear", js_clear);
-  EXPORT_METHOD(exports, "prepare", js_prepare);*/
+  EXPORT_GET(tpl, "running", js_running);
+  EXPORT_GET(tpl, "width", js_width);
+  EXPORT_GET(tpl, "height", js_height);
+  EXPORT_GET(tpl, "mode", js_mode);
+  EXPORT_GET(tpl, "colors", js_colors);
+  EXPORT_GETSET(tpl, "x", js_getx, js_setx);
+  EXPORT_GETSET(tpl, "y", js_gety, js_sety);
+  EXPORT_METHOD(tpl, "goto", js_goto);
+  EXPORT_METHOD(tpl, "color", js_color);
+  EXPORT_METHOD(tpl, "beep", js_beep);
+  EXPORT_METHOD(tpl, "clear", js_clear);
+  EXPORT_METHOD(tpl, "prepare", js_prepare);*/
 }
-NODE_MODULE(ttyu, init);
+NODE_MODULE(ttyu, ttyu_js_c::init);

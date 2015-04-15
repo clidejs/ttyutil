@@ -23,7 +23,7 @@
  */
 #include <ttyu.h>
 
-void getevent(ttyu_data_t *data, ttyu_event_t *event) {
+void getevent(ttyu_js_c *data, ttyu_event_t *event) {
   event->type = EVENT_NONE;
   int c = getch();
   MEVENT mev;
@@ -122,7 +122,7 @@ void getevent(ttyu_data_t *data, ttyu_event_t *event) {
   }
 }
 
-bool ungetevent(ttyu_data_t *data, ttyu_event_t *event) {
+bool ungetevent(ttyu_js_c *data, ttyu_event_t *event) {
   switch(event->type) {
     case EVENT_KEY:
       ungetch(event->key->code);
@@ -186,7 +186,7 @@ bool ungetevent(ttyu_data_t *data, ttyu_event_t *event) {
   }
 }
 
-void event_generate(ttyu_data_t *data, ttyu_event_t *event,
+void event_generate(ttyu_js_c *data, ttyu_event_t *event,
     int arg0 , int arg1, int arg2, int arg3, int arg4) {
   switch(arg0) {
     case EVENT_KEY: {

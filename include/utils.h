@@ -28,18 +28,20 @@
 #include <string.h>
 #include <iostream>
 
-#define EXPORT_METHOD(e, name, cb) do {                                        \
+#define EXPORT_METHOD(tpl, name, cb) do {                                      \
   v8::Local<v8::FunctionTemplate> t = NanNew<v8::FunctionTemplate>(cb);        \
-  e->Set(NanNew<v8::String>(name), t->GetFunction(), v8::ReadOnly);            \
+  tpl->InstanceTemplate()->Set(NanNew<v8::String>(name),                       \
+      t->GetFunction(), v8::ReadOnly);                                         \
 } while(0)
 
 #define EXPORT_GET(tpl, name, fn) do {                                         \
   v8::Local<v8::FunctionTemplate> t = NanNew<v8::FunctionTemplate>(fn);        \
-  tpl->SetAccessor(NanNew<v8::String>(name), t->GetFunction());                \
+  tpl->InstanceTemplate()->SetAccessor(NanNew<v8::String>(name),               \
+      t->GetFunction());                                                       \
 } while(0)
 
 #define EXPORT_GETSET(tpl, name, get, set)                                     \
-  tpl->SetAccessor(NanNew<v8::String>(name), (get), (set))
+  tpl->InstanceTemplate()->SetAccessor(NanNew<v8::String>(name), (get), (set))
 
 #if defined(__GNUC__) && !(defined(DEBUG) && DEBUG)
 # define TTYU_INLINE inline __attribute__((always_inline))

@@ -58,6 +58,8 @@ TTYU_INLINE int ttyu_ee_cb_call(ee__listener_t *l, EE_DATA_ARG(data));
 // callback compare function for the event emitter
 TTYU_INLINE int ttyu_ee_compare(EE_CB_ARG(cb1), EE_CB_ARG(cb2));
 
+class ttyu_js_c;
+
 // key event structure
 typedef struct ttyu_key_s {
   int ctrl;
@@ -100,11 +102,37 @@ void ttyu_pi_destroy(ttyu_pi_t *pi);
 # include <unix.h>
 #endif
 
-// data structure for inter-thread communications
-typedef struct ttyu_data_s {
+// thread functions
+void emitter_thread_func(void *that);
+void handler_thread_func(void *that);
+
+// event get & unget functions and a platform dependent generator
+void getevent(ttyu_js_c *data, ttyu_event_t *event);
+bool ungetevent(ttyu_js_c *data, ttyu_event_t *event);
+void event_generate(ttyu_js_c *data, ttyu_event_t *event, int arg0, int arg1,
+    int arg2, int arg3, int arg4);
+
+class ttyu_js_c : public node::ObjectWrap {
+public:
+  explicit ttyu_js_c();
+  ~ttyu_js_c();
+
+  TTYU_INLINE static void init(v8::Handle<v8::Object> exports,
+      v8::Handle<v8::Object> module);
+  TTYU_INLINE static NAN_METHOD(js_new);
+  TTYU_INLINE static NAN_METHOD(js_start);
+  TTYU_INLINE static NAN_METHOD(js_stop);
+  TTYU_INLINE static NAN_METHOD(js_on);
+  TTYU_INLINE static NAN_METHOD(js_off);
+  TTYU_INLINE static NAN_METHOD(js_emit);
+  TTYU_INLINE static NAN_METHOD(js_running);
+
+  TTYU_INLINE static NAN_METHOD(js_write);
+
   ttyu_pi_t pi;
   uv_thread_t emitter_thread;
   uv_thread_t handler_thread;
+  uv_barrier_t barrier;
   uv_mutex_t emitter_mutex;
   uv_mutex_t emit_mutex;
   uv_mutex_t handler_mutex;
@@ -114,27 +142,8 @@ typedef struct ttyu_data_s {
   std::vector<ttyu_event_t *> work;
   std::vector<ttyu_event_t *> unget;
   ee_emitter_t emitter;
-} ttyu_data_t;
-
-// event loop functions
-void emitter(void *that);
-void handler(void *that);
-
-// event get & unget functions and a platform dependent generator
-void getevent(ttyu_data_t *data, ttyu_event_t *event);
-bool ungetevent(ttyu_data_t *data, ttyu_event_t *event);
-void event_generate(ttyu_data_t *data, ttyu_event_t *event, int arg0, int arg1,
-    int arg2, int arg3, int arg4);
-
+};
 // define export methods for javascript
-TTYU_INLINE NAN_METHOD(js_start);
-TTYU_INLINE NAN_METHOD(js_stop);
-TTYU_INLINE NAN_METHOD(js_on);
-TTYU_INLINE NAN_METHOD(js_off);
-TTYU_INLINE NAN_METHOD(js_emit);
-TTYU_INLINE NAN_METHOD(js_running);
-
-TTYU_INLINE NAN_METHOD(js_write);
 /*
 TTYU_INLINE NAN_METHOD(js_width);
 TTYU_INLINE NAN_METHOD(js_height);

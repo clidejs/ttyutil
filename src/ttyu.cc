@@ -41,10 +41,14 @@ TTYU_INLINE int ttyu_ee_compare(EE_CB_ARG(cb1), EE_CB_ARG(cb2)) {
   return (int)(cb1->GetFunction() == cb2->GetFunction());
 }
 
-void emitter(void *that) {
-  ttyu_data_t *data = static_cast<ttyu_data_t *>(that);
+void emitter_thread_func(void *that) {
+  ttyu_js_c *data = static_cast<ttyu_js_c *>(that);
   std::vector<ttyu_event_t *> work;
   v8::Local<v8::Object> obj;
+
+  if(uv_barrier_wait(&data->barrier) > 0)
+      uv_barrier_destroy(&data->barrier);
+
   while(!data->stop) {
     // collect events
     uv_mutex_lock(&data->emitter_mutex);
@@ -119,12 +123,15 @@ void emitter(void *that) {
   }
 }
 
-void handler(void *that) {
-  ttyu_data_t *data = static_cast<ttyu_data_t *>(that);
+void handler_thread_func(void *that) {
+  ttyu_js_c *data = static_cast<ttyu_js_c *>(that);
   std::vector<ttyu_event_t *> unget;
   unsigned long i = 0;
 //  std::chrono::milliseconds last = std::chrono::system_clock::now();
 //  std::chrono::milliseconds delta = 0;
+
+  if(uv_barrier_wait(&data->barrier) > 0)
+      uv_barrier_destroy(&data->barrier);
 
   while(!data->stop) {
     ttyu_event_t event;

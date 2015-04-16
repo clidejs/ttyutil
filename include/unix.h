@@ -22,8 +22,8 @@
  * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
  * IN THE SOFTWARE.
  */
-#ifndef TTYU_UNIX_H_
-#define TTYU_UNIX_H_
+#ifndef INCLUDE_UNIX_H_
+#define INCLUDE_UNIX_H_
 
 #define NCURSES_OPAQUE FALSE
 #include <curses.h>
@@ -104,4 +104,4 @@ struct ttyu_pi_s {
 TTYU_INLINE int ttyu_unix_key(int which);
 TTYU_INLINE int ttyu_unix_which(int key);
 
-#endif // TTYU_UNIX_H_
+#endif  // INCLUDE_UNIX_H_

@@ -39,13 +39,14 @@ void ttyu_event_create_resize(ttyu_event_t *event) {
 
 void ttyu_event_create_key(ttyu_event_t *event, int ctrl, char *c,
     int code, int which) {
-  char *ch = (char *)std::malloc(sizeof(char) * (strlen(c) + 1));
+  char *ch =
+      reinterpret_cast<char *>(std::malloc(sizeof(char) * (strlen(c) + 1)));
   memcpy(ch, c, sizeof(char) * strlen(c));
   ch[strlen(c)] = '\0';
 
   event->type = EVENT_KEY;
   event->err = NULL;
-  event->key = (ttyu_key_t *)std::malloc(sizeof(ttyu_key_t));
+  event->key = reinterpret_cast<ttyu_key_t *>(std::malloc(sizeof(ttyu_key_t)));
   event->mouse = NULL;
 
   event->key->ctrl = ctrl;
@@ -59,7 +60,8 @@ void ttyu_event_create_mouse(ttyu_event_t *event, int type, int button, int x,
   event->type = type;
   event->err = NULL;
   event->key = NULL;
-  event->mouse = (ttyu_mouse_t *)std::malloc(sizeof(ttyu_mouse_t));
+  event->mouse =
+      reinterpret_cast<ttyu_mouse_t *>(std::malloc(sizeof(ttyu_mouse_t)));
 
   event->mouse->button = button;
   event->mouse->x = x;
@@ -68,12 +70,12 @@ void ttyu_event_create_mouse(ttyu_event_t *event, int type, int button, int x,
 }
 
 void ttyu_event_destroy(ttyu_event_t *event) {
-  if(event) {
-    if(event->mouse) {
+  if (event) {
+    if (event->mouse) {
       std::free(event->mouse);
     }
-    if(event->key) {
-      if(event->key->c) {
+    if (event->key) {
+      if (event->key->c) {
         std::free(event->key->c);
       }
       std::free(event->mouse);

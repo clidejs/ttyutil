@@ -1,4 +1,4 @@
-/* ttyutil - unix.cc - implements methods for unixy systems (see include/unix.h)
+/* ttyutil - win.cc - implements methods for windows systems (see include/win.h)
  * https://github.com/clidejs/ttyutil
  *
  * Copyright Bernhard Bücherl <bernhard.buecherl@gmail.com>
@@ -23,11 +23,13 @@
  */
 #include <ttyu.h>
 
+
 void getevent(ttyu_js_c *data, ttyu_event_t *event) {
   event->type = EVENT_NONE;
-  use_window(&data->pi.win);
-  int c = getch();
-  MEVENT mev;
+  DWORD readed;
+  INPUT_RECORD ir[1];
+  DWORD i;
+  ReadConsoleInput(data->pi->hin, ir, 1, &readed);
 
   if (c == ERR) {
     return;
@@ -223,36 +225,3 @@ void event_generate(ttyu_js_c *data, ttyu_event_t *event,
       break;
   }
 }
-
-TTYU_INLINE int ttyu_unix_key(int which) {
-  #define XXKEY(w, key, shift) if (w == which) {                               \
-    return key;                                                                \
-  }
-  TTYU_UNIX_KW(XXKEY);
-  return WHICH_UNKNOWN;
-}
-
-TTYU_INLINE int ttyu_unix_which(int key) {
-  #define XXWHICH(which, k, shift) if (k == key) {                             \
-    return which;                                                              \
-  }
-  TTYU_UNIX_KW(XXWHICH);
-  return WHICH_UNKNOWN;
-}
-
-void ttyu_pi_init(ttyu_pi_t *pi) {
-  pi->win = initscr();
-  pi->mode = MODE_VT100;
-  noecho();
-  cbreak();
-  keypad(pi->win, TRUE);
-  mousemask(ALL_MOUSE_EVENTS | REPORT_MOUSE_POSITION, &pi->old_mmask);
-  mouseinterval(0);
-  nodelay(pi->win, TRUE);
-}
-
-void ttyu_pi_destroy(ttyu_pi_t *pi) {
-  echo();
-  endwin();
-}
-

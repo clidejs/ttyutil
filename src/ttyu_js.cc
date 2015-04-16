@@ -26,11 +26,13 @@
 ttyu_js_c::ttyu_js_c() {
   running = FALSE;
   stop = TRUE;
+  ee_init(&emitter, ttyu_ee_cb_call, ttyu_ee_compare);
 }
 
 ttyu_js_c::~ttyu_js_c() {
   running = FALSE;
   stop = TRUE;
+  ee_destroy(&emitter);
 }
 
 TTYU_INLINE NAN_METHOD(ttyu_js_c::js_new) {
@@ -44,7 +46,6 @@ TTYU_INLINE NAN_METHOD(ttyu_js_c::js_start) {
   NanScope();
   ttyu_js_c *obj = ObjectWrap::Unwrap<ttyu_js_c>(args.This());
   ttyu_pi_init(&obj->pi);
-  DBG("asdf");
   obj->running = TRUE;
   obj->stop = FALSE;
   uv_barrier_init(&obj->barrier, 3);
@@ -52,12 +53,12 @@ TTYU_INLINE NAN_METHOD(ttyu_js_c::js_start) {
   uv_mutex_init(&obj->emit_mutex);
   uv_mutex_init(&obj->handler_mutex);
   uv_cond_init(&obj->cv);
-  DBG("started threads");
+  DBG("starting threads");
   uv_thread_create(&obj->emitter_thread, emitter_thread_func, obj);
   uv_thread_create(&obj->handler_thread, handler_thread_func, obj);
 
-  if(uv_barrier_wait(&obj->barrier) > 0)
-      uv_barrier_destroy(&obj->barrier);
+  if (uv_barrier_wait(&obj->barrier) > 0)
+    uv_barrier_destroy(&obj->barrier);
 
   NanReturnThis();
 }
@@ -73,7 +74,6 @@ TTYU_INLINE NAN_METHOD(ttyu_js_c::js_stop) {
   uv_mutex_destroy(&obj->emit_mutex);
   uv_mutex_destroy(&obj->handler_mutex);
   uv_cond_destroy(&obj->cv);
-  // TODO destroy obj->pi
   NanReturnThis();
 }
 
@@ -81,8 +81,8 @@ TTYU_INLINE NAN_METHOD(ttyu_js_c::js_on) {
   NanScope();
   ttyu_js_c *obj = ObjectWrap::Unwrap<ttyu_js_c>(args.This());
   uv_mutex_lock(&obj->emit_mutex);
-  ee_on(&obj->emitter, args[0]->Int32Value(),
-      new NanCallback(v8::Local<v8::Function>::Cast(args[1])));
+  // ee_on(&obj->emitter, args[0]->Int32Value(),
+  //    new NanCallback(v8::Local<v8::Function>::Cast(args[1])));
   uv_mutex_unlock(&obj->emit_mutex);
   NanReturnThis();
 }
@@ -91,8 +91,8 @@ TTYU_INLINE NAN_METHOD(ttyu_js_c::js_off) {
   NanScope();
   ttyu_js_c *obj = ObjectWrap::Unwrap<ttyu_js_c>(args.This());
   uv_mutex_lock(&obj->emit_mutex);
-  ee_off(&obj->emitter, args[0]->Int32Value(),
-      new NanCallback(v8::Local<v8::Function>::Cast(args[1])));
+  // ee_off(&obj->emitter, args[0]->Int32Value(),
+  //    new NanCallback(v8::Local<v8::Function>::Cast(args[1])));
   uv_mutex_unlock(&obj->emit_mutex);
   NanReturnThis();
 }
@@ -118,8 +118,8 @@ TTYU_INLINE NAN_METHOD(ttyu_js_c::js_running) {
 
 TTYU_INLINE NAN_METHOD(ttyu_js_c::js_write) {
   NanScope();
-  //ttyu_js_c *obj = ObjectWrap::Unwrap<ttyu_js_c>(args.This());
-  // TODO
+  // ttyu_js_c *obj = ObjectWrap::Unwrap<ttyu_js_c>(args.This());
+  // TODO(@bbuecherl)
   printf("%s\r\n",
       (new v8::String::Utf8Value(args[0]->ToString()))->operator*());
   NanReturnThis();

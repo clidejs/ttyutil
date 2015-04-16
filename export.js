@@ -3,7 +3,7 @@ var signal = require("./signal");
 
 module.exports = function(ttyu_js_c) {
     var ttyu = new ttyu_js_c();
-    var off;
+
     var ttyutil = {
         start: function() {
             ttyu.start();
@@ -15,9 +15,9 @@ module.exports = function(ttyu_js_c) {
             ttyu.write.apply(ttyu, arguments);
         },
         on: function(ev, listener) {
-            /*if(ev === ttyu.EVENT.SIGNAL) {
+            if(ev === ttyutil.EVENT.SIGNAL) {
                 signal.on(ttyu, ttyu, listener);
-            } else*/ if(ev in Const.Event && listener instanceof Function) {
+            } else if(ev in Const.Event && listener instanceof Function) {
                 ttyu.on(Const.Event[ev], listener);
             }
             return ttyutil;
@@ -25,9 +25,9 @@ module.exports = function(ttyu_js_c) {
         removeListener: off,
         emit:function(ev) {
             switch(ev.type) {
-                /*case ttyu.EVENT.SIGNAL:
+                case ttyutil.EVENT.SIGNAL:
                     signal.emit(ev.signal);
-                    break;*/
+                    break;
                 case ttyutil.EVENT.KEY:
                     ttyu.emit(Const.Event[ev.type], ev.which, ev.ctrl);
                     break;
@@ -46,10 +46,10 @@ module.exports = function(ttyu_js_c) {
         },
     }
 
-    off = function(ev, listener) {
-        /*if(ev === ttyu.EVENT.SIGNAL) {
+    function off(ev, listener) {
+        if(ev === ttyutil.EVENT.SIGNAL) {
             signal.off(ttyu, listener);
-        } else*/ if(ev in Const.Event && listener instanceof Function) {
+        } else if(ev in Const.Event && listener instanceof Function) {
             ttyu.off(Const.Event[ev], listener);
         }
         return ttyutil;

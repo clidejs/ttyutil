@@ -21,12 +21,10 @@
  * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
  * IN THE SOFTWARE.
  */
-#ifndef TTYU_H_
-#define TTYU_H_
+#ifndef INCLUDE_TTYU_H_
+#define INCLUDE_TTYU_H_
 
 #include <stdio.h>
-#include <vector>
-//include <chrono>
 
 #include <uv.h>
 #include <node.h>
@@ -41,6 +39,8 @@
 #define EE_CB_ARG(name) NanCallback *name
 #include <ee.h>
 
+#include <vector>
+
 // define TRUE & FALSE
 #ifndef TRUE
 # define TRUE 1
@@ -54,9 +54,9 @@
 #define EMIT_INTERVAL 20
 
 // callback call function for the event emitter
-TTYU_INLINE int ttyu_ee_cb_call(ee__listener_t *l, EE_DATA_ARG(data));
+int ttyu_ee_cb_call(ee__listener_t *l, EE_DATA_ARG(data));
 // callback compare function for the event emitter
-TTYU_INLINE int ttyu_ee_compare(EE_CB_ARG(cb1), EE_CB_ARG(cb2));
+int ttyu_ee_compare(EE_CB_ARG(cb1), EE_CB_ARG(cb2));
 
 class ttyu_js_c;
 
@@ -113,8 +113,8 @@ void event_generate(ttyu_js_c *data, ttyu_event_t *event, int arg0, int arg1,
     int arg2, int arg3, int arg4);
 
 class ttyu_js_c : public node::ObjectWrap {
-public:
-  explicit ttyu_js_c();
+ public:
+  ttyu_js_c();
   ~ttyu_js_c();
 
   TTYU_INLINE static void init(v8::Handle<v8::Object> exports,
@@ -160,4 +160,4 @@ TTYU_INLINE NAN_METHOD(js_clear);
 TTYU_INLINE NAN_METHOD(js_prepare);
 */
 
-#endif // TTYU_H_
+#endif  // INCLUDE_TTYU_H_

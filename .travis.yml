@@ -9,5 +9,7 @@ node_js:
   - "iojs-v1.6.4"
 install:
   - npm install
+  - curl -G -v http://google-styleguide.googlecode.com/svn/trunk/cpplint/cpplint.py -o cpplint.py
 script:
+  - npm run-script lint
   - npm test

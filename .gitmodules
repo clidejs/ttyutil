@@ -1,0 +1,3 @@
+[submodule "deps/ee.c"]
+	path = deps/ee.c
+	url = https://github.com/bbuecherl/ee.c.git

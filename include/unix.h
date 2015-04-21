@@ -22,19 +22,12 @@
  * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
  * IN THE SOFTWARE.
  */
-#ifndef TTYU_UNIX_H_
-#define TTYU_UNIX_H_
+#ifndef INCLUDE_UNIX_H_
+#define INCLUDE_UNIX_H_
 
 #define NCURSES_OPAQUE FALSE
 #include <curses.h>
-#include <queue>
-
-#define ERROR_UNIX_UNDEF "unknown error occured while reading input"
-#define ERROR_UNIX_MOUSEBAD "skipping unreadable mouse event"
-#define ERROR_UNIX_MOUSEUNCAUGHT "skipping unknown mouse event"
-
-#define TTYU_EXIT 2
-#define TTYU_UNKNOWN 1
+#include <vector>
 
 #define TTYU_UNIX_KW(XX)                                                       \
   XX(WHICH_DOWN, KEY_DOWN, FALSE);                                             \
@@ -103,78 +96,27 @@
                                                                                \
   XX(WHICH_SHIFT, 0, TRUE)
 
-// thread save queue
-template<class T> struct ttyu_queue_data_s;
-template<class T> class ttyu_queue_c {
-public:
-  ttyu_queue_c() : size_(0) {
-    uv_mutex_init(&mutex_);
-  }
+TTYU_INLINE int ttyu_unix_which(int c);
+TTYU_INLINE int ttyu_unix_key(int which);
 
-  virtual ~ttyu_queue_c() {
-    uv_mutex_destroy(&mutex_);
-  }
+#define PLATFORM_DEPENDENT_FIELDS                                              \
+  static void handle(uv_work_t *req);                                          \
+  static void complete(uv_work_t *req);                                        \
+  static void curses_thread_func(void *that);                                  \
+  static int curses_threaded_func(WINDOW *win, void *that);                    \
+                                                                               \
+  uv_thread_t curses_thread;                                                   \
+  WINDOW *win;                                                                 \
+  uv_barrier_t barrier;                                                        \
+  uv_mutex_t emitlock;                                                         \
+  uv_mutex_t ungetlock;                                                        \
+  int mode;                                                                    \
+  std::vector<ttyu_event_t *> unget_stack;                                     \
+  std::vector<ttyu_event_t *> emit_stack
 
-  void push(T val) {
-    DBG("push has started");
-    uv_mutex_lock(&mutex_);
-    queue_.push(&val);
-    uv_mutex_unlock(&mutex_);
-    DBG("push has finished");
-  }
+typedef struct ttyu_work_s {
+  ttyu_event_t *event;
+  ttyu_js_c *data;
+} ttyu_work_t;
 
-  T *pop() {
-    DBG("pop acquiring rdlock");
-    uv_mutex_lock(&mutex_);
-    DBG("pop acquired rdlock");
-    T *front = queue_.front();
-    queue_.pop();
-    uv_mutex_unlock(&mutex_);
-    DBG("pop released rdlock");
-    return front;
-  }
-
-  int size() {
-    DBG("size has sarted");
-    if(uv_mutex_trylock(&mutex_) == 0) {
-    DBG("size acquired rdlock");
-      size_ = queue_.size();
-      uv_mutex_unlock(&mutex_);
-    DBG("size released rdlock");
-    }
-    return size_;
-  }
-
-  bool empty() {
-    DBG("empty has sarted");
-    if(uv_mutex_trylock(&mutex_) == 0) {
-    DBG("empty acquired rdlock");
-      size_ = queue_.size();
-      uv_mutex_unlock(&mutex_);
-    DBG("empty released rdlock");
-    }
-    return (size_ == 0);
-  }
-
-private:
-  std::queue<T *> queue_;
-  uv_mutex_t mutex_;
-  int size_;
-};
-
-// unixy data structure
-struct ttyu_data_s {
-  WINDOW *win;
-  mmask_t old_mouse_mask;
-  int mode;
-  bool closing;
-
-  ttyu_queue_c<int> ungetch_stack;
-  ttyu_queue_c<MEVENT> ungetmouse_stack;
-};
-
-void ttyu_unix_clrscr(ttyu_data_t *data, int x, int y, int width, int height);
-int ttyu_unix_key(int which);
-int ttyu_unix_which(int key);
-
-#endif // TTYU_UNIX_H_
+#endif  // INCLUDE_UNIX_H_

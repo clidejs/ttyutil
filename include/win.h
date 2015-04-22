@@ -27,6 +27,8 @@
 
 #include <windows.h>
 
+#define WIN_BUFFER_SIZE 128
+
 #define PLATFORM_DEPENDENT_FIELDS                                              \
   HANDLE hin;                                                                  \
   HANDLE hout;                                                                 \
@@ -36,26 +38,26 @@
   ttyu_worker_c worker
 
 class ttyu_worker_c : public NanAsyncWorker {
-public:
+ public:
   class ttyu_progress_c {
     friend class ttyu_worker_c;
-  public:
+   public:
     void send(const ttyu_event_t *event) const {
         that_->send_(event);
     }
-  private:
+   private:
     explicit ttyu_progress_c(ttyu_worker_c *that) : that_(that) {}
     // prevent movement
     ttyu_progress_c(const ttyu_progress_c&);
     void operator=(const ttyu_progress_c&);
 #if __cplusplus >= 201103L
-    ttyu_progress_c(const ttyu_progress_c&&) V8_DELETE;
-    void operator=(const ttyu_progress_c&&) V8_DELETE;
+    ttyu_progress_c(const ttyu_progress_c&&) V8_DELETE;  // NOLINT(build/c++11)
+    void operator=(const ttyu_progress_c&&) V8_DELETE;  // NOLINT(build/c++11)
 #endif
     ttyu_worker_c *const that_;
   };
 
-  ttyu_worker_c(ttyu_js_c *obj) : NanAsyncWorker(NULL),
+  explicit ttyu_worker_c(ttyu_js_c *obj) : NanAsyncWorker(NULL),
       asyncdata_(NULL), obj_(obj) {
     async = new uv_async_t;
     async_lock = new uv_mutex_t;
@@ -69,7 +71,18 @@ public:
     free(asyncdata_);
   }
 
-  void progress();
+  void progress() {
+    uv_mutex_lock(async_lock);
+    ttyu_event_t *event = asyncdata_;
+    asyncdata_ = NULL;
+    uv_mutex_unlock(async_lock);
+
+    if (event) {
+      handle(event);
+    }
+    ttyu_event_destroy(event);
+    free(event);
+  }
 
   bool execute(const ttyu_progress_c& progress, ttyu_js_c *obj);
   void handle(ttyu_event_t *event);
@@ -82,15 +95,17 @@ public:
     ttyu_progress_c progress(this);
     uv_barrier_wait(&obj_->barrier);
     // loop execute until it returns false (error)
-    while(execute(progress, obj_));
+    while (execute(progress, obj_)) continue;
   }
 
   void WorkComplete() {
     // do nothing
   }
-private:
+
+ private:
   void send_(const ttyu_event_t *event) {
-    ttyu_event_t *new_event = (ttyu_event_t *)malloc(sizeof(event));
+    ttyu_event_t *new_event =
+        reinterpret_cast<ttyu_event_t *>(malloc(sizeof(event)));
     memcpy(&new_event, &event, sizeof(event));
     uv_mutex_lock(async_lock);
     ttyu_event_t *old_event = asyncdata_;
@@ -118,5 +133,9 @@ private:
   ttyu_event_t *asyncdata_;
   ttyu_js_c *obj_;
 }
+
+int ttyu_win_which(DWORD code);
+int ttyu_win_ctrl(DWORD state);
+DWORD ttyu_win_state(int ctrl);
 
 #endif  // INCLUDE_WIN_H_

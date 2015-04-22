@@ -54,6 +54,7 @@ NAN_METHOD(ttyu_js_c::js_start) {
   uv_thread_create(&obj->curses_thread, ttyu_js_c::curses_thread_func, obj);
 
   NAUV_BARRIER_WAIT(&obj->barrier, TRUE);
+  obj->check_queue();
 
   NanReturnThis();
 }
@@ -141,14 +142,27 @@ NAN_METHOD(ttyu_js_c::js_write) {
   NanReturnThis();
 }
 
-void ttyu_js_c::handle(uv_work_t *req) {
-  DBG("handle");
+void ttyu_js_c::check_queue() {
+  if (running && !stop) {
+    uv_work_t work;
+    work.data = this;
+    uv_queue_work(uv_default_loop(), &work, wait, (uv_after_work_cb)complete);
+  }
+}
+
+void ttyu_js_c::wait(uv_work_t *req) {
+  ttyu_js_c *obj = reinterpret_cast<ttyu_js_c *>(req->data);
+  uv_mutex_lock(&obj->emitstacklock);
+  while (obj->emit_stack.size() == 0) {
+    uv_cond_wait(&obj->condition, &obj->emitstacklock);
+  }
+  uv_mutex_unlock(&obj->emitstacklock);
 }
 
 void ttyu_js_c::complete(uv_work_t *req) {
   NanScope();
   DBG("completed");
-  ttyu_work_t *work = static_cast<ttyu_work_t *>(req->data);
+/*  ttyu_work_t *work = static_cast<ttyu_work_t *>(req->data);
   if (ee_count(&work->data->emitter, work->event->type) == 0 ||
       work->event->type == EVENT_NONE) {
     return;
@@ -204,7 +218,7 @@ void ttyu_js_c::complete(uv_work_t *req) {
 
   uv_mutex_lock(&work->data->emitlock);
   ee_emit(&work->data->emitter, work->event->type, obj);
-  uv_mutex_unlock(&work->data->emitlock);
+  uv_mutex_unlock(&work->data->emitlock);*/
 }
 
 int ttyu_js_c::curses_threaded_func(WINDOW *win, void *that) {
@@ -217,7 +231,7 @@ int ttyu_js_c::curses_threaded_func(WINDOW *win, void *that) {
   if (c == ERR) {
     uv_mutex_lock(&obj->ungetlock);
     if (obj->unget_stack.size() > 0) {
-      // TODO(@bbuecherl) work on the stack
+      // TODO(@bbuecherl) work on unget stack
       uv_mutex_unlock(&obj->ungetlock);
     } else {
       uv_mutex_unlock(&obj->ungetlock);
@@ -318,14 +332,9 @@ int ttyu_js_c::curses_threaded_func(WINDOW *win, void *that) {
   }
 
   if (event.type != EVENT_NONE) {
-    /*
-    uv_work_t work;
-    ttyu_work_t w;
-    w.event = &event;
-    w.data = obj;
-    work.data = &w;
-    uv_queue_work(uv_default_loop(), &work, handle, (uv_after_work_cb)complete);
-    */
+    uv_mutex_lock(&obj->emitstacklock);
+    obj->emit_stack.push_back(&event);
+    uv_mutex_unlock(&obj->emitstacklock);
   }
   return 0;
 }

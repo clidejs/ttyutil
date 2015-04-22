@@ -100,7 +100,8 @@ TTYU_INLINE int ttyu_unix_which(int c);
 TTYU_INLINE int ttyu_unix_key(int which);
 
 #define PLATFORM_DEPENDENT_FIELDS                                              \
-  static void handle(uv_work_t *req);                                          \
+  void check_queue();                                                          \
+  static void wait(uv_work_t *req);                                            \
   static void complete(uv_work_t *req);                                        \
   static void curses_thread_func(void *that);                                  \
   static int curses_threaded_func(WINDOW *win, void *that);                    \
@@ -109,14 +110,11 @@ TTYU_INLINE int ttyu_unix_key(int which);
   WINDOW *win;                                                                 \
   uv_barrier_t barrier;                                                        \
   uv_mutex_t emitlock;                                                         \
+  uv_mutex_t emitstacklock;                                                    \
   uv_mutex_t ungetlock;                                                        \
+  uv_cond_t condition;                                                         \
   int mode;                                                                    \
   std::vector<ttyu_event_t *> unget_stack;                                     \
   std::vector<ttyu_event_t *> emit_stack
-
-typedef struct ttyu_work_s {
-  ttyu_event_t *event;
-  ttyu_js_c *data;
-} ttyu_work_t;
 
 #endif  // INCLUDE_UNIX_H_

@@ -93,7 +93,7 @@ class ttyu_worker_c : public NanAsyncWorker {
 
   void Execute() {
     ttyu_progress_c progress(this);
-    uv_barrier_wait(&obj_->barrier);
+    nauv_barrier_kill(&obj_->barrier, FALSE);
     // loop execute until it returns false (error)
     while (execute(progress, obj_)) continue;
   }
@@ -132,7 +132,7 @@ class ttyu_worker_c : public NanAsyncWorker {
   uv_mutex_t *async_lock;
   ttyu_event_t *asyncdata_;
   ttyu_js_c *obj_;
-}
+};
 
 int ttyu_win_which(DWORD code);
 int ttyu_win_ctrl(DWORD state);

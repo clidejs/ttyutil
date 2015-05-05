@@ -26,7 +26,7 @@
   },
   "homepage": "https://github.com/clidejs/ttyutil",
   "dependencies": {
-    "nan": "1.7.0"
+    "nan": "1.8.4"
   },
   "devDependencies": {
     "node-gyp": "1.0.2",

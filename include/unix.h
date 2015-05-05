@@ -99,10 +99,21 @@
 TTYU_INLINE int ttyu_unix_which(int c);
 TTYU_INLINE int ttyu_unix_key(int which);
 
+class emit_worker_c : public NanAsyncWorker {
+ public:
+  emit_worker_c(ttyu_js_c *obj) : NanAsyncWorker(NULL), obj(obj) { }
+  ~emit_worker_c() { }
+
+  void Execute();
+  void HandleOKCallback();
+
+ private:
+  ttyu_js_c *obj;
+  std::vector<ttyu_event_t *> emit_stack;
+};
+
 #define PLATFORM_DEPENDENT_FIELDS                                              \
   void check_queue();                                                          \
-  static void wait(uv_work_t *req);                                            \
-  static void complete(uv_work_t *req);                                        \
   static void curses_thread_func(void *that);                                  \
   static int curses_threaded_func(WINDOW *win, void *that);                    \
                                                                                \

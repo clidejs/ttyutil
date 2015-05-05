@@ -84,11 +84,60 @@ TTYU_INLINE int util_max(int a, int b);
 TTYU_INLINE int util_min(int a, int b);
 TTYU_INLINE int util_abs(int a);
 
+// DEBUGGING
 #ifdef DEBUG
-# include <iostream>
-# define DBG(msg) std::cout << msg << "\r\n"
-#else
-# define DBG(msg)  // empty
-#endif
+#include <iostream>
+#include <fstream>
+#include <string>
+#define THREAD_NUM 4
+#define COL_SIZE 25
+TTYU_INLINE void _DBG(const std::string &text, int thread) {
+  std::ofstream log_file;
+  log_file.open("debug.log", std::ios_base::app);
+  log_file << "|";
+  int x = COL_SIZE * thread;
+
+  while (x-- > 0) {
+    log_file << " ";
+    if (x%COL_SIZE == 0) {
+      log_file << "|";
+    }
+  }
+
+  log_file << text;
+
+  int tlen = text.length();
+  x = COL_SIZE * (THREAD_NUM - thread) - tlen;
+  while (x-- > 0) {
+    log_file << " ";
+    if (x%COL_SIZE == 0) {
+      log_file << "|";
+    }
+  }
+  log_file << std::endl;
+  log_file.close();
+}
+
+TTYU_INLINE void _DBGHEAD() {
+  std::ofstream log_file;
+  log_file.open("debug.log", std::ios_base::app);
+  log_file << "+-------------------------+-------------------------+----------"
+      << "---------------+-------------------------+" << std::endl;
+  log_file << "|                                            ttyutil debug.log "
+      << "                                         |" << std::endl;
+  log_file << "+-------------------------+-------------------------+----------"
+      << "---------------+-------------------------+" << std::endl;
+  log_file << "|       main thread       |      libuv thread       |      curs"
+      << "es thread      |         emit loop       |" << std::endl;
+  log_file << "+-------------------------+-------------------------+----------"
+      << "---------------+-------------------------+" << std::endl;
+  log_file.close();
+}
+#define DBG(msg, thread) _DBG(msg, thread);
+#define DBGHEAD() _DBGHEAD();
+#else  // DEBUG
+#define DBG(msg, thread) // undef
+#define DBGHEAD()  // undef
+#endif  // DEBUG
 
 #endif  // INCLUDE_UTILS_H_

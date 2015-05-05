@@ -27,7 +27,6 @@
 #include <stdio.h>
 
 #include <nan.h>
-#include <nauv.h>
 #include <generated.h>
 #include <utils.h>
 

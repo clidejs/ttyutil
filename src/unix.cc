@@ -159,11 +159,11 @@ NAN_METHOD(ttyu_js_c::js_write) {
 void ttyu_js_c::check_queue() {
   DBG("::check_queue()", 0);
   if (running && !stop) {
-    NanAsyncQueueWorker(new emit_worker_c(this));
+    NanAsyncQueueWorker(new ttyu_worker_c(this));
   }
 }
 
-void emit_worker_c::Execute() {
+void ttyu_worker_c::Execute() {
   DBG("::Execute()", 3);
   uv_mutex_lock(&obj->emitstacklock);
   {
@@ -181,16 +181,16 @@ void emit_worker_c::Execute() {
   DBG("  finished wait", 3);
 }
 
-void emit_worker_c::HandleOKCallback() {
+void ttyu_worker_c::HandleOKCallback() {
   DBG("::HandleOKCallback()", 3);
   NanScope();
-  for(std::vector<ttyu_event_t *>::iterator it = emit_stack.begin();
+  for (std::vector<ttyu_event_t *>::iterator it = emit_stack.begin();
       it != emit_stack.end(); ++it) {
     ttyu_event_t *event = *it;
 
 /*    uv_mutex_lock(&obj->emitlock);
     {*/
-      if(ee_count(&obj->emitter, event->type) == 0 ||
+      if (ee_count(&obj->emitter, event->type) == 0 ||
           event->type == EVENT_NONE) {
         continue;  // fast skip
       }

@@ -23,8 +23,7 @@
  */
 #include <ttyu.h>
 
-ttyu_js_c::ttyu_js_c() : running(FALSE), stop(TRUE), mode(MODE_VT100) {
-  worker(this);
+ttyu_js_c::ttyu_js_c() : running(FALSE), stop(TRUE), worker(this), top(0) {
   ee_init(&emitter, ttyu_ee_cb_call, ttyu_ee_compare);
 }
 
@@ -43,7 +42,7 @@ NAN_METHOD(ttyu_js_c::js_start) {
   obj->hin = GetStdHandle(STD_INPUT_HANDLE);
   obj->hout = GetStdHandle(STD_OUTPUT_HANDLE);
 
-  if (INVALID_HANDLE_VALUE == data->hin || INVALID_HANDLE_VALUE == data->hout) {
+  if (INVALID_HANDLE_VALUE == obj->hin || INVALID_HANDLE_VALUE == obj->hout) {
     NanThrowError("invalid std handles");
   }
 
@@ -99,26 +98,26 @@ NAN_METHOD(ttyu_js_c::js_write) {
 
 
 bool ttyu_worker_c::execute(const ttyu_worker_c::ttyu_progress_c& progress,
-    ttyu_data_t *data) {
+    ttyu_js_c *obj) {
   DWORD readed;
   INPUT_RECORD ir[WIN_BUFFER_SIZE];
   DWORD i;
 
-  if (data->err->msg) {
+  if (obj->err->msg) {
     ttyu_event_t *event =
         reinterpret_cast<ttyu_event_t *>(malloc(sizeof(ttyu_event_t)));
-    ttyu_event_create_error(event, data->err->msg);
+    ttyu_event_create_error(event, obj->err->msg);
     progress.send(const_cast<const ttyu_event_t *>(event));
-    if (data->err->kill) {
+    if (obj->err->kill) {
       return FALSE;
     }
-    data->err->msg = NULL;
-    data->err->kill = FALSE;
+    obj->err->msg = NULL;
+    obj->err->kill = FALSE;
   }
 
-  ReadConsoleInput(data->hin, ir, WIN_BUFFER_SIZE, &readed);
+  ReadConsoleInput(obj->hin, ir, WIN_BUFFER_SIZE, &readed);
   // exit
-  if (data->closing) { return FALSE; }
+  if (obj->stop) { return FALSE; }
 
   for (i = 0; i < readed; ++i) {
     if (MOUSE_EVENT == ir[i].EventType) {
@@ -127,8 +126,8 @@ bool ttyu_worker_c::execute(const ttyu_worker_c::ttyu_progress_c& progress,
       ttyu_event_create_mouse(event, EVENT_ERROR,
           static_cast<int>(ir[i].Event.MouseEvent.dwButtonState),
           static_cast<int>(ir[i].Event.MouseEvent.dwMousePosition.X),
-          static_cast<int>(ir[i].Event.MouseEvent.dwMousePosition.Y) -
-          data->top, ttyu_win_ctrl(ir[i].Event.MouseEvent.dwControlKeyState));
+          static_cast<int>(ir[i].Event.MouseEvent.dwMousePosition.Y - obj->top),
+          ttyu_win_ctrl(ir[i].Event.MouseEvent.dwControlKeyState));
 
       if (ir[i].Event.MouseEvent.dwButtonState == 0 &&
           ir[i].Event.MouseEvent.dwEventFlags == 0) {
@@ -164,11 +163,11 @@ bool ttyu_worker_c::execute(const ttyu_worker_c::ttyu_progress_c& progress,
       ttyu_event_t *event =
           reinterpret_cast<ttyu_event_t *>(malloc(sizeof(ttyu_event_t)));
 
-      if (!ttyu_win_scr_update(data)) {
-        ttyu_event_create_error(event, data->err->msg);
-      } else {
+      //if (!ttyu_win_scr_update(obj)) {
+      //  ttyu_event_create_error(event, obj->err->msg);
+      //} else {
         ttyu_event_create_resize(event);
-      }
+      //}
       progress.send(const_cast<const ttyu_event_t *>(event));
     }
   }
@@ -229,6 +228,13 @@ void ttyu_worker_c::handle(ttyu_event_t *event) {
   uv_mutex_lock(&obj_->emitlock);
   ee_emit(&obj_->emitter, event->type, obj);
   uv_mutex_unlock(&obj_->emitlock);
+}
+
+void ttyu_worker_c::Execute() {
+  ttyu_progress_c progress(this);
+  uv_barrier_wait(&obj_->barrier);
+  // loop execute until it returns false (error)
+  while (execute(progress, obj_)) continue;
 }
 
 int ttyu_win_ctrl(DWORD state) {

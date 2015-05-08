@@ -86,11 +86,11 @@ TTYU_INLINE int util_abs(int a);
 
 // DEBUGGING
 #ifdef DEBUG
+#define THREAD_NUM 4
+#define COL_SIZE 25
 #include <iostream>
 #include <fstream>
 #include <string>
-#define THREAD_NUM 4
-#define COL_SIZE 25
 TTYU_INLINE void _DBG(const std::string &text, int thread) {
   std::ofstream log_file;
   log_file.open("debug.log", std::ios_base::app);
@@ -136,7 +136,7 @@ TTYU_INLINE void _DBGHEAD() {
 #define DBG(msg, thread) _DBG(msg, thread);
 #define DBGHEAD() _DBGHEAD();
 #else  // DEBUG
-#define DBG(msg, thread) // undef
+#define DBG(msg, thread)  // undef
 #define DBGHEAD()  // undef
 #endif  // DEBUG
 

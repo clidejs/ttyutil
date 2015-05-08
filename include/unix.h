@@ -99,10 +99,10 @@
 TTYU_INLINE int ttyu_unix_which(int c);
 TTYU_INLINE int ttyu_unix_key(int which);
 
-class emit_worker_c : public NanAsyncWorker {
+class ttyu_worker_c : public NanAsyncWorker {
  public:
-  emit_worker_c(ttyu_js_c *obj) : NanAsyncWorker(NULL), obj(obj) { }
-  ~emit_worker_c() { }
+  explicit ttyu_worker_c(ttyu_js_c *obj) : NanAsyncWorker(NULL), obj(obj) { }
+  ~ttyu_worker_c() { }
 
   void Execute();
   void HandleOKCallback();

@@ -49,6 +49,28 @@
 #define EVENT_NONE -1
 #define EMIT_INTERVAL 20
 
+// error types
+#define E_ALL 0
+#define E_WIN 1
+#define E_UNIX 2
+
+// error messages
+#define __ERRMSG(XX)                                                           \
+  XX(0x00, "critical unknown error (0x00)", E_ALL);                            \
+  XX(0x01, "invalid console handle value (0x01)", E_WIN);                      \
+  XX(0x02, "could not get console output buffer information (0x02)", E_WIN);   \
+  XX(0x03, "could not set console output buffer information (0x03)", E_WIN);   \
+  XX(0x04, "could not fill console output buffer (0x04)", E_WIN)
+
+template<typename T>
+TTYU_INLINE T _ERRMSG(int id) {
+  #define XX(i, name, platform) if (i == id) { return name; }
+  __ERRMSG(XX);
+  #undef XX
+  return "";
+}
+#define ERRMSG(id) _ERRMSG(id)
+
 // callback call function for the event emitter
 int ttyu_ee_cb_call(ee__listener_t *l, EE_DATA_ARG(data));
 // callback compare function for the event emitter

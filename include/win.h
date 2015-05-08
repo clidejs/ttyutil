@@ -29,14 +29,12 @@
 
 #define WIN_BUFFER_SIZE 128
 
-#define PLATFORM_DEPENDENT_FIELDS                                              \
-  HANDLE hin;                                                                  \
-  HANDLE hout;                                                                 \
-  DWORD old_mode;                                                              \
-  uv_mutex_t emitlock;                                                         \
-  uv_barrier_t barrier;                                                        \
-  ttyu_worker_c worker
+typedef struct ttyu_error_s {
+  char *msg;
+  bool kill;
+} ttyu_error_t;
 
+// worker class, heavily inspired by nan's NanAsyncProgressWorker
 class ttyu_worker_c : public NanAsyncWorker {
  public:
   class ttyu_progress_c {
@@ -91,12 +89,7 @@ class ttyu_worker_c : public NanAsyncWorker {
     uv_close(reinterpret_cast<uv_handle_t*>(async), async_close_);
   }
 
-  void Execute() {
-    ttyu_progress_c progress(this);
-    nauv_barrier_kill(&obj_->barrier, FALSE);
-    // loop execute until it returns false (error)
-    while (execute(progress, obj_)) continue;
-  }
+  void Execute();
 
   void WorkComplete() {
     // do nothing
@@ -127,12 +120,21 @@ class ttyu_worker_c : public NanAsyncWorker {
     delete worker;
   }
 
-
   uv_async_t *async;
   uv_mutex_t *async_lock;
   ttyu_event_t *asyncdata_;
   ttyu_js_c *obj_;
 };
+
+#define PLATFORM_DEPENDENT_FIELDS                                              \
+  HANDLE hin;                                                                  \
+  HANDLE hout;                                                                 \
+  DWORD old_mode;                                                              \
+  DWORD top;                                                                   \
+  uv_mutex_t emitlock;                                                         \
+  uv_barrier_t barrier;                                                        \
+  ttyu_error_t *err;                                                           \
+  ttyu_worker_c worker
 
 int ttyu_win_which(DWORD code);
 int ttyu_win_ctrl(DWORD state);

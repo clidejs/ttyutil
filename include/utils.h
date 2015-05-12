@@ -91,11 +91,11 @@ TTYU_INLINE int util_abs(int a);
 #include <iostream>
 #include <fstream>
 #include <string>
-TTYU_INLINE void _DBG(const std::string &text, int thread) {
+TTYU_INLINE void _DBG(const std::string &text, int thread) {  // NOLINT ???
   std::ofstream log_file;
   log_file.open("debug.log", std::ios_base::app);
   log_file << "|";
-  int x = COL_SIZE * thread;
+  size_t x = COL_SIZE * thread;
 
   while (x-- > 0) {
     log_file << " ";
@@ -106,7 +106,7 @@ TTYU_INLINE void _DBG(const std::string &text, int thread) {
 
   log_file << text;
 
-  int tlen = text.length();
+  size_t tlen = text.length();
   x = COL_SIZE * (THREAD_NUM - thread) - tlen;
   while (x-- > 0) {
     log_file << " ";

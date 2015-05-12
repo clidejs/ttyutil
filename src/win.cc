@@ -39,6 +39,10 @@ NAN_METHOD(ttyu_js_c::js_start) {
   obj->running = TRUE;
   obj->stop = FALSE;
 
+  DBG("::js_start()", 0);
+  uv_mutex_init(&obj->emitlock);
+  uv_barrier_init(&obj->barrier, 2);
+
   obj->hin = GetStdHandle(STD_INPUT_HANDLE);
   obj->hout = GetStdHandle(STD_OUTPUT_HANDLE);
 
@@ -52,6 +56,14 @@ NAN_METHOD(ttyu_js_c::js_start) {
       ~(ENABLE_QUICK_EDIT_MODE));
   SetConsoleMode(obj->hin, new_mode);
 
+  DBG("  async queue start", 0);
+  NanAsyncQueueWorker(&obj->worker);
+
+  DBG("  wait barrier", 0);
+  uv_barrier_wait(&obj->barrier);
+  DBG("  destroy barrier", 0);
+  uv_barrier_destroy(&obj->barrier);
+  DBG("  destroyed barrier", 0);
   NanReturnThis();
 }
 
@@ -88,36 +100,118 @@ NAN_METHOD(ttyu_js_c::js_off) {
 
 NAN_METHOD(ttyu_js_c::js_emit) {
   NanScope();
+  ttyu_js_c *obj = ObjectWrap::Unwrap<ttyu_js_c>(args.This());
+  if (obj->running) {
+    int ev = args[0]->Int32Value();
+    INPUT_RECORD in[1];
+    DWORD w;
+
+    in[0].EventType = 0;
+
+    switch (ev) {
+      case EVENT_KEY:
+        KEY_EVENT_RECORD kev;
+
+        kev.bKeyDown = TRUE;
+        kev.wVirtualKeyCode = (WORD)args[1]->Int32Value();
+        kev.dwControlKeyState = ttyu_win_state(args[2]->Int32Value());
+        kev.uChar.UnicodeChar = static_cast<WCHAR>(kev.wVirtualKeyCode);
+        kev.uChar.AsciiChar = static_cast<CHAR>(kev.wVirtualKeyCode);
+        kev.wRepeatCount = 1;
+        kev.wVirtualScanCode = MapVirtualKey(kev.wVirtualKeyCode,
+            MAPVK_VK_TO_VSC);
+
+        in[0].EventType = KEY_EVENT;
+        in[0].Event.KeyEvent = kev;
+        break;
+      case EVENT_RESIZE:
+        WINDOW_BUFFER_SIZE_RECORD wev;
+        COORD size;
+
+        size.X = args[1]->Int32Value();
+        size.Y = args[2]->Int32Value();
+
+        wev.dwSize = size;
+        in[0].EventType = WINDOW_BUFFER_SIZE_EVENT;
+        in[0].Event.WindowBufferSizeEvent = wev;
+        break;
+      case EVENT_MOUSEDOWN:
+      case EVENT_MOUSEUP:
+      case EVENT_MOUSEMOVE:
+      case EVENT_MOUSEWHEEL:
+      case EVENT_MOUSEHWHEEL:
+        MOUSE_EVENT_RECORD mev;
+        COORD pos;
+
+        in[0].EventType = MOUSE_EVENT;
+        pos.X = static_cast<int16_t>(args[2]->Int32Value());
+        pos.Y = static_cast<int16_t>(args[3]->Int32Value() + obj->top);
+        mev.dwControlKeyState = ttyu_win_state(args[4]->Int32Value());
+
+        if (ev == EVENT_MOUSEUP) {
+          mev.dwButtonState = args[1]->Int32Value();
+          mev.dwEventFlags = 0;
+        } else if (ev == EVENT_MOUSEDOWN) {
+          mev.dwButtonState = args[1]->Int32Value();
+          mev.dwEventFlags = 2;
+        } else if (ev == EVENT_MOUSEMOVE) {
+          mev.dwEventFlags = 1;
+        } else if (ev == EVENT_MOUSEWHEEL) {
+          mev.dwEventFlags = 4;
+        } else if (ev == EVENT_MOUSEHWHEEL) {
+          mev.dwEventFlags = 8;
+        } else {
+          // invalidate event
+          in[0].EventType = 0;
+        }
+
+        mev.dwMousePosition = pos;
+        in[0].Event.MouseEvent = mev;
+        break;
+      default:  // EVENT_ERROR, EVENT_SIGNAL
+        // do nothing
+        break;
+    }
+
+    if (in[0].EventType != 0) {
+      WriteConsoleInput(obj->hin, in, 1, &w);
+    }
+  }
   NanReturnThis();
 }
 
 NAN_METHOD(ttyu_js_c::js_write) {
   NanScope();
+  printf("%s\r\n",
+      (new v8::String::Utf8Value(args[0]->ToString()))->operator*());
   NanReturnThis();
 }
 
 
 bool ttyu_worker_c::execute(const ttyu_worker_c::ttyu_progress_c& progress,
     ttyu_js_c *obj) {
+  DBG("::execute()", 2);
   DWORD readed;
   INPUT_RECORD ir[WIN_BUFFER_SIZE];
   DWORD i;
-
-  if (obj->err->msg) {
+  DBG("  start", 2);
+  if (obj->err) {
     ttyu_event_t *event =
         reinterpret_cast<ttyu_event_t *>(malloc(sizeof(ttyu_event_t)));
     ttyu_event_create_error(event, obj->err->msg);
     progress.send(const_cast<const ttyu_event_t *>(event));
     if (obj->err->kill) {
+      DBG("  killed", 2);
       return FALSE;
     }
     obj->err->msg = NULL;
     obj->err->kill = FALSE;
   }
 
+  DBG("  read input", 2);
+
   ReadConsoleInput(obj->hin, ir, WIN_BUFFER_SIZE, &readed);
-  // exit
-  if (obj->stop) { return FALSE; }
+  if (obj->stop) { DBG("  exited", 2); return FALSE; }  // exit
 
   for (i = 0; i < readed; ++i) {
     if (MOUSE_EVENT == ir[i].EventType) {
@@ -163,19 +257,20 @@ bool ttyu_worker_c::execute(const ttyu_worker_c::ttyu_progress_c& progress,
       ttyu_event_t *event =
           reinterpret_cast<ttyu_event_t *>(malloc(sizeof(ttyu_event_t)));
 
-      //if (!ttyu_win_scr_update(obj)) {
-      //  ttyu_event_create_error(event, obj->err->msg);
-      //} else {
+     // if (!ttyu_win_scr_update(obj)) {
+     //   ttyu_event_create_error(event, obj->err->msg);
+     // } else {
         ttyu_event_create_resize(event);
-      //}
+     // }
       progress.send(const_cast<const ttyu_event_t *>(event));
     }
   }
-
+  DBG("  end", 2);
   return TRUE;
 }
 
 void ttyu_worker_c::handle(ttyu_event_t *event) {
+  DBG("::handle()", 1);
   if (ee_count(&obj_->emitter, event->type) == 0 || obj_->stop ||
       !obj_->running) {
     return;
@@ -231,8 +326,11 @@ void ttyu_worker_c::handle(ttyu_event_t *event) {
 }
 
 void ttyu_worker_c::Execute() {
+  DBG("::Execute()", 1);
   ttyu_progress_c progress(this);
+  DBG("  barrier wait", 1);
   uv_barrier_wait(&obj_->barrier);
+  DBG("  start execute loop", 1);
   // loop execute until it returns false (error)
   while (execute(progress, obj_)) continue;
 }

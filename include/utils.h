@@ -42,6 +42,9 @@
 #define EXPORT_GETSET(tpl, name, get, set)                                     \
   tpl->InstanceTemplate()->SetAccessor(NanNew<v8::String>(name), (get), (set))
 
+#define TTYU_TOSTRING(handle)                                                  \
+  (new v8::String::Utf8Value(handle->ToString()))->operator*()
+
 #if defined(__GNUC__) && !(defined(DEBUG) && DEBUG)
 # define TTYU_INLINE inline __attribute__((always_inline))
 #elif defined(_MSC_VER) && !(defined(DEBUG) && DEBUG)
@@ -85,12 +88,11 @@ TTYU_INLINE int util_min(int a, int b);
 TTYU_INLINE int util_abs(int a);
 
 // DEBUGGING
+#include <iostream>
+#include <fstream>
 #ifdef DEBUG
 #define THREAD_NUM 4
 #define COL_SIZE 25
-#include <iostream>
-#include <fstream>
-#include <string>
 TTYU_INLINE void _DBG(const std::string &text, int thread) {  // NOLINT ???
   std::ofstream log_file;
   log_file.open("debug.log", std::ios_base::app);
@@ -136,8 +138,8 @@ TTYU_INLINE void _DBGHEAD() {
 #define DBG(msg, thread) _DBG(msg, thread);
 #define DBGHEAD() _DBGHEAD();
 #else  // DEBUG
-#define DBG(msg, thread)  // undef
-#define DBGHEAD()  // undef
+#define DBG(msg, thread)
+#define DBGHEAD()
 #endif  // DEBUG
 
 #endif  // INCLUDE_UTILS_H_

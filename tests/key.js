@@ -96,13 +96,10 @@ var unix_required = [
 
 var current = [];
 
-module.exports = function(TTYUtil, expect) {
+module.exports = function(ttyu, expect) {
     describe("TTYUtil `key` event handling", function() {
         describe(".which", function() {
-            var ttyu;
-
             before(function() {
-                ttyu = new TTYUtil();
                 ttyu.start();
             });
 
@@ -126,7 +123,7 @@ module.exports = function(TTYUtil, expect) {
                     ttyu.removeListener(TTYUtil.EVENT.KEY, el);
                 }
                 setTimeout(function() {
-                    ttyu.destroy();
+                    ttyu.stop();
                     done();
                 }, 100);
             });

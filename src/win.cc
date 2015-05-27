@@ -182,8 +182,7 @@ NAN_METHOD(ttyu_js_c::js_emit) {
 
 NAN_METHOD(ttyu_js_c::js_write) {
   NanScope();
-  printf("%s\r\n",
-      (new v8::String::Utf8Value(args[0]->ToString()))->operator*());
+  printf("%s", TTYU_TOSTRING(args[0]));
   NanReturnThis();
 }
 
@@ -257,11 +256,11 @@ bool ttyu_worker_c::execute(const ttyu_worker_c::ttyu_progress_c& progress,
       ttyu_event_t *event =
           reinterpret_cast<ttyu_event_t *>(malloc(sizeof(ttyu_event_t)));
 
-     // if (!ttyu_win_scr_update(obj)) {
-     //   ttyu_event_create_error(event, obj->err->msg);
-     // } else {
+      if (!ttyu_win_scr_update(obj, FALSE)) {
+        ttyu_event_create_error(event, obj->err->msg);
+      } else {
         ttyu_event_create_resize(event);
-     // }
+      }
       progress.send(const_cast<const ttyu_event_t *>(event));
     }
   }
@@ -333,6 +332,28 @@ void ttyu_worker_c::Execute() {
   DBG("  start execute loop", 1);
   // loop execute until it returns false (error)
   while (execute(progress, obj_)) continue;
+}
+
+bool ttyu_win_scr_update(ttyu_js_c *obj, bool initial) {
+  CONSOLE_SCREEN_BUFFER_INFO con_info;
+
+  if (!GetConsoleScreenBufferInfo(obj->hout, &con_info)) {
+    /*data->err->msg = ERRMSG(0x02);
+    return !(data->err->kill = TRUE);*/
+    return FALSE;
+  }
+
+  obj->top = con_info.srWindow.Top;
+  obj->width = con_info.dwSize.X;
+  obj->height = con_info.dwSize.Y - obj->top;
+
+  obj->curx = con_info.dwCursorPosition.X;
+  obj->cury = con_info.dwCursorPosition.Y - obj->top;
+
+  /*if(initial) {
+    data->base_color = (short)con_info.wAttributes;
+  } */
+  return TRUE;
 }
 
 int ttyu_win_ctrl(DWORD state) {

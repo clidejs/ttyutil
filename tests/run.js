@@ -1,13 +1,13 @@
-var TTYUtil = require("../export")(require("../build/Release/ttyu"));
+var ttyu = require("../export")(require("../build/Release/ttyu"));
 var expect = require("chai").expect;
 
 // test specs
-require("./spec")(TTYUtil, expect);
+// require("./spec")(ttyu, expect);
 
 // test input listeners
-require("./key")(TTYUtil, expect);
-require("./mouse")(TTYUtil, expect);
-//require("./signal")(TTYUtil, expect);
+require("./key")(ttyu, expect);
+//require("./mouse")(ttyu, expect);
+//require("./signal")(ttyu, expect);
 
 // test output functions
-//require("./output")(TTYUtil, expect);
+//require("./output")(ttyu, expect);

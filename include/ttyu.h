@@ -29,13 +29,14 @@
 #include <nan.h>
 #include <generated.h>
 #include <utils.h>
+#include <string>
 
 // predefine event data and callbacks for ee.c
 #define EE_DATA_TYPE v8::Local<v8::Value>
 #define EE_DATA_ARG(name) v8::Local<v8::Value> name
 #define EE_CB_TYPE NanCallback *
 #define EE_CB_ARG(name) NanCallback *name
-#include <ee.h>
+#include <ee.h>  // NOLINT
 
 // define TRUE & FALSE
 #ifndef TRUE
@@ -49,27 +50,31 @@
 #define EVENT_NONE -1
 #define EMIT_INTERVAL 20
 
-// error types
-#define E_ALL 0
-#define E_WIN 1
-#define E_UNIX 2
-
 // error messages
-#define __ERRMSG(XX)                                                           \
-  XX(0x00, "critical unknown error (0x00)", E_ALL);                            \
-  XX(0x01, "invalid console handle value (0x01)", E_WIN);                      \
-  XX(0x02, "could not get console output buffer information (0x02)", E_WIN);   \
-  XX(0x03, "could not set console output buffer information (0x03)", E_WIN);   \
-  XX(0x04, "could not fill console output buffer (0x04)", E_WIN)
+typedef struct ttyu_error_s {
+  int id;
+  const char *msg;
+} ttyu_error_t;
 
-template<typename T>
-TTYU_INLINE T _ERRMSG(int id) {
-  #define XX(i, name, platform) if (i == id) { return name; }
+#define __ERRMSG(XX)                                                           \
+  XX(0x00, "critical unknown error");                                          \
+  XX(0x01, "invalid console handle value");                                    \
+  XX(0x02, "could not get console output buffer information");                 \
+  XX(0x03, "could not set console output buffer information");                 \
+  XX(0x04, "could not fill console output buffer")
+
+TTYU_INLINE ttyu_error_t _ERRMSG(int id) {
+  ttyu_error_t err;
+  err.id = id;
+  #define XX(i, name) if (i == id) {                                           \
+    err.msg = name;                                                            \
+    return err;                                                                \
+  }
   __ERRMSG(XX);
   #undef XX
-  return "";
+  return _ERRMSG(0);
 }
-#define ERRMSG(id) _ERRMSG(id)
+#define ERRMSG(id) &_ERRMSG(id)
 
 // callback call function for the event emitter
 int ttyu_ee_cb_call(ee__listener_t *l, EE_DATA_ARG(data));
@@ -93,11 +98,10 @@ typedef struct ttyu_mouse_s {
 // event data structure
 typedef struct ttyu_event_s {
   int type;
-  const char *err;
   ttyu_key_t *key;
   ttyu_mouse_t *mouse;
 } ttyu_event_t;
-void ttyu_event_create_error(ttyu_event_t *event, const char *err);
+void ttyu_event_create_error(ttyu_event_t *event);
 void ttyu_event_create_resize(ttyu_event_t *event);
 void ttyu_event_create_key(ttyu_event_t *event, int ctrl, char *c, int code,
     int which);
@@ -132,6 +136,7 @@ class ttyu_js_c : public node::ObjectWrap {
 
   static NAN_METHOD(js_write);
 
+  ttyu_error_t *err;
   bool running;
   bool stop;
   ee_emitter_t emitter;

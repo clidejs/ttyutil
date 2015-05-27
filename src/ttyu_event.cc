@@ -23,16 +23,14 @@
  */
 #include <ttyu.h>
 
-void ttyu_event_create_error(ttyu_event_t *event, const char *err) {
+void ttyu_event_create_error(ttyu_event_t *event) {
   event->type = EVENT_ERROR;
-  event->err = err;
   event->key = NULL;
   event->mouse = NULL;
 }
 
 void ttyu_event_create_resize(ttyu_event_t *event) {
   event->type = EVENT_RESIZE;
-  event->err = NULL;
   event->key = NULL;
   event->mouse = NULL;
 }
@@ -45,7 +43,6 @@ void ttyu_event_create_key(ttyu_event_t *event, int ctrl, char *c,
   ch[strlen(c)] = '\0';
 
   event->type = EVENT_KEY;
-  event->err = NULL;
   event->key = reinterpret_cast<ttyu_key_t *>(std::malloc(sizeof(ttyu_key_t)));
   event->mouse = NULL;
 
@@ -58,7 +55,6 @@ void ttyu_event_create_key(ttyu_event_t *event, int ctrl, char *c,
 void ttyu_event_create_mouse(ttyu_event_t *event, int type, int button, int x,
     int y, int ctrl) {
   event->type = type;
-  event->err = NULL;
   event->key = NULL;
   event->mouse =
       reinterpret_cast<ttyu_mouse_t *>(std::malloc(sizeof(ttyu_mouse_t)));

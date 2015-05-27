@@ -24,42 +24,34 @@
 #include <ttyu.h>
 
 ttyu_js_c::ttyu_js_c() : running(FALSE), stop(TRUE), mode(MODE_VT100) {
-  DBG("::ttyu_js_c()", 0);
   ee_init(&emitter, ttyu_ee_cb_call, ttyu_ee_compare);
 }
 
 ttyu_js_c::~ttyu_js_c() {
-  DBG("::~ttyu_js_c()", 0);
   running = FALSE;
   stop = TRUE;
   ee_destroy(&emitter);
 }
 
 NAN_METHOD(ttyu_js_c::js_start) {
-  DBG("::~start()", 0);
   NanScope();
   ttyu_js_c *obj = ObjectWrap::Unwrap<ttyu_js_c>(args.This());
   obj->running = TRUE;
   obj->stop = FALSE;
 
-  DBG("  init screen", 0);
   obj->win = initscr();
 
-  DBG("  init threads", 0);
   uv_barrier_init(&obj->barrier, 2);
   uv_mutex_init(&obj->emitlock);
   uv_mutex_init(&obj->emitstacklock);
   uv_mutex_init(&obj->ungetlock);
   uv_cond_init(&obj->condition);
 
-  DBG("  spawn threads", 0);
   uv_thread_create(&obj->curses_thread, ttyu_js_c::curses_thread_func, obj);
   obj->check_queue();
 
-  DBG("  barrier kill 1", 0);
   uv_barrier_wait(&obj->barrier);
   uv_barrier_destroy(&obj->barrier);
-  DBG("  barrier killed 1", 0);
   NanReturnThis();
 }
 
@@ -80,7 +72,6 @@ NAN_METHOD(ttyu_js_c::js_stop) {
 NAN_METHOD(ttyu_js_c::js_on) {
   NanScope();
   ttyu_js_c *obj = ObjectWrap::Unwrap<ttyu_js_c>(args.This());
-  DBG("on", 0);
   uv_mutex_lock(&obj->emitlock);
   {
     ee_on(&obj->emitter, args[0]->Int32Value(),
@@ -153,23 +144,22 @@ NAN_METHOD(ttyu_js_c::js_emit) {
 
 NAN_METHOD(ttyu_js_c::js_write) {
   NanScope();
+  printf("%s", TTYU_TOSTRING(args[0]));
+  refresh();
   NanReturnThis();
 }
 
 void ttyu_js_c::check_queue() {
-  DBG("::check_queue()", 0);
   if (running && !stop) {
     NanAsyncQueueWorker(new ttyu_worker_c(this));
   }
 }
 
 void ttyu_worker_c::Execute() {
-  DBG("::Execute()", 3);
   uv_mutex_lock(&obj->emitstacklock);
   {
     while (obj->emit_stack.size() == 0) {
       uv_cond_wait(&obj->condition, &obj->emitstacklock);
-      DBG("  signaled condition", 3);
     }
 
     // copy stack into emit_worker and clear stack
@@ -178,24 +168,18 @@ void ttyu_worker_c::Execute() {
     obj->emit_stack.clear();
   }
   uv_mutex_unlock(&obj->emitstacklock);
-  DBG("  finished wait", 3);
 }
 
 void ttyu_worker_c::HandleOKCallback() {
-  DBG("::HandleOKCallback()", 3);
   NanScope();
   for (std::vector<ttyu_event_t *>::iterator it = emit_stack.begin();
       it != emit_stack.end(); ++it) {
     ttyu_event_t *event = *it;
 
-/*    uv_mutex_lock(&obj->emitlock);
-    {*/
       if (ee_count(&obj->emitter, event->type) == 0 ||
           event->type == EVENT_NONE) {
         continue;  // fast skip
       }
-/*    }
-    uv_mutex_unlock(&obj->emitlock);*/
 
     v8::Local<v8::Object> jsobj = NanNew<v8::Object>();
     switch (event->type) {
@@ -240,26 +224,19 @@ void ttyu_worker_c::HandleOKCallback() {
         break;
       default:  // EVENT_ERROR, EVENT_SIGNAL
         jsobj->Set(NanNew<v8::String>("type"), EVENTSTRING_ERROR);
-        jsobj->Set(NanNew<v8::String>("error"), NanError(event->err));
+        jsobj->Set(NanNew<v8::String>("error"), NanError("..."));
         event->type = EVENT_ERROR;
         break;
     }
 
-    /*uv_mutex_lock(&obj->emitlock);
-    {*/
-      ee_emit(&obj->emitter, event->type, jsobj);
-    /*}
-    uv_mutex_unlock(&obj->emitlock);*/
+    ee_emit(&obj->emitter, event->type, jsobj);
   }
   obj->check_queue();
 }
 
 int ttyu_js_c::curses_threaded_func(WINDOW *win, void *that) {
-  DBG("::curses_threaded_func()", 2);
   ttyu_js_c *obj = static_cast<ttyu_js_c *>(that);
-  DBG("  wgetch", 2);
   int c = wgetch(win);
-  DBG("  wgetch finished", 2);
   MEVENT mev;
   ttyu_event_t event;
   event.type = EVENT_NONE;
@@ -368,26 +345,21 @@ int ttyu_js_c::curses_threaded_func(WINDOW *win, void *that) {
   }
 
   if (event.type != EVENT_NONE) {
-    DBG("  event catch", 2);
     uv_mutex_lock(&obj->emitstacklock);
     {
       obj->emit_stack.push_back(&event);
-      DBG("  signaling condition", 2);
+      std::ofstream _;  // why is this necessary???
       uv_cond_signal(&obj->condition);
-      DBG("  signaled condition", 2);
     }
     uv_mutex_unlock(&obj->emitstacklock);
   }
-  DBG("  event caught", 2);
   return 0;
 }
 
 void ttyu_js_c::curses_thread_func(void *that) {
-  DBG("::curses_thread_func()", 1);
   ttyu_js_c *obj = static_cast<ttyu_js_c *>(that);
   uv_barrier_wait(&obj->barrier);
 
-  DBG("  init screen", 1);
   noecho();
   cbreak();
   keypad(obj->win, TRUE);
@@ -399,7 +371,6 @@ void ttyu_js_c::curses_thread_func(void *that) {
     use_window(obj->win, curses_threaded_func, that);
     usleep(100);
   }
-  DBG("  end window", 1);
   endwin();
 }
 

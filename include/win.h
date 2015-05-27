@@ -29,11 +29,6 @@
 
 #define WIN_BUFFER_SIZE 128
 
-typedef struct ttyu_error_s {
-  char *msg;
-  bool kill;
-} ttyu_error_t;
-
 // worker class, heavily inspired by nan's NanAsyncProgressWorker
 class ttyu_worker_c : public NanAsyncWorker {
  public:
@@ -131,11 +126,16 @@ class ttyu_worker_c : public NanAsyncWorker {
   HANDLE hout;                                                                 \
   DWORD old_mode;                                                              \
   DWORD top;                                                                   \
+  DWORD width;                                                                 \
+  DWORD height;                                                                \
+  DWORD curx;                                                                  \
+  DWORD cury;                                                                  \
   uv_mutex_t emitlock;                                                         \
   uv_barrier_t barrier;                                                        \
   ttyu_error_t *err;                                                           \
   ttyu_worker_c worker
 
+bool ttyu_win_scr_update(ttyu_js_c *obj, bool initial);
 int ttyu_win_which(DWORD code);
 int ttyu_win_ctrl(DWORD state);
 DWORD ttyu_win_state(int ctrl);

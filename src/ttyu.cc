@@ -51,8 +51,6 @@ NAN_METHOD(ttyu_js_c::js_new) {
 // initialize node module
 void ttyu_js_c::init(v8::Handle<v8::Object> exports,
     v8::Handle<v8::Object> module) {
-  // DBG Header
-  DBGHEAD();
 
   v8::Local<v8::FunctionTemplate> tpl =
       NanNew<v8::FunctionTemplate>(js_new);

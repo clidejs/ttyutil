@@ -23,6 +23,7 @@ module.exports = function(ttyu_js_c) {
             return ttyutil;
         },
         removeListener: off,
+        off: off,
         emit:function(ev) {
             switch(ev.type) {
                 case ttyutil.EVENT.SIGNAL:

@@ -28,6 +28,7 @@
 #define NCURSES_OPAQUE FALSE
 #include <curses.h>
 #include <vector>
+#include <queue>
 
 #define TTYU_UNIX_KW(XX)                                                       \
   XX(WHICH_DOWN, KEY_DOWN, FALSE);                                             \
@@ -125,7 +126,7 @@ class ttyu_worker_c : public NanAsyncWorker {
   uv_mutex_t ungetlock;                                                        \
   uv_cond_t condition;                                                         \
   int mode;                                                                    \
-  std::vector<ttyu_event_t *> unget_stack;                                     \
+  std::queue<ttyu_event_t> unget_stack;                                        \
   std::vector<ttyu_event_t *> emit_stack
 
 #endif  // INCLUDE_UNIX_H_

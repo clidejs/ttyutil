@@ -106,26 +106,31 @@ module.exports = function(ttyu, expect) {
             it.each(which, "should recognize character #%s", ['element'],
                     function(element, next) {
                 this.timeout(100);
-                ttyu.on(TTYUtil.EVENT.KEY, createTest(element, next));
-                ttyu.emit(TTYUtil.KeyEvent(element, 0));
+                if(!(process.platform !== "win32" &&
+                        unix_required.indexOf(element) === -1)) {
+                    ttyu.on(ttyu.EVENT.KEY, createTest(element, next));
+                    ttyu.emit(ttyu.KeyEvent(element, 0));
+                } else {
+                    next();
+                }
             });
 
             afterEach(function() {
                 var el;
                 while((el = current.pop())) {
-                    ttyu.removeListener(TTYUtil.EVENT.KEY, el);
+                    ttyu.removeListener(ttyu.EVENT.KEY, el);
                 }
             })
 
             after(function(done) {
                 var el;
                 while((el = current.pop())) {
-                    ttyu.removeListener(TTYUtil.EVENT.KEY, el);
+                    ttyu.removeListener(ttyu.EVENT.KEY, el);
                 }
                 setTimeout(function() {
                     ttyu.stop();
                     done();
-                }, 100);
+                }, 1000);
             });
 
             function createTest(element, callback) {

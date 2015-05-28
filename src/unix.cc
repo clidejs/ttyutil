@@ -132,10 +132,10 @@ NAN_METHOD(ttyu_js_c::js_emit) {
       break;
   }
 
-  if (event.type == EVENT_NONE) {
+  if (event.type != EVENT_NONE) {
     uv_mutex_lock(&obj->ungetlock);
     {
-      obj->unget_stack.push_back(&event);
+      obj->unget_stack.push(event);
     }
     uv_mutex_unlock(&obj->ungetlock);
   }
@@ -236,6 +236,7 @@ void ttyu_worker_c::HandleOKCallback() {
 
 int ttyu_js_c::curses_threaded_func(WINDOW *win, void *that) {
   ttyu_js_c *obj = static_cast<ttyu_js_c *>(that);
+
   int c = wgetch(win);
   MEVENT mev;
   ttyu_event_t event;
@@ -243,16 +244,72 @@ int ttyu_js_c::curses_threaded_func(WINDOW *win, void *that) {
 
   if (c == ERR) {
     uv_mutex_lock(&obj->ungetlock);
-    if (obj->unget_stack.size() > 0) {
-      // TODO(@bbuecherl) work on unget stack
+    if (!obj->unget_stack.empty()) {
+      ttyu_event_t ev = obj->unget_stack.front();
+      obj->unget_stack.pop();
       uv_mutex_unlock(&obj->ungetlock);
+      switch(ev.type) {
+        case EVENT_KEY:
+          ungetch(ev.key->code);
+          break;
+        case EVENT_MOUSEUP:
+        case EVENT_MOUSEDOWN:
+        case EVENT_MOUSEMOVE:
+          mev.x = ev.mouse->x;
+          mev.y = ev.mouse->y;
+          mev.bstate = 0;
+
+          if (ev.mouse->ctrl & CTRL_ALT) { mev.bstate |= BUTTON_ALT; }
+          if (ev.mouse->ctrl & CTRL_CTRL) { mev.bstate |= BUTTON_CTRL; }
+          if (ev.mouse->ctrl & CTRL_SHIFT) { mev.bstate |= BUTTON_SHIFT; }
+
+          if (ev.type == EVENT_MOUSEMOVE) {
+            mev.bstate |= REPORT_MOUSE_POSITION;
+          } else if (ev.type == EVENT_MOUSEUP) {
+            if (ev.mouse->button == MOUSE_LEFT) {
+              mev.bstate |= BUTTON1_RELEASED;
+            } else if (ev.mouse->button == MOUSE_LEFT2) {
+              mev.bstate |= BUTTON2_RELEASED;
+            } else if (ev.mouse->button == MOUSE_LEFT3) {
+              mev.bstate |= BUTTON3_RELEASED;
+            } else if (ev.mouse->button == MOUSE_LEFT4) {
+              mev.bstate |= BUTTON4_RELEASED;
+            } else if (ev.mouse->button == MOUSE_RIGHT) {
+#if NCURSES_MOUSE_VERSION > 1
+              mev.bstate |= BUTTON5_RELEASED;
+#else
+              mev.bstate |= BUTTON4_RELEASED;
+#endif
+            }
+          } else if (ev.type == EVENT_MOUSEDOWN) {
+            if (ev.mouse->button == MOUSE_LEFT) {
+              mev.bstate |= BUTTON1_PRESSED;
+            } else if (ev.mouse->button == MOUSE_LEFT2) {
+              mev.bstate |= BUTTON2_PRESSED;
+            } else if (ev.mouse->button == MOUSE_LEFT3) {
+              mev.bstate |= BUTTON3_PRESSED;
+            } else if (ev.mouse->button == MOUSE_LEFT4) {
+              mev.bstate |= BUTTON4_PRESSED;
+            } else if (ev.mouse->button == MOUSE_RIGHT) {
+#if NCURSES_MOUSE_VERSION > 1
+              mev.bstate |= BUTTON5_PRESSED;
+#else
+              mev.bstate |= BUTTON4_PRESSED;
+#endif
+            }
+          }
+          ungetmouse(&mev);
+          break;
+        default:
+          // EVENT_NONE, EVENT_ERROR, EVENT_SIGNAL, EVENT_RESIZE,
+          // EVENT_MOUSEWHEEL, EVENT_MOUSEHWHEEL
+          break;
+      }
     } else {
       uv_mutex_unlock(&obj->ungetlock);
-      return 0;  // fast exit
     }
-  }
-
-  if (c == KEY_RESIZE) {
+    return 0;
+  } else if (c == KEY_RESIZE) {
     ttyu_event_create_resize(&event);
   } else if (c == KEY_MOUSE) {
     if (getmouse(&mev) == OK) {
@@ -364,8 +421,8 @@ void ttyu_js_c::curses_thread_func(void *that) {
   cbreak();
   keypad(obj->win, TRUE);
   mousemask(ALL_MOUSE_EVENTS | REPORT_MOUSE_POSITION, NULL);
-  nodelay(obj->win, 0);
-  mouseinterval(0);
+  nodelay(obj->win, TRUE);
+  mouseinterval(FALSE);
 
   while (obj->running && !obj->stop) {
     use_window(obj->win, curses_threaded_func, that);

@@ -120,7 +120,7 @@ module.exports = function(ttyu, expect) {
                 while((el = current.pop())) {
                     ttyu.removeListener(ttyu.EVENT.KEY, el);
                 }
-            })
+            });
 
             after(function(done) {
                 var el;

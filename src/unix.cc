@@ -60,7 +60,7 @@ NAN_METHOD(ttyu_js_c::js_stop) {
   ttyu_js_c *obj = ObjectWrap::Unwrap<ttyu_js_c>(args.This());
   obj->running = FALSE;
   obj->stop = TRUE;
-  endwin();
+  delwin(obj->win);
   uv_thread_join(&obj->curses_thread);
   uv_mutex_destroy(&obj->emitlock);
   uv_mutex_destroy(&obj->emitstacklock);

@@ -132,7 +132,7 @@ class ttyu_js_c : public node::ObjectWrap {
   static NAN_METHOD(js_on);
   static NAN_METHOD(js_off);
   static NAN_METHOD(js_emit);
-  // static NAN_METHOD(js_running);
+  static NAN_METHOD(js_running);
 
   static NAN_METHOD(js_write);
 

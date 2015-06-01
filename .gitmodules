@@ -1,3 +1,6 @@
 [submodule "deps/ee.c"]
 	path = deps/ee.c
 	url = git://github.com/clidejs/ee.c.git
+[submodule "deps/ncurses"]
+	path = deps/ncurses
+	url = git://ncurses.scripts.mit.edu/ncurses.git

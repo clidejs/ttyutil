@@ -42,10 +42,16 @@ int ttyu_ee_compare(EE_CB_ARG(cb1), EE_CB_ARG(cb2)) {
 }
 
 NAN_METHOD(ttyu_js_c::js_new) {
-    NanScope();
-    ttyu_js_c *obj = new ttyu_js_c();
-    obj->Wrap(args.This());
-    NanReturnThis();
+  NanScope();
+  ttyu_js_c *obj = new ttyu_js_c();
+  obj->Wrap(args.This());
+  NanReturnThis();
+}
+
+NAN_METHOD(ttyu_js_c::js_running) {
+  NanScope();
+  ttyu_js_c *obj = ObjectWrap::Unwrap<ttyu_js_c>(args.This());
+  NanReturnValue(obj->running);
 }
 
 // initialize node module
@@ -62,11 +68,10 @@ void ttyu_js_c::init(v8::Handle<v8::Object> exports,
   EXPORT_METHOD(tpl, "on", js_on);
   EXPORT_METHOD(tpl, "off", js_off);
   EXPORT_METHOD(tpl, "emit", js_emit);
-
   EXPORT_METHOD(tpl, "write", js_write);
-  module->Set(NanNew<v8::String>("exports"), tpl->GetFunction());
 /*
   EXPORT_GET(tpl, "running", js_running);
+
   EXPORT_GET(tpl, "width", js_width);
   EXPORT_GET(tpl, "height", js_height);
   EXPORT_GET(tpl, "mode", js_mode);
@@ -78,5 +83,7 @@ void ttyu_js_c::init(v8::Handle<v8::Object> exports,
   EXPORT_METHOD(tpl, "beep", js_beep);
   EXPORT_METHOD(tpl, "clear", js_clear);
   EXPORT_METHOD(tpl, "prepare", js_prepare);*/
+
+  module->Set(NanNew<v8::String>("exports"), tpl->GetFunction());
 }
 NODE_MODULE(ttyu, ttyu_js_c::init);

@@ -54,6 +54,9 @@ fs.writeFile(generated, cont, function(err) {
     }
     cfg.on("exit", function(code) {
       if(code !== 0) throw "ncurses './configure' exited with code -" + code;
+      console.log("    [preinstall] ncurses modify Makefile");
+      fs.appendFileSync(path.join(__dirname, "deps", "ncurses", "Makefile"),
+          "\n# custom override\noverride CFLAGS+=-fPIC\n");
       console.log("    [preinstall] ncurses 'make'");
       var make = cp.spawn("make", {
         cwd: path.join(__dirname, "deps", "ncurses")
@@ -64,17 +67,7 @@ fs.writeFile(generated, cont, function(err) {
       }
       make.on("exit", function(code) {
         if(code !== 0) throw "ncurses 'make' exited with code -" + code;
-/*        console.log("    [preinstall] ncurses 'make test'"); // TODO
-        var test = cp.spawn("make", {
-          cwd: path.join(__dirname, "deps", "ncurses", "test")
-        });
-        if(BDEBUG)
-          test.stdout.pipe(process.stdout);
-        test.stderr.pipe(process.stderr);
-        test.on("exit", function(code) {
-          if(code !== 0) throw "ncurses 'make test' exited with code -" + code;*/
-          console.log("    [preinstall] finished with code -0");
-/*        });*/
+        console.log("    [preinstall] finished with code -0");
       });
     });
   } else {

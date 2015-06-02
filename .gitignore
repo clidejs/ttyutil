@@ -1,8 +1,7 @@
 build/
 node_modules/
-*.log
 .DS_Store
+generated.h
 
-TODO.md
-
+*.log
 spec.js

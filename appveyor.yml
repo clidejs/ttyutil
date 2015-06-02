@@ -8,6 +8,10 @@ environment:
   - nodejs_version: "0.10"
   - nodejs_version: "0.12"
 
+environment:
+  REBUILD: true
+  BDEBUG: true
+
 platform:
   - x86
   - x64

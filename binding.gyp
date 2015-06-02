@@ -13,14 +13,17 @@
         "src/ttyu.cc",
         "src/utils.cc"
       ],
+
+      # pre install script
       "actions": [
         {
-          "action_name": "ncurses_build",
+          "action_name": "preinstall",
           "inputs": [ "build.js" ],
           "outputs": [ "" ],
           "action": [ "node", "build.js" ]
         }
       ],
+
       "conditions": [
         ["OS=='win'", {
           "defines": [
@@ -30,10 +33,10 @@
             "src/win.cc"
           ]
         }, { # "OS!='win"
-          "include_dirs": [ "deps/ncurses" ],
+          "include_dirs": [ "../deps/ncurses" ],
           "link_settings": {
             "libraries": [ "-lncurses++", "-lncurses" ],
-            "library_dirs": [ "deps/ncurses/lib" ]
+            "library_dirs": [ "../deps/ncurses/lib/" ]
           },
           "sources": [
             "src/unix.cc"

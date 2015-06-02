@@ -4,6 +4,7 @@
   "description": "cross-platform terminal utilities",
   "main": "index.js",
   "scripts": {
+    "prepublish": "npm run-script lint",
     "lint": "cpplint.py --extensions=h,cc --filter=-runtime/printf include/* src/*",
     "test": "./node_modules/.bin/mocha tests/run"
   },
@@ -29,11 +30,12 @@
     "nan": "1.8.4"
   },
   "devDependencies": {
-    "node-gyp": "1.0.2",
-    "pangyp": "2.1.0",
     "chai": "2.1.2",
+    "it-each": "0.3.1",
     "mocha": "2.2.1",
-    "it-each": "0.3.1"
+    "node-gyp": "1.0.2",
+    "node-is": "^0.5.2",
+    "pangyp": "2.1.0"
   },
   "engines": {
     "node": ">=0.8.0"

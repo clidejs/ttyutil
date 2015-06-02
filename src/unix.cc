@@ -248,7 +248,7 @@ int ttyu_js_c::curses_threaded_func(WINDOW *win, void *that) {
       ttyu_event_t ev = obj->unget_stack.front();
       obj->unget_stack.pop();
       uv_mutex_unlock(&obj->ungetlock);
-      switch(ev.type) {
+      switch (ev.type) {
         case EVENT_KEY:
           ungetch(ev.key->code);
           break;

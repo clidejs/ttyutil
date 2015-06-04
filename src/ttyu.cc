@@ -1,4 +1,4 @@
-/* ttyutil - ttyu.cc - implements threads and additional functions
+/* ttyutil - ttyu.cc - implements additional functions
  * https://github.com/clidejs/ttyutil
  *
  * Copyright Bernhard Bücherl <bernhard.buecherl@gmail.com>

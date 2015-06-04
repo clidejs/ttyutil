@@ -132,7 +132,6 @@ class ttyu_worker_c : public NanAsyncWorker {
   DWORD cury;                                                                  \
   uv_mutex_t emitlock;                                                         \
   uv_barrier_t barrier;                                                        \
-  ttyu_error_t *err;                                                           \
   ttyu_worker_c worker
 
 bool ttyu_win_scr_update(ttyu_js_c *obj, bool initial);

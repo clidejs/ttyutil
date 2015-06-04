@@ -29,6 +29,7 @@
 #include <curses.h>
 #include <vector>
 #include <queue>
+#include <fstream>
 
 #define TTYU_UNIX_KW(XX)                                                       \
   XX(WHICH_DOWN, KEY_DOWN, FALSE);                                             \
@@ -110,7 +111,7 @@ class ttyu_worker_c : public NanAsyncWorker {
 
  private:
   ttyu_js_c *obj;
-  std::vector<ttyu_event_t *> emit_stack;
+  std::vector<ttyu_event_t> emit_stack;
 };
 
 #define PLATFORM_DEPENDENT_FIELDS                                              \
@@ -126,6 +127,7 @@ class ttyu_worker_c : public NanAsyncWorker {
   uv_mutex_t ungetlock;                                                        \
   uv_cond_t condition;                                                         \
   int mode;                                                                    \
+  bool worker_run;                                                             \
   std::queue<ttyu_event_t> unget_stack;                                        \
   std::vector<ttyu_event_t *> emit_stack
 

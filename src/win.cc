@@ -197,14 +197,13 @@ bool ttyu_worker_c::execute(const ttyu_worker_c::ttyu_progress_c& progress,
   if (obj->err) {
     ttyu_event_t *event =
         reinterpret_cast<ttyu_event_t *>(malloc(sizeof(ttyu_event_t)));
-    ttyu_event_create_error(event, obj->err->msg);
+    ttyu_event_create_error(event);
     progress.send(const_cast<const ttyu_event_t *>(event));
-    if (obj->err->kill) {
+    if (obj->err) {
       DBG("  killed", 2);
       return FALSE;
     }
     obj->err->msg = NULL;
-    obj->err->kill = FALSE;
   }
 
   DBG("  read input", 2);
@@ -257,7 +256,7 @@ bool ttyu_worker_c::execute(const ttyu_worker_c::ttyu_progress_c& progress,
           reinterpret_cast<ttyu_event_t *>(malloc(sizeof(ttyu_event_t)));
 
       if (!ttyu_win_scr_update(obj, FALSE)) {
-        ttyu_event_create_error(event, obj->err->msg);
+        ttyu_event_create_error(event);
       } else {
         ttyu_event_create_resize(event);
       }
@@ -315,7 +314,7 @@ void ttyu_worker_c::handle(ttyu_event_t *event) {
       break;
     default:  // EVENT_ERROR, EVENT_SIGNAL
       obj->Set(NanNew<v8::String>("type"), EVENTSTRING_ERROR);
-      obj->Set(NanNew<v8::String>("error"), NanError(event->err));
+      obj->Set(NanNew<v8::String>("error"), NanError("TODO"));
       event->type = EVENT_ERROR;
       break;
   }

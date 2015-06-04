@@ -1,6 +1,6 @@
 require("it-each")({ testPerIteration: true});
 var is = require("node-is");
-var Const = require("../const");
+var Const = require("../lib/const");
 
 var which = [];
 
@@ -105,7 +105,7 @@ module.exports = function(ttyu, expect) {
 
             it.each(which, "should recognize character #%s", ['element'],
                     function(element, next) {
-                this.timeout(100);
+                this.timeout(500);
                 if(!(process.platform !== "win32" &&
                         unix_required.indexOf(element) === -1)) {
                     ttyu.on(ttyu.EVENT.KEY, createTest(element, next));
@@ -123,6 +123,7 @@ module.exports = function(ttyu, expect) {
             });
 
             after(function(done) {
+                this.timeout(4000);
                 var el;
                 while((el = current.pop())) {
                     ttyu.removeListener(ttyu.EVENT.KEY, el);
@@ -130,7 +131,7 @@ module.exports = function(ttyu, expect) {
                 setTimeout(function() {
                     ttyu.stop();
                     done();
-                }, 1000);
+                }, 2000);
             });
 
             function createTest(element, callback) {

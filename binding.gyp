@@ -18,9 +18,9 @@
       "actions": [
         {
           "action_name": "preinstall",
-          "inputs": [ "build.js" ],
+          "inputs": [ "tools/build.js" ],
           "outputs": [ "" ],
-          "action": [ "node", "build.js" ]
+          "action": [ "node", "tools/build.js" ]
         }
       ],
 

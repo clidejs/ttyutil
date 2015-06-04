@@ -29,6 +29,7 @@
 #include <nan.h>
 #include <generated.h>
 #include <utils.h>
+#include <cdebug.h>
 #include <string>
 
 // predefine event data and callbacks for ee.c

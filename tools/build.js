@@ -2,10 +2,10 @@ var fs = require("fs");
 var path = require("path");
 var cp = require("child_process");
 
-var Const = require("./const");
-var pkg = require("./package.json");
+var Const = require("../lib/const");
+var pkg = require("../package.json");
 
-var generated = path.join(__dirname, "include", "generated.h");
+var generated = path.join(__dirname, "..", "include", "generated.h");
 var cont = "/** ttyutil - generated.h - generated header\n" +
            " * https://github.com/clidejs/ttyutil\n" +
            " *\n" +
@@ -20,6 +20,7 @@ var cont = "/** ttyutil - generated.h - generated header\n" +
            "\n";
 var REBUILD = process.env.REBUILD || false;
 var BDEBUG = process.env.BDEBUG || false;
+var CDEBUG = process.env.CDEBUG || false;
 
 for(var name in Const) {
   for(var sub in Const[name]) {
@@ -28,7 +29,13 @@ for(var name in Const) {
   }
   cont += "\n";
 }
-
+if(CDEBUG) {
+  cont += "#define CDEBUG\n";
+  if(CDEBUG === "file") {
+    cont += "#define CDEBUG_FILE";
+  }
+  cont += "\n";
+}
 cont += "#endif  // INCLUDE_GENERATED_H_\n";
 
 function toCpp(v) {
@@ -39,14 +46,17 @@ function toCpp(v) {
   }
 }
 
+console.log("    [preinstall] ENV: [ REBUILD='" +
+    REBUILD + "', BDEBUG='" + BDEBUG + "', CDEBUG='" + CDEBUG + "' ]");
 console.log("    [preinstall] write constants to 'generated.h'");
 fs.writeFile(generated, cont, function(err) {
   if(err) throw err;
-  if((!fs.existsSync(path.join(__dirname, "deps", "ncurses", "lib",
+  if((!fs.existsSync(path.join(__dirname, "..", "deps", "ncurses", "lib",
       "libncurses++.a")) || REBUILD) && process.platform !== "win32") {
     console.log("    [preinstall] ncurses './configure'");
-    var cfg = cp.spawn("./configure", {
-      cwd: path.join(__dirname, "deps", "ncurses")
+    var cfg = cp.spawn("./configure", ["--with-shared", "--enable-pc-files",
+        "--enable-widec", "--without-normal"], {
+      cwd: path.join(__dirname, "..", "deps", "ncurses")
     });
     if(BDEBUG) {
       cfg.stdout.pipe(process.stdout);
@@ -54,12 +64,9 @@ fs.writeFile(generated, cont, function(err) {
     }
     cfg.on("exit", function(code) {
       if(code !== 0) throw "ncurses './configure' exited with code -" + code;
-      console.log("    [preinstall] ncurses modify Makefile");
-      fs.appendFileSync(path.join(__dirname, "deps", "ncurses", "Makefile"),
-          "\n# custom override\noverride CFLAGS+=-fPIC\n");
       console.log("    [preinstall] ncurses 'make'");
       var make = cp.spawn("make", {
-        cwd: path.join(__dirname, "deps", "ncurses")
+        cwd: path.join(__dirname, "..", "deps", "ncurses")
       });
       if(BDEBUG) {
         make.stdout.pipe(process.stdout);

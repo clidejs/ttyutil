@@ -1,1 +1,1 @@
-module.exports = require("./export")(require("./build/Release/ttyu"));
+module.exports = require("./lib/export")(require("./build/Release/ttyu"));

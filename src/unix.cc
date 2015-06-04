@@ -38,10 +38,10 @@ NAN_METHOD(ttyu_js_c::js_start) {
   ttyu_js_c *obj = ObjectWrap::Unwrap<ttyu_js_c>(args.This());
   obj->running = TRUE;
   obj->stop = FALSE;
-
+  obj->worker_run = TRUE;
   obj->win = initscr();
 
-  uv_barrier_init(&obj->barrier, 2);
+  uv_barrier_init(&obj->barrier, 3);
   uv_mutex_init(&obj->emitlock);
   uv_mutex_init(&obj->emitstacklock);
   uv_mutex_init(&obj->ungetlock);
@@ -51,7 +51,6 @@ NAN_METHOD(ttyu_js_c::js_start) {
   obj->check_queue();
 
   uv_barrier_wait(&obj->barrier);
-  uv_barrier_destroy(&obj->barrier);
   NanReturnThis();
 }
 
@@ -66,6 +65,7 @@ NAN_METHOD(ttyu_js_c::js_stop) {
   uv_mutex_destroy(&obj->emitstacklock);
   uv_mutex_destroy(&obj->ungetlock);
   uv_cond_destroy(&obj->condition);
+  uv_barrier_destroy(&obj->barrier);
   NanReturnThis();
 }
 
@@ -158,9 +158,16 @@ void ttyu_js_c::check_queue() {
 void ttyu_worker_c::Execute() {
   uv_mutex_lock(&obj->emitstacklock);
   {
+    if (obj->worker_run) {
+      obj->worker_run = FALSE;
+      uv_barrier_wait(&obj->barrier);
+    }
+
     while (obj->emit_stack.size() == 0) {
       uv_cond_wait(&obj->condition, &obj->emitstacklock);
     }
+
+    SDBG("::Execute %zu", obj->emit_stack.size());
 
     // copy stack into emit_worker and clear stack
     std::copy(obj->emit_stack.begin(), obj->emit_stack.end(),
@@ -172,65 +179,70 @@ void ttyu_worker_c::Execute() {
 
 void ttyu_worker_c::HandleOKCallback() {
   NanScope();
-  for (std::vector<ttyu_event_t *>::iterator it = emit_stack.begin();
-      it != emit_stack.end(); ++it) {
-    ttyu_event_t *event = *it;
+  for (std::vector<ttyu_event_t>::size_type i = 0;
+      i < emit_stack.size(); ++i) {
+    ttyu_event_t event = emit_stack[i];
+    SDBG("::HandleOKCallback %d", i);
+    SDBG(":: %d", event.type);
+    SDBG(":: %d", event.key->which);
 
-      if (ee_count(&obj->emitter, event->type) == 0 ||
-          event->type == EVENT_NONE) {
-        continue;  // fast skip
-      }
+    /*if (ee_count(&obj->emitter, event->type) == 0 ||
+        event->type == EVENT_NONE) {
+      SDBG("::HandleOkCallback skip %d", event->type);
+      continue;  // fast skip
+    }*/
 
     v8::Local<v8::Object> jsobj = NanNew<v8::Object>();
-    switch (event->type) {
+    switch (event.type) {
       case EVENT_RESIZE:
         jsobj->Set(NanNew<v8::String>("type"), EVENTSTRING_RESIZE);
         break;
       case EVENT_KEY:
         jsobj->Set(NanNew<v8::String>("type"), EVENTSTRING_KEY);
         jsobj->Set(NanNew<v8::String>("ctrl"),
-            NanNew<v8::Integer>(event->key->ctrl));
+            NanNew<v8::Integer>(event.key->ctrl));
         jsobj->Set(NanNew<v8::String>("char"),
-            NanNew<v8::String>(event->key->c));
+            NanNew<v8::String>(event.key->c));
         jsobj->Set(NanNew<v8::String>("code"),
-            NanNew<v8::Integer>(event->key->code));
+            NanNew<v8::Integer>(event.key->code));
         jsobj->Set(NanNew<v8::String>("which"),
-            NanNew<v8::Integer>(event->key->which));
+            NanNew<v8::Integer>(event.key->which));
         break;
       case EVENT_MOUSEDOWN:
       case EVENT_MOUSEUP:
       case EVENT_MOUSEMOVE:
       case EVENT_MOUSEWHEEL:
       case EVENT_MOUSEHWHEEL:
-        if (event->type == EVENT_MOUSEDOWN) {
+        if (event.type == EVENT_MOUSEDOWN) {
           jsobj->Set(NanNew<v8::String>("type"), EVENTSTRING_MOUSEDOWN);
-        } else if (event->type == EVENT_MOUSEUP) {
+        } else if (event.type == EVENT_MOUSEUP) {
           jsobj->Set(NanNew<v8::String>("type"), EVENTSTRING_MOUSEUP);
-        } else if (event->type == EVENT_MOUSEMOVE) {
+        } else if (event.type == EVENT_MOUSEMOVE) {
           jsobj->Set(NanNew<v8::String>("type"), EVENTSTRING_MOUSEMOVE);
-        } else if (event->type == EVENT_MOUSEWHEEL) {
+        } else if (event.type == EVENT_MOUSEWHEEL) {
           jsobj->Set(NanNew<v8::String>("type"), EVENTSTRING_MOUSEWHEEL);
-        } else if (event->type == EVENT_MOUSEHWHEEL) {
+        } else if (event.type == EVENT_MOUSEHWHEEL) {
           jsobj->Set(NanNew<v8::String>("type"), EVENTSTRING_MOUSEHWHEEL);
         }
         jsobj->Set(NanNew<v8::String>("button"),
-            NanNew<v8::Integer>(event->mouse->button));
+            NanNew<v8::Integer>(event.mouse->button));
         jsobj->Set(NanNew<v8::String>("x"),
-            NanNew<v8::Integer>(event->mouse->x));
+            NanNew<v8::Integer>(event.mouse->x));
         jsobj->Set(NanNew<v8::String>("y"),
-            NanNew<v8::Integer>(event->mouse->y));
+            NanNew<v8::Integer>(event.mouse->y));
         jsobj->Set(NanNew<v8::String>("ctrl"),
-            NanNew<v8::Integer>(event->mouse->ctrl));
+            NanNew<v8::Integer>(event.mouse->ctrl));
         break;
       default:  // EVENT_ERROR, EVENT_SIGNAL
         jsobj->Set(NanNew<v8::String>("type"), EVENTSTRING_ERROR);
         jsobj->Set(NanNew<v8::String>("error"), NanError("..."));
-        event->type = EVENT_ERROR;
+        event.type = EVENT_ERROR;
         break;
     }
 
-    ee_emit(&obj->emitter, event->type, jsobj);
+    ee_emit(&obj->emitter, event.type, jsobj);
   }
+  emit_stack.clear();
   obj->check_queue();
 }
 

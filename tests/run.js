@@ -1,4 +1,4 @@
-var ttyu = require("../export")(require("../build/Release/ttyu"));
+var ttyu = require("../lib/export")(require("../build/Release/ttyu"));
 var expect = require("chai").expect;
 
 // test specs

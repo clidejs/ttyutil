@@ -29,16 +29,16 @@
 #ifdef CDEBUG
 # ifdef CDEBUG_FILE
 // TODO(@bbuecherl) write debugging log
-# else  // CDEBUG_FILE
+# else  // ifndef CDEBUG_FILE
 #define DBG(msg) printf("%s\r\n", msg)
-#define SDBG(f, msg) do {                                                      \
+#define SDBG(f, ...) do {                                                      \
   std::string str = f;                                                         \
   str.append("\r\n");                                                          \
-  printf(str.c_str(), msg);                                                    \
+  printf(str.c_str(), __VA_ARGS__);                                            \
 } while (0)
 
 # endif  // CDEBUG_FILE
-#else  // CDEBUG
+#else  // ifndef CDEBUG
 #define DBG(msg)
 #define SDBG(f, msg)
 

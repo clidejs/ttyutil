@@ -18,9 +18,9 @@ var cont = "/** ttyutil - generated.h - generated header\n" +
            "#ifndef INCLUDE_GENERATED_H_\n" +
            "#define INCLUDE_GENERATED_H_\n" +
            "\n";
-var REBUILD = process.env.REBUILD || false;
-var BDEBUG = process.env.BDEBUG || false;
-var CDEBUG = process.env.CDEBUG || false;
+var TTYU_NCURSES_REBUILD = process.env.TTYU_NCURSES_REBUILD || false;
+var TTYU_BUILD_DEBUG = process.env.TTYU_BUILD_DEBUG || false;
+var TTYU_CODE_DEBUG = process.env.TTYU_CODE_DEBUG || false;
 
 for(var name in Const) {
   for(var sub in Const[name]) {
@@ -29,9 +29,9 @@ for(var name in Const) {
   }
   cont += "\n";
 }
-if(CDEBUG) {
+if(TTYU_CODE_DEBUG) {
   cont += "#define CDEBUG\n";
-  if(CDEBUG === "file") {
+  if(TTYU_CODE_DEBUG === "file") {
     cont += "#define CDEBUG_FILE";
   }
   cont += "\n";
@@ -46,19 +46,21 @@ function toCpp(v) {
   }
 }
 
-console.log("    [preinstall] ENV: [ REBUILD='" +
-    REBUILD + "', BDEBUG='" + BDEBUG + "', CDEBUG='" + CDEBUG + "' ]");
+console.log("    [preinstall] ENV: [ TTYU_NCURSES_REBUILD='" +
+    TTYU_NCURSES_REBUILD + "', TTYU_BUILD_DEBUG='" + TTYU_BUILD_DEBUG +
+    "', TTYU_CODE_DEBUG='" + TTYU_CODE_DEBUG + "' ]");
 console.log("    [preinstall] write constants to 'generated.h'");
 fs.writeFile(generated, cont, function(err) {
   if(err) throw err;
   if((!fs.existsSync(path.join(__dirname, "..", "deps", "ncurses", "lib",
-      "libncurses++.a")) || REBUILD) && process.platform !== "win32") {
+      "libncurses++.a")) || TTYU_NCURSES_REBUILD) &&
+      process.platform !== "win32") {
     console.log("    [preinstall] ncurses './configure'");
     var cfg = cp.spawn("./configure", ["--with-shared", "--enable-pc-files",
         "--enable-widec", "--without-normal"], {
       cwd: path.join(__dirname, "..", "deps", "ncurses")
     });
-    if(BDEBUG) {
+    if(TTYU_BUILD_DEBUG) {
       cfg.stdout.pipe(process.stdout);
       cfg.stderr.pipe(process.stderr);
     }
@@ -68,7 +70,7 @@ fs.writeFile(generated, cont, function(err) {
       var make = cp.spawn("make", {
         cwd: path.join(__dirname, "..", "deps", "ncurses")
       });
-      if(BDEBUG) {
+      if(TTYU_BUILD_DEBUG) {
         make.stdout.pipe(process.stdout);
         make.stderr.pipe(process.stderr);
       }

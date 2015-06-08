@@ -59,13 +59,17 @@ NAN_METHOD(ttyu_js_c::js_stop) {
   ttyu_js_c *obj = ObjectWrap::Unwrap<ttyu_js_c>(args.This());
   obj->running = FALSE;
   obj->stop = TRUE;
-  delwin(obj->win);
+
   uv_thread_join(&obj->curses_thread);
   uv_mutex_destroy(&obj->emitlock);
   uv_mutex_destroy(&obj->emitstacklock);
   uv_mutex_destroy(&obj->ungetlock);
   uv_cond_destroy(&obj->condition);
   uv_barrier_destroy(&obj->barrier);
+  endwin();
+  delwin(obj->win);
+
+  DBG("window deleted");
   NanReturnThis();
 }
 
@@ -149,6 +153,62 @@ NAN_METHOD(ttyu_js_c::js_write) {
   NanReturnThis();
 }
 
+NAN_METHOD(ttyu_js_c::js_getwidth) {
+  NanScope();
+  struct winsize w;
+  ioctl(STDOUT_FILENO, TIOCGWINSZ, &w);
+  NanReturnValue(NanNew<v8::Number>(w.ws_col));
+}
+
+NAN_METHOD(ttyu_js_c::js_getheight) {
+  NanScope();
+  struct winsize w;
+  ioctl(STDOUT_FILENO, TIOCGWINSZ, &w);
+  NanReturnValue(NanNew<v8::Number>(w.ws_row));
+}
+
+NAN_METHOD(ttyu_js_c::js_setwidth) {
+  NanScope();
+  struct winsize w;
+  ioctl(STDOUT_FILENO, TIOCGWINSZ, &w);
+  resizeterm(args[0]->Int32Value(), w.ws_row);
+  NanReturnUndefined();
+}
+
+NAN_METHOD(ttyu_js_c::js_setheight) {
+  NanScope();
+  struct winsize w;
+  ioctl(STDOUT_FILENO, TIOCGWINSZ, &w);
+  resizeterm(w.ws_col, args[0]->Int32Value());
+  NanReturnUndefined();
+}
+
+NAN_METHOD(ttyu_js_c::js_setx) {
+  NanScope();
+  NanReturnUndefined();
+}
+
+NAN_METHOD(ttyu_js_c::js_getx) {
+  NanScope();
+  NanReturnUndefined();
+}
+
+NAN_METHOD(ttyu_js_c::js_sety) {
+  NanScope();
+  NanReturnUndefined();
+}
+
+NAN_METHOD(ttyu_js_c::js_gety) {
+  NanScope();
+  NanReturnUndefined();
+}
+
+NAN_METHOD(ttyu_js_c::js_mode) {
+  NanScope();
+  ttyu_js_c *obj = ObjectWrap::Unwrap<ttyu_js_c>(args.This());
+  NanReturnValue(NanNew<v8::Number>(obj->mode));
+}
+
 void ttyu_js_c::check_queue() {
   if (running && !stop) {
     NanAsyncQueueWorker(new ttyu_worker_c(this));
@@ -182,15 +242,12 @@ void ttyu_worker_c::HandleOKCallback() {
   for (std::vector<ttyu_event_t>::size_type i = 0;
       i < emit_stack.size(); ++i) {
     ttyu_event_t event = emit_stack[i];
-    SDBG("::HandleOKCallback %d", i);
-    SDBG(":: %d", event.type);
-    SDBG(":: %d", event.key->which);
+    SDBG("::HandleOKCallback %d %d", i, event.type);
 
-    /*if (ee_count(&obj->emitter, event->type) == 0 ||
-        event->type == EVENT_NONE) {
-      SDBG("::HandleOkCallback skip %d", event->type);
+    if (ee_count(&obj->emitter, event.type) == 0 ||
+        event.type == EVENT_NONE) {
       continue;  // fast skip
-    }*/
+    }
 
     v8::Local<v8::Object> jsobj = NanNew<v8::Object>();
     switch (event.type) {
@@ -312,9 +369,12 @@ int ttyu_js_c::curses_threaded_func(WINDOW *win, void *that) {
           }
           ungetmouse(&mev);
           break;
+        case EVENT_MOUSEWHEEL:
+        case EVENT_MOUSEHWHEEL:
+          // TODO(@bbuecherl)
+          break;
         default:
-          // EVENT_NONE, EVENT_ERROR, EVENT_SIGNAL, EVENT_RESIZE,
-          // EVENT_MOUSEWHEEL, EVENT_MOUSEHWHEEL
+          // EVENT_NONE, EVENT_ERROR, EVENT_SIGNAL, EVENT_RESIZE
           break;
       }
     } else {
@@ -416,8 +476,7 @@ int ttyu_js_c::curses_threaded_func(WINDOW *win, void *that) {
   if (event.type != EVENT_NONE) {
     uv_mutex_lock(&obj->emitstacklock);
     {
-      obj->emit_stack.push_back(&event);
-      std::ofstream _;  // why is this necessary???
+      obj->emit_stack.push_back(event);
       uv_cond_signal(&obj->condition);
     }
     uv_mutex_unlock(&obj->emitstacklock);
@@ -427,7 +486,6 @@ int ttyu_js_c::curses_threaded_func(WINDOW *win, void *that) {
 
 void ttyu_js_c::curses_thread_func(void *that) {
   ttyu_js_c *obj = static_cast<ttyu_js_c *>(that);
-  uv_barrier_wait(&obj->barrier);
 
   noecho();
   cbreak();
@@ -436,11 +494,12 @@ void ttyu_js_c::curses_thread_func(void *that) {
   nodelay(obj->win, TRUE);
   mouseinterval(FALSE);
 
+  uv_barrier_wait(&obj->barrier);
+
   while (obj->running && !obj->stop) {
     use_window(obj->win, curses_threaded_func, that);
     usleep(100);
   }
-  endwin();
 }
 
 TTYU_INLINE int ttyu_unix_key(int which) {

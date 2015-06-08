@@ -33,15 +33,6 @@
       t->GetFunction(), v8::ReadOnly);                                         \
 } while (0)
 
-#define EXPORT_GET(tpl, name, fn) do {                                         \
-  v8::Local<v8::FunctionTemplate> t = NanNew<v8::FunctionTemplate>(fn);        \
-  tpl->InstanceTemplate()->SetAccessor(NanNew<v8::String>(name),               \
-      t->GetFunction());                                                       \
-} while (0)
-
-#define EXPORT_GETSET(tpl, name, get, set)                                     \
-  tpl->InstanceTemplate()->SetAccessor(NanNew<v8::String>(name), (get), (set))
-
 #define TTYU_TOSTRING(handle)                                                  \
   (new v8::String::Utf8Value(handle->ToString()))->operator*()
 

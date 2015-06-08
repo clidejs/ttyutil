@@ -122,16 +122,8 @@ module.exports = function(ttyu, expect) {
                 }
             });
 
-            after(function(done) {
-                this.timeout(4000);
-                var el;
-                while((el = current.pop())) {
-                    ttyu.removeListener(ttyu.EVENT.KEY, el);
-                }
-                setTimeout(function() {
-                    ttyu.stop();
-                    done();
-                }, 2000);
+            after(function() {
+                ttyu.stop();
             });
 
             function createTest(element, callback) {

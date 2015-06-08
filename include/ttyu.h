@@ -134,6 +134,15 @@ class ttyu_js_c : public node::ObjectWrap {
   static NAN_METHOD(js_off);
   static NAN_METHOD(js_emit);
   static NAN_METHOD(js_running);
+  static NAN_METHOD(js_getwidth);
+  static NAN_METHOD(js_getheight);
+  static NAN_METHOD(js_setwidth);
+  static NAN_METHOD(js_setheight);
+  static NAN_METHOD(js_mode);
+  static NAN_METHOD(js_setx);
+  static NAN_METHOD(js_getx);
+  static NAN_METHOD(js_sety);
+  static NAN_METHOD(js_gety);
 
   static NAN_METHOD(js_write);
 

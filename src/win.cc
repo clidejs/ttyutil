@@ -39,7 +39,7 @@ NAN_METHOD(ttyu_js_c::js_start) {
   obj->running = TRUE;
   obj->stop = FALSE;
 
-  DBG("::js_start()", 0);
+  DBG("::js_start()");
   uv_mutex_init(&obj->emitlock);
   uv_barrier_init(&obj->barrier, 2);
 
@@ -56,14 +56,14 @@ NAN_METHOD(ttyu_js_c::js_start) {
       ~(ENABLE_QUICK_EDIT_MODE));
   SetConsoleMode(obj->hin, new_mode);
 
-  DBG("  async queue start", 0);
+  DBG("  async queue start");
   NanAsyncQueueWorker(&obj->worker);
 
-  DBG("  wait barrier", 0);
+  DBG("  wait barrier");
   uv_barrier_wait(&obj->barrier);
-  DBG("  destroy barrier", 0);
+  DBG("  destroy barrier");
   uv_barrier_destroy(&obj->barrier);
-  DBG("  destroyed barrier", 0);
+  DBG("  destroyed barrier");
   NanReturnThis();
 }
 

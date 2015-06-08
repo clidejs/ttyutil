@@ -51,7 +51,7 @@ NAN_METHOD(ttyu_js_c::js_new) {
 NAN_METHOD(ttyu_js_c::js_running) {
   NanScope();
   ttyu_js_c *obj = ObjectWrap::Unwrap<ttyu_js_c>(args.This());
-  NanReturnValue(obj->running);
+  NanReturnValue(obj->running ? NanTrue() : NanFalse());
 }
 
 // initialize node module
@@ -61,7 +61,7 @@ void ttyu_js_c::init(v8::Handle<v8::Object> exports,
   v8::Local<v8::FunctionTemplate> tpl =
       NanNew<v8::FunctionTemplate>(js_new);
   tpl->SetClassName(NanNew<v8::String>("ttyu_js_c"));
-  tpl->InstanceTemplate()->SetInternalFieldCount(19);
+  tpl->InstanceTemplate()->SetInternalFieldCount(9);
 
   EXPORT_METHOD(tpl, "start", js_start);
   EXPORT_METHOD(tpl, "stop", js_stop);
@@ -69,9 +69,18 @@ void ttyu_js_c::init(v8::Handle<v8::Object> exports,
   EXPORT_METHOD(tpl, "off", js_off);
   EXPORT_METHOD(tpl, "emit", js_emit);
   EXPORT_METHOD(tpl, "write", js_write);
-/*
-  EXPORT_GET(tpl, "running", js_running);
+  EXPORT_METHOD(tpl, "getrunning", js_running);
+  EXPORT_METHOD(tpl, "getwidth", js_getwidth);
+  EXPORT_METHOD(tpl, "getheight", js_getheight);
+  EXPORT_METHOD(tpl, "setwidth", js_setwidth);
+  EXPORT_METHOD(tpl, "setheight", js_setheight);
+  EXPORT_METHOD(tpl, "getmode", js_mode);
+  EXPORT_METHOD(tpl, "setx", js_setx);
+  EXPORT_METHOD(tpl, "getx", js_getx);
+  EXPORT_METHOD(tpl, "sety", js_sety);
+  EXPORT_METHOD(tpl, "gety", js_gety);
 
+/*
   EXPORT_GET(tpl, "width", js_width);
   EXPORT_GET(tpl, "height", js_height);
   EXPORT_GET(tpl, "mode", js_mode);

@@ -4,3 +4,6 @@
 [submodule "deps/ncurses"]
 	path = deps/ncurses
 	url = git://ncurses.scripts.mit.edu/ncurses.git
+[submodule "deps/styleguide"]
+	path = deps/styleguide
+	url = git://github.com/google/styleguide.git

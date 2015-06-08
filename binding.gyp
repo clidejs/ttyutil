@@ -9,9 +9,9 @@
       ],
       "sources": [
         "deps/ee.c/ee.c",
-        "src/ttyu_event.cc",
-        "src/ttyu.cc",
-        "src/utils.cc"
+        "src/core/ttyu_event.cc",
+        "src/core/ttyu.cc",
+        "src/core/utils.cc"
       ],
 
       # pre install script
@@ -30,7 +30,7 @@
             "PLATFORM_WINDOWS"
           ],
           "sources": [
-            "src/win.cc"
+            "src/win/main.cc" # TODO
           ]
         }, { # "OS!='win"
           "include_dirs": [ "../deps/ncurses" ],
@@ -39,7 +39,21 @@
             "library_dirs": [ "../deps/ncurses/lib/" ]
           },
           "sources": [
-            "src/unix.cc"
+            "src/unix/beep.cc",
+            "src/unix/clear.cc",
+            "src/unix/emit.cc",
+            "src/unix/goto.cc",
+            "src/unix/mode.cc",
+            "src/unix/off.cc",
+            "src/unix/on.cc",
+            "src/unix/resize.cc",
+            "src/unix/start.cc",
+            "src/unix/stop.cc",
+            "src/unix/write.cc",
+            "src/unix/main.cc",
+            "src/unix/utils.cc",
+            "src/unix/curses.cc",
+            "src/unix/worker.cc"
           ]
         }]
       ]

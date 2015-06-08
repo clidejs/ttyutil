@@ -74,23 +74,17 @@ void ttyu_js_c::init(v8::Handle<v8::Object> exports,
   EXPORT_METHOD(tpl, "getheight", js_getheight);
   EXPORT_METHOD(tpl, "setwidth", js_setwidth);
   EXPORT_METHOD(tpl, "setheight", js_setheight);
+  EXPORT_METHOD(tpl, "resize", js_resize);
   EXPORT_METHOD(tpl, "getmode", js_mode);
   EXPORT_METHOD(tpl, "setx", js_setx);
   EXPORT_METHOD(tpl, "getx", js_getx);
   EXPORT_METHOD(tpl, "sety", js_sety);
   EXPORT_METHOD(tpl, "gety", js_gety);
-
-/*
-  EXPORT_GET(tpl, "width", js_width);
-  EXPORT_GET(tpl, "height", js_height);
-  EXPORT_GET(tpl, "mode", js_mode);
-  EXPORT_GET(tpl, "colors", js_colors);
-  EXPORT_GETSET(tpl, "x", js_getx, js_setx);
-  EXPORT_GETSET(tpl, "y", js_gety, js_sety);
   EXPORT_METHOD(tpl, "goto", js_goto);
-  EXPORT_METHOD(tpl, "color", js_color);
   EXPORT_METHOD(tpl, "beep", js_beep);
   EXPORT_METHOD(tpl, "clear", js_clear);
+/*
+  EXPORT_METHOD(tpl, "color", js_color);
   EXPORT_METHOD(tpl, "prepare", js_prepare);*/
 
   module->Set(NanNew<v8::String>("exports"), tpl->GetFunction());

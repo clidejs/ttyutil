@@ -7,8 +7,8 @@ environment:
   # - nodejs_version: "0.8" mocha does not work on windows with v0.8
   - nodejs_version: "0.10"
   - nodejs_version: "0.12"
-  REBUILD: true
-  BDEBUG: true
+  TTYU_NCURSES_REBUILD: true
+  TTYU_BUILD_DEBUG: true
 
 platform:
   - x86

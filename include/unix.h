@@ -98,8 +98,8 @@
                                                                                \
   XX(WHICH_SHIFT, 0, TRUE)
 
-TTYU_INLINE int ttyu_unix_which(int c);
-TTYU_INLINE int ttyu_unix_key(int which);
+int ttyu_unix_which(int c);
+int ttyu_unix_key(int which);
 
 class ttyu_worker_c : public NanAsyncWorker {
  public:

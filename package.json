@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "prepublish": "npm run-script lint",
-    "lint": "deps/styleguide/cpplint/cpplint.py --extensions=h,cc --filter=-runtime/printf include/* src/*",
+    "lint": "deps/styleguide/cpplint/cpplint.py --extensions=h,cc --filter=-runtime/printf include/* src/core/* src/unix/* src/win/*",
     "test": "./node_modules/.bin/mocha tests/run --reporter min"
   },
   "repository": {

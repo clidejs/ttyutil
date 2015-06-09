@@ -1,4 +1,4 @@
-/* ttyutil - win/main.cc
+/* ttyutil - win/start.cc
  * https://github.com/clidejs/ttyutil
  *
  * Copyright Bernhard Bücherl <bernhard.buecherl@gmail.com>
@@ -23,12 +23,36 @@
  */
 #include <ttyu.h>
 
-ttyu_js_c::ttyu_js_c() : running(FALSE), stop(TRUE), worker(this), top(0) {
-  ee_init(&emitter, ttyu_ee_cb_call, ttyu_ee_compare);
-}
+NAN_METHOD(ttyu_js_c::js_start) {
+  NanScope();
+  ttyu_js_c *obj = ObjectWrap::Unwrap<ttyu_js_c>(args.This());
+  obj->running = TRUE;
+  obj->stop = FALSE;
 
-ttyu_js_c::~ttyu_js_c() {
-  running = FALSE;
-  stop = TRUE;
-  ee_destroy(&emitter);
+  DBG("::js_start()");
+  uv_mutex_init(&obj->emitlock);
+  uv_barrier_init(&obj->barrier, 2);
+
+  obj->hin = GetStdHandle(STD_INPUT_HANDLE);
+  obj->hout = GetStdHandle(STD_OUTPUT_HANDLE);
+
+  if (INVALID_HANDLE_VALUE == obj->hin || INVALID_HANDLE_VALUE == obj->hout) {
+    NanThrowError("invalid std handles");
+  }
+
+  GetConsoleMode(obj->hin, &(obj->old_mode));
+  DWORD new_mode = ((obj->old_mode | ENABLE_MOUSE_INPUT |
+      ENABLE_EXTENDED_FLAGS | ENABLE_PROCESSED_INPUT | ENABLE_WINDOW_INPUT) &
+      ~(ENABLE_QUICK_EDIT_MODE));
+  SetConsoleMode(obj->hin, new_mode);
+
+  DBG("  async queue start");
+  NanAsyncQueueWorker(&obj->worker);
+
+  DBG("  wait barrier");
+  uv_barrier_wait(&obj->barrier);
+  DBG("  destroy barrier");
+  uv_barrier_destroy(&obj->barrier);
+  DBG("  destroyed barrier");
+  NanReturnThis();
 }

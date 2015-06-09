@@ -11,7 +11,7 @@
         "deps/ee.c/ee.c",
         "src/core/ttyu_event.cc",
         "src/core/ttyu.cc",
-        "src/core/utils.cc"
+        "src/core/utilities.cc"
       ],
 
       # pre install script
@@ -19,7 +19,7 @@
         {
           "action_name": "preinstall",
           "inputs": [ "tools/build.js" ],
-          "outputs": [ "" ],
+          "outputs": [ "include/generated.h" ],
           "action": [ "node", "tools/build.js" ]
         }
       ],
@@ -30,7 +30,20 @@
             "PLATFORM_WINDOWS"
           ],
           "sources": [
-            "src/win/main.cc" # TODO
+            "src/win/beep.cc",
+            "src/win/clear.cc",
+            "src/win/emit.cc",
+            "src/win/goto.cc",
+            "src/win/mode.cc",
+            "src/win/off.cc",
+            "src/win/on.cc",
+            "src/win/resize.cc",
+            "src/win/start.cc",
+            "src/win/stop.cc",
+            "src/win/write.cc",
+            "src/win/main.cc",
+            "src/win/utils.cc",
+            "src/win/worker.cc"
           ]
         }, { # "OS!='win"
           "include_dirs": [ "../deps/ncurses" ],

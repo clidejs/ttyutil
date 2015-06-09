@@ -54,6 +54,7 @@ NAN_METHOD(ttyu_js_c::js_setheight) {
 }
 
 NAN_METHOD(ttyu_js_c::js_resize) {
-    NanScope();
-    NanReturnThis();
+  NanScope();
+  resizeterm(args[0]->Int32Value(), args[1]->Int32Value());
+  NanReturnThis();
 }

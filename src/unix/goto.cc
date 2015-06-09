@@ -25,25 +25,30 @@
 
 NAN_METHOD(ttyu_js_c::js_setx) {
   NanScope();
+  // TODO(@bbuecherl)
   NanReturnUndefined();
 }
 
 NAN_METHOD(ttyu_js_c::js_getx) {
   NanScope();
+  // TODO(@bbuecherl)
   NanReturnUndefined();
 }
 
 NAN_METHOD(ttyu_js_c::js_sety) {
   NanScope();
+  // TODO(@bbuecherl)
   NanReturnUndefined();
 }
 
 NAN_METHOD(ttyu_js_c::js_gety) {
   NanScope();
+  // TODO(@bbuecherl)
   NanReturnUndefined();
 }
 
 NAN_METHOD(ttyu_js_c::js_goto) {
   NanScope();
+  // TODO(@bbuecherl)
   NanReturnThis();
 }

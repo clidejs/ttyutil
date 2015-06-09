@@ -1,4 +1,4 @@
-/* ttyutil - win/main.cc
+/* ttyutil - win/off.cc
  * https://github.com/clidejs/ttyutil
  *
  * Copyright Bernhard Bücherl <bernhard.buecherl@gmail.com>
@@ -23,12 +23,12 @@
  */
 #include <ttyu.h>
 
-ttyu_js_c::ttyu_js_c() : running(FALSE), stop(TRUE), worker(this), top(0) {
-  ee_init(&emitter, ttyu_ee_cb_call, ttyu_ee_compare);
-}
-
-ttyu_js_c::~ttyu_js_c() {
-  running = FALSE;
-  stop = TRUE;
-  ee_destroy(&emitter);
+NAN_METHOD(ttyu_js_c::js_off) {
+  NanScope();
+  ttyu_js_c *obj = ObjectWrap::Unwrap<ttyu_js_c>(args.This());
+  uv_mutex_lock(&obj->emitlock);
+  ee_off(&obj->emitter, args[0]->Int32Value(),
+      new NanCallback(v8::Local<v8::Function>::Cast(args[1])));
+  uv_mutex_unlock(&obj->emitlock);
+  NanReturnThis();
 }

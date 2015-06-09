@@ -1,4 +1,4 @@
-/* ttyutil - win/main.cc
+/* ttyutil - win/resize.cc
  * https://github.com/clidejs/ttyutil
  *
  * Copyright Bernhard Bücherl <bernhard.buecherl@gmail.com>
@@ -23,12 +23,32 @@
  */
 #include <ttyu.h>
 
-ttyu_js_c::ttyu_js_c() : running(FALSE), stop(TRUE), worker(this), top(0) {
-  ee_init(&emitter, ttyu_ee_cb_call, ttyu_ee_compare);
+NAN_METHOD(ttyu_js_c::js_getwidth) {
+  NanScope();
+  // TODO(@bbuecherl)
+  NanReturnValue(NanNew<v8::Number>(0));
 }
 
-ttyu_js_c::~ttyu_js_c() {
-  running = FALSE;
-  stop = TRUE;
-  ee_destroy(&emitter);
+NAN_METHOD(ttyu_js_c::js_getheight) {
+  NanScope();
+  // TODO(@bbuecherl)
+  NanReturnValue(NanNew<v8::Number>(0));
+}
+
+NAN_METHOD(ttyu_js_c::js_setwidth) {
+  NanScope();
+  // TODO(@bbuecherl)
+  NanReturnUndefined();
+}
+
+NAN_METHOD(ttyu_js_c::js_setheight) {
+  NanScope();
+  // TODO(@bbuecherl)
+  NanReturnUndefined();
+}
+
+NAN_METHOD(ttyu_js_c::js_resize) {
+  NanScope();
+  // TODO(@bbuecherl)
+  NanReturnThis();
 }

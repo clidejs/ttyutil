@@ -1,4 +1,4 @@
-/* ttyutil - win/main.cc
+/* ttyutil - win/stop.cc
  * https://github.com/clidejs/ttyutil
  *
  * Copyright Bernhard Bücherl <bernhard.buecherl@gmail.com>
@@ -23,12 +23,13 @@
  */
 #include <ttyu.h>
 
-ttyu_js_c::ttyu_js_c() : running(FALSE), stop(TRUE), worker(this), top(0) {
-  ee_init(&emitter, ttyu_ee_cb_call, ttyu_ee_compare);
-}
+NAN_METHOD(ttyu_js_c::js_stop) {
+  NanScope();
+  ttyu_js_c *obj = ObjectWrap::Unwrap<ttyu_js_c>(args.This());
+  obj->running = FALSE;
+  obj->stop = TRUE;
 
-ttyu_js_c::~ttyu_js_c() {
-  running = FALSE;
-  stop = TRUE;
-  ee_destroy(&emitter);
+  SetConsoleMode(obj->hin, obj->old_mode);
+
+  NanReturnThis();
 }

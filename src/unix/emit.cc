@@ -32,6 +32,7 @@ NAN_METHOD(ttyu_js_c::js_emit) {
   int arg3 = args[3]->Int32Value();
   int arg4 = args[4]->Int32Value();
   ttyu_event_t event;
+  THROW_IF_STOPPED(obj);
   switch (arg0) {
     case EVENT_KEY: {
       int c = -1;

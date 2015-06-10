@@ -86,9 +86,7 @@ class ttyu_worker_c : public NanAsyncWorker {
 
   void Execute();
 
-  void WorkComplete() {
-    // do nothing
-  }
+  void WorkComplete() { /* do nothing */ }
 
  private:
   void send_(const ttyu_event_t *event) {

@@ -77,6 +77,10 @@ TTYU_INLINE ttyu_error_t _ERRMSG(int id) {
 }
 #define ERRMSG(id) &_ERRMSG(id)
 
+#define THROW_IF_STOPPED(obj) if (!obj->running) {                             \
+  return NanThrowError("Function requires ttyu to be running");                \
+}
+
 // callback call function for the event emitter
 int ttyu_ee_cb_call(ee__listener_t *l, EE_DATA_ARG(data));
 // callback compare function for the event emitter

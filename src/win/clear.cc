@@ -25,6 +25,8 @@
 
 NAN_METHOD(ttyu_js_c::js_clear) {
   NanScope();
+  ttyu_js_c *obj = ObjectWrap::Unwrap<ttyu_js_c>(args.This());
+  THROW_IF_STOPPED(obj);
   // TODO(@bbuecherl)
   NanReturnThis();
 }

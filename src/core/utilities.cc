@@ -106,7 +106,7 @@ TTYU_INLINE int16_t util_rgb2term(const char *rgb) {
   int16_t cur = 0;
   int16_t pos = 0;
 
-  for (uint8_t i = static_cast<int>(strlen(rgb)); i >= 0; --i) {
+  for (uint8_t i = static_cast<int>(strlen(rgb)); i; --i) {
     if (rgb[i] == ',') {
       ++cur;
       pos = 0;

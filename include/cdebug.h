@@ -40,7 +40,7 @@
 # endif  // CDEBUG_FILE
 #else  // ifndef CDEBUG
 #define DBG(msg)
-#define SDBG(f, msg)
+#define SDBG(f, ...)
 
 #endif  // CDEBUG
 

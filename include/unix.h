@@ -28,6 +28,7 @@
 #define NCURSES_OPAQUE FALSE
 #include <sys/ioctl.h>
 #include <curses.h>
+#include <iostream>
 #include <vector>
 #include <queue>
 
@@ -127,6 +128,8 @@ class ttyu_worker_c : public NanAsyncWorker {
   uv_mutex_t ungetlock;                                                        \
   uv_cond_t condition;                                                         \
   int mode;                                                                    \
+  int x;                                                                       \
+  int y;                                                                       \
   bool worker_run;                                                             \
   std::queue<ttyu_event_t> unget_stack;                                        \
   std::vector<ttyu_event_t> emit_stack

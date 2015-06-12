@@ -26,11 +26,9 @@
 NAN_METHOD(ttyu_js_c::js_off) {
   NanScope();
   ttyu_js_c *obj = ObjectWrap::Unwrap<ttyu_js_c>(args.This());
-  uv_mutex_lock(&obj->emitlock);
-  {
+  MUTEX_LOCK(&obj->emitlock, {
     ee_off(&obj->emitter, args[0]->Int32Value(),
         new NanCallback(v8::Local<v8::Function>::Cast(args[1])));
-  }
-  uv_mutex_unlock(&obj->emitlock);
+  });
   NanReturnThis();
 }

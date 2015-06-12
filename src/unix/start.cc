@@ -30,6 +30,8 @@ NAN_METHOD(ttyu_js_c::js_start) {
   obj->stop = FALSE;
   obj->worker_run = TRUE;
   obj->win = initscr();
+  obj->x = getcurx(obj->win);
+  obj->y = getcury(obj->win);
 
   uv_barrier_init(&obj->barrier, 3);
   uv_mutex_init(&obj->emitlock);

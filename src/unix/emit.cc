@@ -65,11 +65,9 @@ NAN_METHOD(ttyu_js_c::js_emit) {
   }
 
   if (event.type != EVENT_NONE) {
-    uv_mutex_lock(&obj->ungetlock);
-    {
+    MUTEX_LOCK(&obj->ungetlock, {
       obj->unget_stack.push(event);
-    }
-    uv_mutex_unlock(&obj->ungetlock);
+    });
   }
   NanReturnThis();
 }

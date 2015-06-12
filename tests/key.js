@@ -12,7 +12,7 @@ for(var i = 0; i < keys.length; ++i) {
     }
 }
 
-var unix_required = [
+var unix_required = [/*
     Const.Which.BACK,
     Const.Which.TAB,
     Const.Which.CLEAR,
@@ -30,7 +30,7 @@ var unix_required = [
     Const.Which.PRINT,
     Const.Which.INSERT,
     Const.Which.DELETE,
-    Const.Which.HELP,
+    Const.Which.HELP,*/
     Const.Which.CHAR0,
     Const.Which.CHAR1,
     Const.Which.CHAR2,
@@ -66,7 +66,7 @@ var unix_required = [
     Const.Which.CHARW,
     Const.Which.CHARX,
     Const.Which.CHARY,
-    Const.Which.CHARZ,
+    Const.Which.CHARZ/*,
     Const.Which.F1,
     Const.Which.F2,
     Const.Which.F3,
@@ -91,10 +91,8 @@ var unix_required = [
     Const.Which.F22,
     Const.Which.F23,
     Const.Which.F24,
-    Const.Which.BROWSER_REFRESH
+    Const.Which.BROWSER_REFRESH*/
 ];
-
-var current = [];
 
 module.exports = function(ttyu, expect) {
     describe("TTYUtil `key` event handling", function() {
@@ -103,23 +101,11 @@ module.exports = function(ttyu, expect) {
                 ttyu.start();
             });
 
-            it.each(which, "should recognize character #%s", ['element'],
-                    function(element, next) {
+            it.each(unix_required, "should recognize character #%s",
+                    ['element'], function(element, next) {
                 this.timeout(500);
-                if(!(process.platform !== "win32" &&
-                        unix_required.indexOf(element) === -1)) {
-                    ttyu.on(ttyu.EVENT.KEY, createTest(element, next));
-                    ttyu.emit(ttyu.KeyEvent(element, 0));
-                } else {
-                    next();
-                }
-            });
-
-            afterEach(function() {
-                var el;
-                while((el = current.pop())) {
-                    ttyu.removeListener(ttyu.EVENT.KEY, el);
-                }
+                createTest(element, next);
+                ttyu.emit(ttyu.KeyEvent(element, 0));
             });
 
             after(function() {
@@ -137,10 +123,10 @@ module.exports = function(ttyu, expect) {
                     } else {
                         expect(ev.which).to.be.equal(element);
                     }
+                    ttyu.off(ttyu.EVENT.KEY, test);
                     callback();
                 };
-                current.push(test);
-
+                ttyu.on(ttyu.EVENT.KEY, test);
                 return test;
             }
         });

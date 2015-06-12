@@ -194,12 +194,10 @@ int ttyu_js_c::curses_threaded_func(WINDOW *win, void *that) {
   }
 
   if (event.type != EVENT_NONE) {
-    uv_mutex_lock(&obj->emitstacklock);
-    {
+    MUTEX_LOCK(&obj->emitstacklock, {
       obj->emit_stack.push_back(event);
       uv_cond_signal(&obj->condition);
-    }
-    uv_mutex_unlock(&obj->emitstacklock);
+    });
   }
   return 0;
 }

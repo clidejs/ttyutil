@@ -27,7 +27,7 @@ NAN_METHOD(ttyu_js_c::js_setx) {
   NanScope();
   ttyu_js_c *obj = ObjectWrap::Unwrap<ttyu_js_c>(args.This());
   THROW_IF_STOPPED(obj);
-  // TODO(@bbuecherl)
+  obj->x = args[0]->Int32Value();
   NanReturnUndefined();
 }
 
@@ -35,15 +35,14 @@ NAN_METHOD(ttyu_js_c::js_getx) {
   NanScope();
   ttyu_js_c *obj = ObjectWrap::Unwrap<ttyu_js_c>(args.This());
   THROW_IF_STOPPED(obj);
-  // TODO(@bbuecherl)
-  NanReturnUndefined();
+  NanReturnValue(NanNew<v8::Number>(obj->x));
 }
 
 NAN_METHOD(ttyu_js_c::js_sety) {
   NanScope();
   ttyu_js_c *obj = ObjectWrap::Unwrap<ttyu_js_c>(args.This());
   THROW_IF_STOPPED(obj);
-  // TODO(@bbuecherl)
+  obj->y = args[0]->Int32Value();
   NanReturnUndefined();
 }
 
@@ -51,14 +50,18 @@ NAN_METHOD(ttyu_js_c::js_gety) {
   NanScope();
   ttyu_js_c *obj = ObjectWrap::Unwrap<ttyu_js_c>(args.This());
   THROW_IF_STOPPED(obj);
-  // TODO(@bbuecherl)
-  NanReturnUndefined();
+  NanReturnValue(NanNew<v8::Number>(obj->y));
 }
 
 NAN_METHOD(ttyu_js_c::js_goto) {
   NanScope();
   ttyu_js_c *obj = ObjectWrap::Unwrap<ttyu_js_c>(args.This());
   THROW_IF_STOPPED(obj);
-  // TODO(@bbuecherl)
+  if(args.Length() == 2) {
+    obj->x = args[0]->Int32Value();
+    obj->y = args[1]->Int32Value();
+    wmove(obj->win, obj->x, obj->y);
+    wrefresh(obj->win);
+  }
   NanReturnThis();
 }

@@ -27,6 +27,22 @@ NAN_METHOD(ttyu_js_c::js_clear) {
   NanScope();
   ttyu_js_c *obj = ObjectWrap::Unwrap<ttyu_js_c>(args.This());
   THROW_IF_STOPPED(obj);
-  werase(obj->win);
+  if (args.Length() == 4) {
+    int x = args[0]->Int32Value();
+    int y = args[1]->Int32Value();
+    int w = args[2]->Int32Value();
+    int h = args[3]->Int32Value();
+    wmove(obj->win, x, y);
+    for (int j = 0; j < h; ++j) {
+      for (int i = 0; i < w; ++i) {
+        std::cout << " ";
+      }
+    }
+    std::cout << "\r\n";
+  } else {
+    werase(obj->win);
+  }
+  wmove(obj->win, obj->x, obj->y);
+  wrefresh(obj->win);
   NanReturnThis();
 }

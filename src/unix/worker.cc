@@ -30,8 +30,7 @@ void ttyu_js_c::check_queue() {
 }
 
 void ttyu_worker_c::Execute() {
-  uv_mutex_lock(&obj->emitstacklock);
-  {
+  MUTEX_LOCK(&obj->emitstacklock,{
     if (obj->worker_run) {
       obj->worker_run = FALSE;
       uv_barrier_wait(&obj->barrier);
@@ -47,8 +46,7 @@ void ttyu_worker_c::Execute() {
     std::copy(obj->emit_stack.begin(), obj->emit_stack.end(),
         std::back_inserter(emit_stack));
     obj->emit_stack.clear();
-  }
-  uv_mutex_unlock(&obj->emitstacklock);
+  });
 }
 
 void ttyu_worker_c::HandleOKCallback() {
@@ -58,10 +56,12 @@ void ttyu_worker_c::HandleOKCallback() {
     ttyu_event_t event = emit_stack[i];
     SDBG("::HandleOKCallback %d %d", i, event.type);
 
-    if (ee_count(&obj->emitter, event.type) == 0 ||
-        event.type == EVENT_NONE) {
-      continue;  // fast skip
-    }
+    MUTEX_LOCK(&obj->emitlock, {
+      if (ee_count(&obj->emitter, event.type) == 0 ||
+          event.type == EVENT_NONE) {
+        continue;  // fast skip
+      }
+    });
 
     v8::Local<v8::Object> jsobj = NanNew<v8::Object>();
     switch (event.type) {
@@ -111,7 +111,9 @@ void ttyu_worker_c::HandleOKCallback() {
         break;
     }
 
-    ee_emit(&obj->emitter, event.type, jsobj);
+    MUTEX_LOCK(&obj->emitlock, {
+      ee_emit(&obj->emitter, event.type, jsobj);
+    });
   }
   emit_stack.clear();
   obj->check_queue();

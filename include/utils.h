@@ -36,6 +36,12 @@
 #define TTYU_TOSTRING(handle)                                                  \
   (new v8::String::Utf8Value(handle->ToString()))->operator*()
 
+#define MUTEX_LOCK(mutex, action) ({                                           \
+  uv_mutex_lock(mutex);                                                        \
+  action;                                                                      \
+  uv_mutex_unlock(mutex);                                                      \
+})
+
 #if defined(__GNUC__) && !(defined(DEBUG) && DEBUG)
 # define TTYU_INLINE inline __attribute__((always_inline))
 #elif defined(_MSC_VER) && !(defined(DEBUG) && DEBUG)

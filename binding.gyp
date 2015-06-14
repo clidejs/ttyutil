@@ -4,11 +4,9 @@
       "target_name": "ttyu",
       "include_dirs" : [
         "<!(node -e \"require('nan')\")",
-        "deps/ee.c/",
         "include/"
       ],
       "sources": [
-        "deps/ee.c/ee.c",
         "src/core/ttyu_event.cc",
         "src/core/ttyu.cc",
         "src/core/utilities.cc"
@@ -35,8 +33,6 @@
             "src/win/emit.cc",
             "src/win/goto.cc",
             "src/win/mode.cc",
-            "src/win/off.cc",
-            "src/win/on.cc",
             "src/win/resize.cc",
             "src/win/start.cc",
             "src/win/stop.cc",
@@ -57,8 +53,6 @@
             "src/unix/emit.cc",
             "src/unix/goto.cc",
             "src/unix/mode.cc",
-            "src/unix/off.cc",
-            "src/unix/on.cc",
             "src/unix/resize.cc",
             "src/unix/start.cc",
             "src/unix/stop.cc",

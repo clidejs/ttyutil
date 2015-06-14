@@ -24,12 +24,10 @@
 #include <ttyu.h>
 
 ttyu_js_c::ttyu_js_c() : running(FALSE), stop(TRUE), mode(MODE_VT100),
-    x(0), y(0) {
-  ee_init(&emitter, ttyu_ee_cb_call, ttyu_ee_compare);
-}
+    x(0), y(0) { }
 
 ttyu_js_c::~ttyu_js_c() {
   running = FALSE;
   stop = TRUE;
-  ee_destroy(&emitter);
+  delete emitter;
 }

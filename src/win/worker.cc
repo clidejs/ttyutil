@@ -105,11 +105,6 @@ bool ttyu_worker_c::execute(const ttyu_worker_c::ttyu_progress_c& progress,
 
 void ttyu_worker_c::handle(ttyu_event_t *event) {
   DBG("::handle()");
-  if (ee_count(&obj_->emitter, event->type) == 0 || obj_->stop ||
-      !obj_->running) {
-    return;
-  }
-
   v8::Local<v8::Object> obj = NanNew<v8::Object>();
   switch (event->type) {
     case EVENT_RESIZE:
@@ -154,9 +149,7 @@ void ttyu_worker_c::handle(ttyu_event_t *event) {
       event->type = EVENT_ERROR;
       break;
   }
-  uv_mutex_lock(&obj_->emitlock);
-  ee_emit(&obj_->emitter, event->type, obj);
-  uv_mutex_unlock(&obj_->emitlock);
+  // TODO emit
 }
 
 void ttyu_worker_c::Execute() {

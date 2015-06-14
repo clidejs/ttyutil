@@ -32,13 +32,6 @@
 #include <cdebug.h>
 #include <string>
 
-// predefine event data and callbacks for ee.c
-#define EE_DATA_TYPE v8::Local<v8::Value>
-#define EE_DATA_ARG(name) v8::Local<v8::Value> name
-#define EE_CB_TYPE NanCallback *
-#define EE_CB_ARG(name) NanCallback *name
-#include <ee.h>  // NOLINT
-
 // define TRUE & FALSE
 #ifndef TRUE
 # define TRUE 1
@@ -80,11 +73,6 @@ TTYU_INLINE ttyu_error_t _ERRMSG(int id) {
 #define THROW_IF_STOPPED(obj) if (!obj->running) {                             \
   return NanThrowError("Function requires ttyu to be running");                \
 }
-
-// callback call function for the event emitter
-int ttyu_ee_cb_call(ee__listener_t *l, EE_DATA_ARG(data));
-// callback compare function for the event emitter
-int ttyu_ee_compare(EE_CB_ARG(cb1), EE_CB_ARG(cb2));
 
 // key event structure
 typedef struct ttyu_key_s {
@@ -134,8 +122,6 @@ class ttyu_js_c : public node::ObjectWrap {
   static NAN_METHOD(js_new);
   static NAN_METHOD(js_start);
   static NAN_METHOD(js_stop);
-  static NAN_METHOD(js_on);
-  static NAN_METHOD(js_off);
   static NAN_METHOD(js_emit);
   static NAN_METHOD(js_running);
   static NAN_METHOD(js_getwidth);
@@ -157,7 +143,7 @@ class ttyu_js_c : public node::ObjectWrap {
   ttyu_error_t *err;
   bool running;
   bool stop;
-  ee_emitter_t emitter;
+  NanCallback *emitter;
   PLATFORM_DEPENDENT_FIELDS;
 };
 

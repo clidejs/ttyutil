@@ -23,28 +23,11 @@
  */
 #include <ttyu.h>
 
-int ttyu_ee_cb_call(ee__listener_t *l, v8::Local<v8::Value> data) {
-  v8::Local<v8::Value> args[] = {
-    data
-  };
-  int count = 0;
-  do {
-    if (l->cb) {
-      l->cb->Call(1, args);
-      ++count;
-    }
-  } while ((l = l->next));
-  return count;
-}
-
-int ttyu_ee_compare(EE_CB_ARG(cb1), EE_CB_ARG(cb2)) {
-  return static_cast<int>(cb1->GetFunction() == cb2->GetFunction());
-}
-
 NAN_METHOD(ttyu_js_c::js_new) {
   NanScope();
   ttyu_js_c *obj = new ttyu_js_c();
   obj->Wrap(args.This());
+  obj->emitter = new NanCallback(v8::Local<v8::Function>::Cast(args[0]));
   NanReturnThis();
 }
 
@@ -65,8 +48,6 @@ void ttyu_js_c::init(v8::Handle<v8::Object> exports,
 
   EXPORT_METHOD(tpl, "start", js_start);
   EXPORT_METHOD(tpl, "stop", js_stop);
-  EXPORT_METHOD(tpl, "on", js_on);
-  EXPORT_METHOD(tpl, "off", js_off);
   EXPORT_METHOD(tpl, "emit", js_emit);
   EXPORT_METHOD(tpl, "write", js_write);
   EXPORT_METHOD(tpl, "getrunning", js_running);

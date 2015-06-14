@@ -27,7 +27,6 @@ NAN_METHOD(ttyu_js_c::js_emit) {
   NanScope();
   ttyu_js_c *obj = ObjectWrap::Unwrap<ttyu_js_c>(args.This());
   THROW_IF_STOPPED(obj);
-  ttyu_js_c *obj = ObjectWrap::Unwrap<ttyu_js_c>(args.This());
   if (obj->running) {
     int ev = args[0]->Int32Value();
     INPUT_RECORD in[1];

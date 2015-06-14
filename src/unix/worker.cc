@@ -55,14 +55,6 @@ void ttyu_worker_c::HandleOKCallback() {
       i < emit_stack.size(); ++i) {
     ttyu_event_t event = emit_stack[i];
     SDBG("::HandleOKCallback %d %d", i, event.type);
-
-    MUTEX_LOCK(&obj->emitlock, {
-      if (ee_count(&obj->emitter, event.type) == 0 ||
-          event.type == EVENT_NONE) {
-        continue;  // fast skip
-      }
-    });
-
     v8::Local<v8::Object> jsobj = NanNew<v8::Object>();
     switch (event.type) {
       case EVENT_RESIZE:
@@ -111,9 +103,10 @@ void ttyu_worker_c::HandleOKCallback() {
         break;
     }
 
-    MUTEX_LOCK(&obj->emitlock, {
-      ee_emit(&obj->emitter, event.type, jsobj);
-    });
+    v8::Local<v8::Value> args[] = {
+      jsobj
+    };
+    obj->emitter->Call(1, args);
   }
   emit_stack.clear();
   obj->check_queue();

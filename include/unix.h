@@ -115,6 +115,12 @@ class ttyu_worker_c : public NanAsyncWorker {
   std::vector<ttyu_event_t> emit_stack;
 };
 
+typedef struct ttyu_listener_s {
+  int type;
+  NanCallback *cb;
+  bool on;
+} ttyu_listener_t;
+
 #define PLATFORM_DEPENDENT_FIELDS                                              \
   void check_queue();                                                          \
   static void curses_thread_func(void *that);                                  \
@@ -132,6 +138,7 @@ class ttyu_worker_c : public NanAsyncWorker {
   int y;                                                                       \
   bool worker_run;                                                             \
   std::queue<ttyu_event_t> unget_stack;                                        \
-  std::vector<ttyu_event_t> emit_stack
+  std::vector<ttyu_event_t> emit_stack;                                        \
+  std::vector<ttyu_listener_t> listener_modifiers
 
 #endif  // INCLUDE_UNIX_H_#

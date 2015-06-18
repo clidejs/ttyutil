@@ -27,5 +27,5 @@ NAN_METHOD(ttyu_js_c::js_beep) {
   NanScope();
   THROW_IF_STOPPED(ObjectWrap::Unwrap<ttyu_js_c>(args.This()));
   beep();
-  NanReturnThis();
+  NanReturnUndefined();
 }

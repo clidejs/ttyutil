@@ -8,8 +8,7 @@
       ],
       "sources": [
         "src/core/ttyu_event.cc",
-        "src/core/ttyu.cc",
-        "src/core/utilities.cc"
+        "src/core/ttyu.cc"
       ],
 
       # pre install script
@@ -33,6 +32,7 @@
             "src/win/emit.cc",
             "src/win/goto.cc",
             "src/win/mode.cc",
+            "src/win/colors.cc",
             "src/win/resize.cc",
             "src/win/start.cc",
             "src/win/stop.cc",
@@ -53,6 +53,7 @@
             "src/unix/emit.cc",
             "src/unix/goto.cc",
             "src/unix/mode.cc",
+            "src/unix/colors.cc",
             "src/unix/resize.cc",
             "src/unix/start.cc",
             "src/unix/stop.cc",

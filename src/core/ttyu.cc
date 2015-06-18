@@ -57,6 +57,7 @@ void ttyu_js_c::init(v8::Handle<v8::Object> exports,
   EXPORT_METHOD(tpl, "setheight", js_setheight);
   EXPORT_METHOD(tpl, "resize", js_resize);
   EXPORT_METHOD(tpl, "getmode", js_mode);
+  EXPORT_METHOD(tpl, "getcolors", js_colors);
   EXPORT_METHOD(tpl, "setx", js_setx);
   EXPORT_METHOD(tpl, "getx", js_getx);
   EXPORT_METHOD(tpl, "sety", js_sety);

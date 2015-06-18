@@ -26,5 +26,5 @@
 NAN_METHOD(ttyu_js_c::js_write) {
   NanScope();
   printf("%s", TTYU_TOSTRING(args[0]));
-  NanReturnThis();
+  NanReturnUndefined();
 }

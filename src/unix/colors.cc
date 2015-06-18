@@ -1,4 +1,4 @@
-/* ttyutil - unix/write.cc
+/* ttyutil - unix/colors.cc
  * https://github.com/clidejs/ttyutil
  *
  * Copyright Bernhard Bücherl <bernhard.buecherl@gmail.com>
@@ -23,11 +23,8 @@
  */
 #include <ttyu.h>
 
-NAN_METHOD(ttyu_js_c::js_write) {
+NAN_METHOD(ttyu_js_c::js_colors) {
   NanScope();
   ttyu_js_c *obj = ObjectWrap::Unwrap<ttyu_js_c>(args.This());
-  THROW_IF_STOPPED(obj);
-  printf(TTYU_TOSTRING(args[1]), TTYU_TOSTRING(args[0]));
-  refresh();
-  NanReturnUndefined();
+  NanReturnValue(NanNew<v8::Number>(obj->colors));
 }

@@ -63,5 +63,5 @@ NAN_METHOD(ttyu_js_c::js_goto) {
     wmove(obj->win, obj->x, obj->y);
     wrefresh(obj->win);
   }
-  NanReturnThis();
+  NanReturnUndefined();
 }

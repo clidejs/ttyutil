@@ -69,5 +69,5 @@ NAN_METHOD(ttyu_js_c::js_emit) {
       obj->unget_stack.push(event);
     });
   }
-  NanReturnThis();
+  NanReturnUndefined();
 }

@@ -65,5 +65,5 @@ NAN_METHOD(ttyu_js_c::js_resize) {
   THROW_IF_STOPPED(obj);
   resizeterm(args[0]->Int32Value(), args[1]->Int32Value());
   wrefresh(obj->win);
-  NanReturnThis();
+  NanReturnUndefined();
 }

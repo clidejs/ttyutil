@@ -31,7 +31,6 @@ NAN_METHOD(ttyu_js_c::js_stop) {
   obj->stop = TRUE;
 
   uv_thread_join(&obj->curses_thread);
-  uv_mutex_destroy(&obj->emitlock);
   uv_mutex_destroy(&obj->emitstacklock);
   uv_mutex_destroy(&obj->ungetlock);
   uv_cond_destroy(&obj->condition);
@@ -40,5 +39,5 @@ NAN_METHOD(ttyu_js_c::js_stop) {
   delwin(obj->win);
 
   DBG("window deleted");
-  NanReturnThis();
+  NanReturnUndefined();
 }

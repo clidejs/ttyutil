@@ -130,6 +130,7 @@ class ttyu_js_c : public node::ObjectWrap {
   static NAN_METHOD(js_setheight);
   static NAN_METHOD(js_resize);
   static NAN_METHOD(js_mode);
+  static NAN_METHOD(js_colors);
   static NAN_METHOD(js_setx);
   static NAN_METHOD(js_getx);
   static NAN_METHOD(js_sety);

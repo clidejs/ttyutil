@@ -28,6 +28,7 @@
 #define NCURSES_OPAQUE FALSE
 #include <sys/ioctl.h>
 #include <curses.h>
+#include <math.h>
 #include <iostream>
 #include <vector>
 #include <queue>
@@ -101,6 +102,7 @@
 
 int ttyu_unix_which(int c);
 int ttyu_unix_key(int which);
+TTYU_INLINE int ttyu_get_colors();
 
 class ttyu_worker_c : public NanAsyncWorker {
  public:
@@ -115,12 +117,6 @@ class ttyu_worker_c : public NanAsyncWorker {
   std::vector<ttyu_event_t> emit_stack;
 };
 
-typedef struct ttyu_listener_s {
-  int type;
-  NanCallback *cb;
-  bool on;
-} ttyu_listener_t;
-
 #define PLATFORM_DEPENDENT_FIELDS                                              \
   void check_queue();                                                          \
   static void curses_thread_func(void *that);                                  \
@@ -129,16 +125,15 @@ typedef struct ttyu_listener_s {
   uv_thread_t curses_thread;                                                   \
   WINDOW *win;                                                                 \
   uv_barrier_t barrier;                                                        \
-  uv_mutex_t emitlock;                                                         \
   uv_mutex_t emitstacklock;                                                    \
   uv_mutex_t ungetlock;                                                        \
   uv_cond_t condition;                                                         \
   int mode;                                                                    \
   int x;                                                                       \
   int y;                                                                       \
+  int colors;                                                                  \
   bool worker_run;                                                             \
   std::queue<ttyu_event_t> unget_stack;                                        \
-  std::vector<ttyu_event_t> emit_stack;                                        \
-  std::vector<ttyu_listener_t> listener_modifiers
+  std::vector<ttyu_event_t> emit_stack
 
 #endif  // INCLUDE_UNIX_H_#

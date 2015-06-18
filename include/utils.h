@@ -25,8 +25,6 @@
 #ifndef INCLUDE_UTILS_H_
 #define INCLUDE_UTILS_H_
 
-#include <string.h>
-
 #define EXPORT_METHOD(tpl, name, cb) do {                                      \
   v8::Local<v8::FunctionTemplate> t = NanNew<v8::FunctionTemplate>(cb);        \
   tpl->InstanceTemplate()->Set(NanNew<v8::String>(name),                       \
@@ -49,39 +47,5 @@
 #else
 # define TTYU_INLINE inline
 #endif
-
-#define WIN_COLORS 16
-
-#define COLORS_ARRAY(XX, i)                                                    \
-  XX(0, i, 0x000000)                                                           \
-  XX(1, i, 0x800000)                                                           \
-  XX(2, i, 0x008000)                                                           \
-  XX(3, i, 0x808000)                                                           \
-  XX(4, i, 0x000080)                                                           \
-  XX(5, i, 0x800080)                                                           \
-  XX(6, i, 0x008080)                                                           \
-  XX(7, i, 0xc0c0c0)                                                           \
-  XX(8, i, 0x808080)                                                           \
-  XX(9, i, 0xff0000)                                                           \
-  XX(10, i, 0x00ff00)                                                          \
-  XX(11, i, 0xffff00)                                                          \
-  XX(12, i, 0x0000ff)                                                          \
-  XX(13, i, 0xff00ff)                                                          \
-  XX(14, i, 0x00ffff)                                                          \
-  XX(15, i, 0xffffff)
-
-TTYU_INLINE uint32_t util_colormatch(uint8_t i);
-TTYU_INLINE int16_t util_rgbi2term(int16_t r, int16_t g, int16_t b);
-TTYU_INLINE int16_t util_rgbi2win(int16_t r, int16_t g, int16_t b);
-TTYU_INLINE char *util_render(const char *ch, int16_t fg, int16_t bg);
-TTYU_INLINE int16_t util_parse_dec(char d);
-TTYU_INLINE int16_t util_parse_hex(char h);
-TTYU_INLINE uint32_t util_term2argb(int16_t t);
-TTYU_INLINE int16_t util_rgb2term(const char *rgb);
-TTYU_INLINE int16_t util_hex2term(const char *hex);
-TTYU_INLINE int16_t util_color(const char *c);
-TTYU_INLINE int util_max(int a, int b);
-TTYU_INLINE int util_min(int a, int b);
-TTYU_INLINE int util_abs(int a);
 
 #endif  // INCLUDE_UTILS_H_

@@ -34,7 +34,6 @@ NAN_METHOD(ttyu_js_c::js_start) {
   obj->y = getcury(obj->win);
 
   uv_barrier_init(&obj->barrier, 3);
-  uv_mutex_init(&obj->emitlock);
   uv_mutex_init(&obj->emitstacklock);
   uv_mutex_init(&obj->ungetlock);
   uv_cond_init(&obj->condition);
@@ -43,5 +42,5 @@ NAN_METHOD(ttyu_js_c::js_start) {
   obj->check_queue();
 
   uv_barrier_wait(&obj->barrier);
-  NanReturnThis();
+  NanReturnUndefined();
 }

@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "lint": "./deps/styleguide/cpplint/cpplint.py --extensions=h,cc --filter=-runtime/printf include/* src/core/* src/unix/* src/win/*",
-    "test": "./node_modules/.bin/mocha tests/run --reporter min"
+    "test": "tap tests/*.js"
   },
   "repository": {
     "type": "git",
@@ -29,11 +29,9 @@
     "nan": "1.8.4"
   },
   "devDependencies": {
-    "chai": "3.0.0",
-    "it-each": "0.3.1",
-    "mocha": "2.2.5",
     "node-gyp": "2.0.1",
-    "node-is": "0.5.2"
+    "node-is": "0.5.2",
+    "tap": "^1.2.1"
   },
   "engines": {
     "node": ">=0.8.0"

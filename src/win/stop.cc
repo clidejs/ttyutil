@@ -25,6 +25,7 @@
 
 NAN_METHOD(ttyu_js_c::js_stop) {
   NanScope();
+  DBG("::stop");
   ttyu_js_c *obj = ObjectWrap::Unwrap<ttyu_js_c>(args.This());
   THROW_IF_STOPPED(obj);
   obj->running = FALSE;
@@ -32,5 +33,5 @@ NAN_METHOD(ttyu_js_c::js_stop) {
 
   SetConsoleMode(obj->hin, obj->old_mode);
 
-  NanReturnThis();
+  NanReturnUndefined();
 }

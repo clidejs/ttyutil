@@ -50,5 +50,5 @@ NAN_METHOD(ttyu_js_c::js_setheight) {
 NAN_METHOD(ttyu_js_c::js_resize) {
   NanScope();
   // TODO(@bbuecherl)
-  NanReturnThis();
+  NanReturnUndefined();
 }

@@ -25,6 +25,7 @@
 
 NAN_METHOD(ttyu_js_c::js_emit) {
   NanScope();
+  DBG("::js_emit");
   ttyu_js_c *obj = ObjectWrap::Unwrap<ttyu_js_c>(args.This());
   THROW_IF_STOPPED(obj);
   if (obj->running) {
@@ -103,5 +104,5 @@ NAN_METHOD(ttyu_js_c::js_emit) {
       WriteConsoleInput(obj->hin, in, 1, &w);
     }
   }
-  NanReturnThis();
+  NanReturnUndefined();
 }

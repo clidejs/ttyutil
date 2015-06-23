@@ -30,7 +30,7 @@ bool ttyu_worker_c::execute(const ttyu_worker_c::ttyu_progress_c& progress,
   INPUT_RECORD ir[WIN_BUFFER_SIZE];
   DWORD i;
   DBG("  start");
-  if (obj->err) {
+  /*if (obj->err) {
     ttyu_event_t *event =
         reinterpret_cast<ttyu_event_t *>(malloc(sizeof(ttyu_event_t)));
     ttyu_event_create_error(event);
@@ -40,7 +40,7 @@ bool ttyu_worker_c::execute(const ttyu_worker_c::ttyu_progress_c& progress,
       return FALSE;
     }
     obj->err->msg = NULL;
-  }
+  }*/
 
   DBG("  read input");
 
@@ -86,6 +86,7 @@ bool ttyu_worker_c::execute(const ttyu_worker_c::ttyu_progress_c& progress,
 
       free(ch);
 
+      DBG("  sending key");
       progress.send(const_cast<const ttyu_event_t *>(event));
     } else if (WINDOW_BUFFER_SIZE_EVENT == ir[i].EventType) {
       ttyu_event_t *event =

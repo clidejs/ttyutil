@@ -26,13 +26,14 @@
 NAN_METHOD(ttyu_js_c::js_emit) {
   NanScope();
   ttyu_js_c *obj = ObjectWrap::Unwrap<ttyu_js_c>(args.This());
+  THROW_IF_STOPPED(obj);
   int arg0 = args[0]->Int32Value();
   int arg1 = args[1]->Int32Value();
   int arg2 = args[2]->Int32Value();
   int arg3 = args[3]->Int32Value();
   int arg4 = args[4]->Int32Value();
   ttyu_event_t event;
-  THROW_IF_STOPPED(obj);
+  SDBG("__%d", arg1);
   switch (arg0) {
     case EVENT_KEY: {
       int c = -1;
@@ -50,6 +51,7 @@ NAN_METHOD(ttyu_js_c::js_emit) {
       } else {
         c = ttyu_unix_key(arg1);
       }  // TODO(@bbuecherl)               v
+      SDBG("___%d", c);
       ttyu_event_create_key(&event, arg2, &ch, c, arg1);
       } break;
     case EVENT_MOUSEDOWN:

@@ -1,9 +1,8 @@
-var ttyu = require("../lib/export")(
-        require("../build/Release/ttyu"));
+var ttyu = require("../index");
 
-ttyu.start().bold().italic().underline();
-ttyu.on(ttyu.EVENT.KEY, out);
-ttyu.on(ttyu.EVENT.MOUSEDOWN, out);
+ttyu.start().bold().italic().underline()
+    .on(ttyu.EVENT.KEY, out)
+    .on(ttyu.EVENT.MOUSEDOWN, out);
 
 function col() {
     return Math.round(Math.random()*255);

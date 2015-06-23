@@ -29,6 +29,10 @@
 
 #define WIN_BUFFER_SIZE 128
 
+#ifndef MOUSE_HWHEELED
+#define MOUSE_HWHEELED 0x0008
+#endif
+
 // worker class, heavily inspired by nan's NanAsyncProgressWorker
 class ttyu_worker_c : public NanAsyncWorker {
  public:

@@ -1,5 +1,5 @@
 /* ttyutil - unix.h - additional header file for unixy systems,
- * impementation in src/unix.cc
+ * impementation in src/unix/.
  * https://github.com/clidejs/ttyutil
  *
  * Copyright Bernhard Bücherl <bernhard.buecherl@gmail.com>
@@ -120,7 +120,8 @@ class ttyu_worker_c : public NanAsyncWorker {
 #define PLATFORM_DEPENDENT_FIELDS                                              \
   void check_queue();                                                          \
   static void curses_thread_func(void *that);                                  \
-  static int curses_threaded_func(WINDOW *win, void *that);                    \
+  static int curses_threaded_func_thread(WINDOW *win, void *that);             \
+  static int curses_threaded_func(WINDOW *win, ttyu_js_c *obj);                \
                                                                                \
   uv_thread_t curses_thread;                                                   \
   WINDOW *win;                                                                 \

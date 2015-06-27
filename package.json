@@ -4,8 +4,7 @@
   "description": "cross-platform terminal utilities",
   "main": "index.js",
   "scripts": {
-    "lint": "./deps/styleguide/cpplint/cpplint.py --extensions=h,cc --filter=-runtime/printf include/* src/core/* src/unix/* src/win/*",
-    "test": "tap tests/*.js"
+    "test": "node tests/*.js"
   },
   "repository": {
     "type": "git",
@@ -27,11 +26,6 @@
   "homepage": "https://github.com/clidejs/ttyutil",
   "dependencies": {
     "nan": "1.8.4"
-  },
-  "devDependencies": {
-    "node-gyp": "2.0.1",
-    "node-is": "0.5.2",
-    "tap": "^1.2.1"
   },
   "engines": {
     "node": ">=0.8.0"

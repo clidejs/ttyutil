@@ -33,7 +33,6 @@ NAN_METHOD(ttyu_js_c::js_emit) {
   int arg3 = args[3]->Int32Value();
   int arg4 = args[4]->Int32Value();
   ttyu_event_t event;
-  SDBG("__%d", arg1);
   switch (arg0) {
     case EVENT_KEY: {
       int c = -1;
@@ -51,7 +50,6 @@ NAN_METHOD(ttyu_js_c::js_emit) {
       } else {
         c = ttyu_unix_key(arg1);
       }  // TODO(@bbuecherl)               v
-      SDBG("___%d", c);
       ttyu_event_create_key(&event, arg2, &ch, c, arg1);
       } break;
     case EVENT_MOUSEDOWN:

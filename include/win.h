@@ -1,5 +1,5 @@
 /* ttyutil - win.h - additional header file for windows systems,
- * implementation in src/win.cc
+ * implementation in src/win/.
  * https://github.com/clidejs/ttyutil
  *
  * Copyright Bernhard Bücherl <bernhard.buecherl@gmail.com>

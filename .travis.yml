@@ -10,7 +10,5 @@ node_js:
   - "iojs-v2.2.0"
 install:
   - npm install --verbose
-  - curl -G -v http://google-styleguide.googlecode.com/svn/trunk/cpplint/cpplint.py -o cpplint.py
 script:
-  - npm run-script lint
   - npm test

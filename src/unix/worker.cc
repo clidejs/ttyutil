@@ -54,7 +54,6 @@ void ttyu_worker_c::HandleOKCallback() {
   for (std::vector<ttyu_event_t>::size_type i = 0;
       i < emit_stack.size(); ++i) {
     ttyu_event_t event = emit_stack[i];
-    SDBG("::HandleOKCallback %d %d", i, event.type);
     v8::Local<v8::Object> jsobj = NanNew<v8::Object>();
     switch (event.type) {
       case EVENT_RESIZE:

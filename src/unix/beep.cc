@@ -23,9 +23,7 @@
  */
 #include <ttyu.h>
 
-NAN_METHOD(ttyu_js_c::js_beep) {
-  NanScope();
-  THROW_IF_STOPPED(ObjectWrap::Unwrap<ttyu_js_c>(args.This()));
+JSFUNCTION(ttyu_js_c,js_beep, {
+  THROW_IF_STOPPED(that);
   beep();
-  NanReturnUndefined();
-}
+})

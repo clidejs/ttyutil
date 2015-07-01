@@ -1,4 +1,4 @@
-/* ttyutil - unix/start.cc
+/* ttyutil - unix/cursor.cc
  * https://github.com/clidejs/ttyutil
  *
  * Copyright Bernhard Bücherl <bernhard.buecherl@gmail.com>
@@ -23,24 +23,12 @@
  */
 #include <ttyu.h>
 
-NAN_METHOD(ttyu_js_c::js_start) {
-  NanScope();
-  ttyu_js_c *obj = ObjectWrap::Unwrap<ttyu_js_c>(args.This());
-  obj->running = TRUE;
-  obj->stop = FALSE;
-  obj->worker_run = TRUE;
-  obj->win = initscr();
-  obj->x = getcurx(obj->win);
-  obj->y = getcury(obj->win);
+JSFUNCTION(ttyu_js_c, js_hide, {
+  THROW_IF_STOPPED(that);
+  // TODO(@bbuecherl)
+})
 
-  uv_barrier_init(&obj->barrier, 3);
-  uv_mutex_init(&obj->emitstacklock);
-  uv_mutex_init(&obj->ungetlock);
-  uv_cond_init(&obj->condition);
-
-  uv_thread_create(&obj->curses_thread, ttyu_js_c::curses_thread_func, obj);
-  obj->check_queue();
-
-  uv_barrier_wait(&obj->barrier);
-  NanReturnUndefined();
-}
+JSFUNCTION(ttyu_js_c, js_show, {
+  THROW_IF_STOPPED(that);
+  // TODO(@bbuecherl)
+})

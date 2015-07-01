@@ -23,16 +23,14 @@
  */
 #include <ttyu.h>
 
-NAN_METHOD(ttyu_js_c::js_clear) {
-  NanScope();
-  ttyu_js_c *obj = ObjectWrap::Unwrap<ttyu_js_c>(args.This());
-  THROW_IF_STOPPED(obj);
+JSFUNCTION(ttyu_js_c, js_clear, {
+  THROW_IF_STOPPED(that);
   if (args.Length() == 4) {
     int x = args[0]->Int32Value();
     int y = args[1]->Int32Value();
     int w = args[2]->Int32Value();
     int h = args[3]->Int32Value();
-    wmove(obj->win, x, y);
+    wmove(that->win, x, y);
     for (int j = 0; j < h; ++j) {
       for (int i = 0; i < w; ++i) {
         std::cout << " ";
@@ -40,9 +38,8 @@ NAN_METHOD(ttyu_js_c::js_clear) {
     }
     std::cout << "\r\n";
   } else {
-    werase(obj->win);
+    werase(that->win);
   }
-  wmove(obj->win, obj->x, obj->y);
-  wrefresh(obj->win);
-  NanReturnUndefined();
-}
+  wmove(that->win, that->x, that->y);
+  wrefresh(that->win);
+});

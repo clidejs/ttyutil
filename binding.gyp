@@ -29,6 +29,7 @@
           "sources": [
             "src/win/beep.cc",
             "src/win/clear.cc",
+            "src/win/cursor.cc",
             "src/win/emit.cc",
             "src/win/goto.cc",
             "src/win/mode.cc",
@@ -50,6 +51,7 @@
           "sources": [
             "src/unix/beep.cc",
             "src/unix/clear.cc",
+            "src/unix/cursor.cc",
             "src/unix/emit.cc",
             "src/unix/goto.cc",
             "src/unix/mode.cc",

@@ -4,7 +4,7 @@
   "description": "cross-platform terminal utilities",
   "main": "index.js",
   "scripts": {
-    "test": "node tests/*.js"
+    "test": "node tests/index.js"
   },
   "repository": {
     "type": "git",

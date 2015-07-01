@@ -1,4 +1,4 @@
-/* ttyutil - unix/mode.cc
+/* ttyutil - win/cursor.cc
  * https://github.com/clidejs/ttyutil
  *
  * Copyright Bernhard Bücherl <bernhard.buecherl@gmail.com>
@@ -23,6 +23,12 @@
  */
 #include <ttyu.h>
 
-JSFUNCTION(ttyu_js_c, js_mode, {
-  NanReturnValue(NanNew<v8::Number>(that->mode));
+JSFUNCTION(ttyu_js_c, js_hide, {
+  THROW_IF_STOPPED(that);
+  // TODO(@bbuecherl)
+})
+
+JSFUNCTION(ttyu_js_c, js_show, {
+  THROW_IF_STOPPED(that);
+  // TODO(@bbuecherl)
 })

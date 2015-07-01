@@ -32,7 +32,7 @@ for(var name in Const) {
 if(TTYU_CODE_DEBUG) {
   cont += "#define CDEBUG\n";
   if(TTYU_CODE_DEBUG === "file") {
-    cont += "#define CDEBUG_FILE";
+    cont += "#define CDEBUG_FILE\n";
   }
   cont += "\n";
 }

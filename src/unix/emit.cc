@@ -23,10 +23,8 @@
  */
 #include <ttyu.h>
 
-NAN_METHOD(ttyu_js_c::js_emit) {
-  NanScope();
-  ttyu_js_c *obj = ObjectWrap::Unwrap<ttyu_js_c>(args.This());
-  THROW_IF_STOPPED(obj);
+JSFUNCTION(ttyu_js_c, js_emit, {
+  THROW_IF_STOPPED(that);
   int arg0 = args[0]->Int32Value();
   int arg1 = args[1]->Int32Value();
   int arg2 = args[2]->Int32Value();
@@ -65,9 +63,8 @@ NAN_METHOD(ttyu_js_c::js_emit) {
   }
 
   if (event.type != EVENT_NONE) {
-    MUTEX_LOCK(&obj->ungetlock, {
-      obj->unget_stack.push(event);
+    MUTEX_LOCK(&that->ungetlock, {
+      that->unget_stack.push(event);
     });
   }
-  NanReturnUndefined();
-}
+})

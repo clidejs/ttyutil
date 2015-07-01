@@ -23,47 +23,36 @@
  */
 #include <ttyu.h>
 
-NAN_METHOD(ttyu_js_c::js_getwidth) {
-  NanScope();
+JSFUNCTION(ttyu_js_c::js_getwidth, {
   struct winsize w;
   ioctl(STDOUT_FILENO, TIOCGWINSZ, &w);
   NanReturnValue(NanNew<v8::Number>(w.ws_col));
-}
+})
 
-NAN_METHOD(ttyu_js_c::js_getheight) {
-  NanScope();
+JSFUNCTION(ttyu_js_c::js_getheight, {
   struct winsize w;
   ioctl(STDOUT_FILENO, TIOCGWINSZ, &w);
   NanReturnValue(NanNew<v8::Number>(w.ws_row));
-}
+})
 
-NAN_METHOD(ttyu_js_c::js_setwidth) {
-  NanScope();
-  ttyu_js_c *obj = ObjectWrap::Unwrap<ttyu_js_c>(args.This());
-  THROW_IF_STOPPED(obj);
+JSFUNCTION(ttyu_js_c, js_setwidth, {
+  THROW_IF_STOPPED(that);
   struct winsize w;
   ioctl(STDOUT_FILENO, TIOCGWINSZ, &w);
   resizeterm(args[0]->Int32Value(), w.ws_row);
-  wrefresh(obj->win);
-  NanReturnUndefined();
-}
+  wrefresh(that->win);
+})
 
-NAN_METHOD(ttyu_js_c::js_setheight) {
-  NanScope();
-  ttyu_js_c *obj = ObjectWrap::Unwrap<ttyu_js_c>(args.This());
-  THROW_IF_STOPPED(obj);
+JSFUNCTION(ttyu_js_c, js_setheight, {
+  THROW_IF_STOPPED(that);
   struct winsize w;
   ioctl(STDOUT_FILENO, TIOCGWINSZ, &w);
   resizeterm(w.ws_col, args[0]->Int32Value());
-  wrefresh(obj->win);
-  NanReturnUndefined();
-}
+  wrefresh(that->win);
+})
 
-NAN_METHOD(ttyu_js_c::js_resize) {
-  NanScope();
-  ttyu_js_c *obj = ObjectWrap::Unwrap<ttyu_js_c>(args.This());
-  THROW_IF_STOPPED(obj);
+JSFUNCTION(ttyu_js_c, js_resize, {
+  THROW_IF_STOPPED(that);
   resizeterm(args[0]->Int32Value(), args[1]->Int32Value());
-  wrefresh(obj->win);
-  NanReturnUndefined();
-}
+  wrefresh(that->win);
+})

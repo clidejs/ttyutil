@@ -71,7 +71,7 @@ TTYU_INLINE ttyu_error_t _ERRMSG(int id) {
 #define ERRMSG(id) &_ERRMSG(id)
 
 #define THROW_IF_STOPPED(obj) if (!obj->running) {                             \
-  return NanThrowError("Function requires ttyu to be running");                \
+  return NanThrowError("Function requires ttyutil to be running");             \
 }
 
 // key event structure
@@ -138,8 +138,9 @@ class ttyu_js_c : public node::ObjectWrap {
   static NAN_METHOD(js_goto);
   static NAN_METHOD(js_beep);
   static NAN_METHOD(js_clear);
-
   static NAN_METHOD(js_write);
+  static NAN_METHOD(js_hide);
+  static NAN_METHOD(js_show);
 
   ttyu_error_t *err;
   bool running;

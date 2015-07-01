@@ -100,6 +100,9 @@
                                                                                \
   XX(WHICH_SHIFT, 0, TRUE)
 
+#define REFRESH_POSITION(obj) wmove(obj->win, obj->x, obj->y);                 \
+  wrefresh(obj->win)
+
 int ttyu_unix_which(int c);
 int ttyu_unix_key(int which);
 TTYU_INLINE int ttyu_get_colors();

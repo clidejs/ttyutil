@@ -23,21 +23,19 @@
  */
 #include <ttyu.h>
 
-NAN_METHOD(ttyu_js_c::js_stop) {
-  NanScope();
-  ttyu_js_c *obj = ObjectWrap::Unwrap<ttyu_js_c>(args.This());
-  THROW_IF_STOPPED(obj);
-  obj->running = FALSE;
-  obj->stop = TRUE;
+JSFUNCTION(ttyu_js_c, js_stop, {
+  if(that->running) {
+    that->running = FALSE;
+    that->stop = TRUE;
 
-  uv_thread_join(&obj->curses_thread);
-  uv_mutex_destroy(&obj->emitstacklock);
-  uv_mutex_destroy(&obj->ungetlock);
-  uv_cond_destroy(&obj->condition);
-  uv_barrier_destroy(&obj->barrier);
-  endwin();
-  delwin(obj->win);
+    uv_thread_join(&that->curses_thread);
+    uv_mutex_destroy(&that->emitstacklock);
+    uv_mutex_destroy(&that->ungetlock);
+    uv_cond_destroy(&that->condition);
+    uv_barrier_destroy(&that->barrier);
+    endwin();
+    delwin(that->win);
 
-  DBG("window deleted");
-  NanReturnUndefined();
-}
+    DBG("window deleted");
+  }
+})

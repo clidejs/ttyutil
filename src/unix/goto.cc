@@ -23,45 +23,33 @@
  */
 #include <ttyu.h>
 
-NAN_METHOD(ttyu_js_c::js_setx) {
-  NanScope();
-  ttyu_js_c *obj = ObjectWrap::Unwrap<ttyu_js_c>(args.This());
-  THROW_IF_STOPPED(obj);
-  obj->x = args[0]->Int32Value();
-  NanReturnUndefined();
-}
+JSFUNCTION(ttyu_js_c, js_setx, {
+  THROW_IF_STOPPED(that);
+  that->x = args[0]->Int32Value();
+  REFRESH_POSITION(that);
+})
 
-NAN_METHOD(ttyu_js_c::js_getx) {
-  NanScope();
-  ttyu_js_c *obj = ObjectWrap::Unwrap<ttyu_js_c>(args.This());
-  THROW_IF_STOPPED(obj);
-  NanReturnValue(NanNew<v8::Number>(obj->x));
-}
+JSFUNCTION(ttyu_js_c, js_getx, {
+  THROW_IF_STOPPED(that);
+  NanReturnValue(NanNew<v8::Number>(that->x));
+})
 
-NAN_METHOD(ttyu_js_c::js_sety) {
-  NanScope();
-  ttyu_js_c *obj = ObjectWrap::Unwrap<ttyu_js_c>(args.This());
-  THROW_IF_STOPPED(obj);
-  obj->y = args[0]->Int32Value();
-  NanReturnUndefined();
-}
+JSFUNCTION(ttyu_js_c, js_sety, {
+  THROW_IF_STOPPED(that);
+  that->y = args[0]->Int32Value();
+  REFRESH_POSITION(that);
+})
 
-NAN_METHOD(ttyu_js_c::js_gety) {
-  NanScope();
-  ttyu_js_c *obj = ObjectWrap::Unwrap<ttyu_js_c>(args.This());
-  THROW_IF_STOPPED(obj);
-  NanReturnValue(NanNew<v8::Number>(obj->y));
-}
+JSFUNCTION(ttyu_js_c, js_gety, {
+  THROW_IF_STOPPED(that);
+  NanReturnValue(NanNew<v8::Number>(that->y));
+})
 
-NAN_METHOD(ttyu_js_c::js_goto) {
-  NanScope();
-  ttyu_js_c *obj = ObjectWrap::Unwrap<ttyu_js_c>(args.This());
-  THROW_IF_STOPPED(obj);
+JSFUNCTION(ttyu_js_c, js_goto, {
+  THROW_IF_STOPPED(that);
   if(args.Length() == 2) {
-    obj->x = args[0]->Int32Value();
-    obj->y = args[1]->Int32Value();
-    wmove(obj->win, obj->x, obj->y);
-    wrefresh(obj->win);
+    that->x = args[0]->Int32Value();
+    that->y = args[1]->Int32Value();
+    REFRESH_POSITION(that);
   }
-  NanReturnUndefined();
-}
+})

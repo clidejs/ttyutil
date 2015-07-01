@@ -23,11 +23,8 @@
  */
 #include <ttyu.h>
 
-NAN_METHOD(ttyu_js_c::js_write) {
-  NanScope();
-  ttyu_js_c *obj = ObjectWrap::Unwrap<ttyu_js_c>(args.This());
-  THROW_IF_STOPPED(obj);
+JSFUNCTION(ttyu_js_c, js_write, {
+  THROW_IF_STOPPED(that);
   printf(TTYU_TOSTRING(args[1]), TTYU_TOSTRING(args[0]));
   refresh();
-  NanReturnUndefined();
-}
+})

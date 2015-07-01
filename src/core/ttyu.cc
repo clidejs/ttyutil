@@ -65,6 +65,8 @@ void ttyu_js_c::init(v8::Handle<v8::Object> exports,
   EXPORT_METHOD(tpl, "goto", js_goto);
   EXPORT_METHOD(tpl, "beep", js_beep);
   EXPORT_METHOD(tpl, "clear", js_clear);
+  EXPORT_METHOD(tpl, "hide", js_hide);
+  EXPORT_METHOD(tpl, "show", js_show);
 
   module->Set(NanNew<v8::String>("exports"), tpl->GetFunction());
 }

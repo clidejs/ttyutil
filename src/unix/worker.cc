@@ -53,59 +53,7 @@ void ttyu_worker_c::HandleOKCallback() {
   NanScope();
   for (std::vector<ttyu_event_t>::size_type i = 0;
       i < emit_stack.size(); ++i) {
-    ttyu_event_t event = emit_stack[i];
-    v8::Local<v8::Object> jsobj = NanNew<v8::Object>();
-    switch (event.type) {
-      case EVENT_RESIZE:
-        jsobj->Set(NanNew<v8::String>("type"), EVENTSTRING_RESIZE);
-        break;
-      case EVENT_KEY:
-        jsobj->Set(NanNew<v8::String>("type"), EVENTSTRING_KEY);
-        jsobj->Set(NanNew<v8::String>("ctrl"),
-            NanNew<v8::Integer>(event.key->ctrl));
-        jsobj->Set(NanNew<v8::String>("char"),
-            NanNew<v8::String>(event.key->c));
-        jsobj->Set(NanNew<v8::String>("code"),
-            NanNew<v8::Integer>(event.key->code));
-        jsobj->Set(NanNew<v8::String>("which"),
-            NanNew<v8::Integer>(event.key->which));
-        break;
-      case EVENT_MOUSEDOWN:
-      case EVENT_MOUSEUP:
-      case EVENT_MOUSEMOVE:
-      case EVENT_MOUSEWHEEL:
-      case EVENT_MOUSEHWHEEL:
-        if (event.type == EVENT_MOUSEDOWN) {
-          jsobj->Set(NanNew<v8::String>("type"), EVENTSTRING_MOUSEDOWN);
-        } else if (event.type == EVENT_MOUSEUP) {
-          jsobj->Set(NanNew<v8::String>("type"), EVENTSTRING_MOUSEUP);
-        } else if (event.type == EVENT_MOUSEMOVE) {
-          jsobj->Set(NanNew<v8::String>("type"), EVENTSTRING_MOUSEMOVE);
-        } else if (event.type == EVENT_MOUSEWHEEL) {
-          jsobj->Set(NanNew<v8::String>("type"), EVENTSTRING_MOUSEWHEEL);
-        } else if (event.type == EVENT_MOUSEHWHEEL) {
-          jsobj->Set(NanNew<v8::String>("type"), EVENTSTRING_MOUSEHWHEEL);
-        }
-        jsobj->Set(NanNew<v8::String>("button"),
-            NanNew<v8::Integer>(event.mouse->button));
-        jsobj->Set(NanNew<v8::String>("x"),
-            NanNew<v8::Integer>(event.mouse->x));
-        jsobj->Set(NanNew<v8::String>("y"),
-            NanNew<v8::Integer>(event.mouse->y));
-        jsobj->Set(NanNew<v8::String>("ctrl"),
-            NanNew<v8::Integer>(event.mouse->ctrl));
-        break;
-      default:  // EVENT_ERROR, EVENT_SIGNAL
-        jsobj->Set(NanNew<v8::String>("type"), EVENTSTRING_ERROR);
-        jsobj->Set(NanNew<v8::String>("error"), NanError("..."));
-        event.type = EVENT_ERROR;
-        break;
-    }
-
-    v8::Local<v8::Value> args[] = {
-      jsobj
-    };
-    obj->emitter->Call(1, args);
+    EMIT_EVENT_OBJECT((&emit_stack[i]), obj->emitter);
   }
   emit_stack.clear();
   obj->check_queue();

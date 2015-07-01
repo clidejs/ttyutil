@@ -38,10 +38,6 @@ bool ttyu_win_scr_update(ttyu_js_c *obj, bool initial) {
 
   obj->curx = con_info.dwCursorPosition.X;
   obj->cury = con_info.dwCursorPosition.Y - obj->top;
-
-  /*if(initial) {
-    data->base_color = (short)con_info.wAttributes;
-  } */
   return TRUE;
 }
 

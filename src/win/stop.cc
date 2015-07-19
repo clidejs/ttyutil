@@ -23,14 +23,24 @@
  */
 #include <ttyu.h>
 
-NAN_METHOD(ttyu_js_c::js_stop) {
-  NanScope();
-  DBG("::stop");
-  ttyu_js_c *obj = ObjectWrap::Unwrap<ttyu_js_c>(args.This());
-  if(obj->running) {
-      obj->running = FALSE;
-      obj->stop = TRUE;
-      SetConsoleMode(obj->hin, obj->old_mode);
+JSFUNCTION(ttyu_js_c, js_stop, {
+  if(that->running) {
+      DBG("::stop stopping");
+      INPUT_RECORD in[1];
+      KEY_EVENT_RECORD kev;
+      DWORD w;
+
+      kev.bKeyDown = TRUE;
+      kev.wVirtualKeyCode = WHICH_FN;
+      kev.dwControlKeyState = 0;
+      kev.wRepeatCount = 1;
+      kev.wVirtualScanCode = MapVirtualKey(WHICH_FN, MAPVK_VK_TO_VSC);
+      in[0].EventType = KEY_EVENT;
+      in[0].Event.KeyEvent = kev;
+
+      that->running = FALSE;
+      that->stop = TRUE;
+      WriteConsoleInput(that->hin, in, 1, &w);
+      SetConsoleMode(that->hin, that->old_mode);
     }
-  NanReturnUndefined();
-}
+})

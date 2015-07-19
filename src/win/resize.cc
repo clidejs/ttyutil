@@ -23,32 +23,24 @@
  */
 #include <ttyu.h>
 
-NAN_METHOD(ttyu_js_c::js_getwidth) {
-  NanScope();
+JSFUNCTION(ttyu_js_c, js_getwidth, {
   // TODO(@bbuecherl)
   NanReturnValue(NanNew<v8::Number>(0));
-}
+})
 
-NAN_METHOD(ttyu_js_c::js_getheight) {
-  NanScope();
+JSFUNCTION(ttyu_js_c, js_getheight, {
   // TODO(@bbuecherl)
   NanReturnValue(NanNew<v8::Number>(0));
-}
+})
 
-NAN_METHOD(ttyu_js_c::js_setwidth) {
-  NanScope();
+JSFUNCTION(ttyu_js_c, js_setwidth, {
   // TODO(@bbuecherl)
-  NanReturnUndefined();
-}
+})
 
-NAN_METHOD(ttyu_js_c::js_setheight) {
-  NanScope();
+JSFUNCTION(ttyu_js_c, js_setheight, {
   // TODO(@bbuecherl)
-  NanReturnUndefined();
-}
+})
 
-NAN_METHOD(ttyu_js_c::js_resize) {
-  NanScope();
+JSFUNCTION(ttyu_js_c, js_resize, {
   // TODO(@bbuecherl)
-  NanReturnUndefined();
-}
+})

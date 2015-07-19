@@ -23,28 +23,24 @@
  */
 #include <ttyu.h>
 
-NAN_METHOD(ttyu_js_c::js_new) {
-  NanScope();
+JSFUNCTION(ttyu_js_c::js_new, {
   ttyu_js_c *obj = new ttyu_js_c();
   obj->Wrap(args.This());
   obj->emitter = new NanCallback(v8::Local<v8::Function>::Cast(args[0]));
   NanReturnThis();
-}
+})
 
-NAN_METHOD(ttyu_js_c::js_running) {
-  NanScope();
-  ttyu_js_c *obj = ObjectWrap::Unwrap<ttyu_js_c>(args.This());
-  NanReturnValue(obj->running ? NanTrue() : NanFalse());
-}
+JSFUNCTION(ttyu_js_c, js_running, {
+  NanReturnValue(that->running ? NanTrue() : NanFalse());
+})
 
 // initialize node module
 void ttyu_js_c::init(v8::Handle<v8::Object> exports,
     v8::Handle<v8::Object> module) {
-
+  int _exports = 0;
   v8::Local<v8::FunctionTemplate> tpl =
       NanNew<v8::FunctionTemplate>(js_new);
   tpl->SetClassName(NanNew<v8::String>("ttyu_js_c"));
-  tpl->InstanceTemplate()->SetInternalFieldCount(9);
 
   EXPORT_METHOD(tpl, "start", js_start);
   EXPORT_METHOD(tpl, "stop", js_stop);
@@ -68,6 +64,7 @@ void ttyu_js_c::init(v8::Handle<v8::Object> exports,
   EXPORT_METHOD(tpl, "hide", js_hide);
   EXPORT_METHOD(tpl, "show", js_show);
 
+  tpl->InstanceTemplate()->SetInternalFieldCount(_exports);
   module->Set(NanNew<v8::String>("exports"), tpl->GetFunction());
 }
 NODE_MODULE(ttyu, ttyu_js_c::init);

@@ -4,7 +4,6 @@ os:
   - osx
 env: TTYU_NCURSES_REBUILD=true TTYU_BUILD_DEBUG=true
 node_js:
-  - "0.8"
   - "0.10"
   - "0.12"
   - "iojs-v2.2.0"

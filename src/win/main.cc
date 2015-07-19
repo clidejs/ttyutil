@@ -23,7 +23,7 @@
  */
 #include <ttyu.h>
 
-ttyu_js_c::ttyu_js_c() : running(FALSE), stop(TRUE), worker(this), top(0) {
+ttyu_js_c::ttyu_js_c() : running(FALSE), stop(TRUE), top(0) {
   DBG("::ttyu_js_c");
 }
 

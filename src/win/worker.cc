@@ -69,10 +69,10 @@ bool ttyu_worker_c::execute(const ttyu_worker_c::ttyu_progress_c& progress,
         }
         break;
       case KEY_EVENT: {
-        char ch[3];
-        size_t ret = wcstombs(ch, &(ir[i].Event.KeyEvent.uChar.UnicodeChar),
-            sizeof(char) * 2);
-        ch[ret-1] = '\0';
+        char *ch = reinterpret_cast<char *>(std::malloc(sizeof(char) * 3));
+        wcstombs(ch, &(ir[i].Event.KeyEvent.uChar.UnicodeChar),
+          sizeof(char) * 2);
+        ch[2] = '\0';
 
         ttyu_event_create_key(&event,
             ttyu_win_ctrl(ir[i].Event.KeyEvent.dwControlKeyState), ch,
@@ -89,6 +89,7 @@ bool ttyu_worker_c::execute(const ttyu_worker_c::ttyu_progress_c& progress,
         break;
     }
 
+    DBG("  emitting");
     progress.send(const_cast<const ttyu_event_t *>(&event));
   }
   return TRUE;
@@ -96,7 +97,9 @@ bool ttyu_worker_c::execute(const ttyu_worker_c::ttyu_progress_c& progress,
 
 void ttyu_worker_c::handle(ttyu_event_t *event) {
   NanScope();
+  DBG("::handle");
   EMIT_EVENT_OBJECT(event, obj_->emitter);
+  DBG("  handled");
 }
 
 void ttyu_worker_c::Execute() {

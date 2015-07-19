@@ -23,36 +23,34 @@
  */
 #include <ttyu.h>
 
-NAN_METHOD(ttyu_js_c::js_start) {
-  NanScope();
-  ttyu_js_c *obj = ObjectWrap::Unwrap<ttyu_js_c>(args.This());
-  obj->running = TRUE;
-  obj->stop = FALSE;
+JSFUNCTION(ttyu_js_c, js_start, {
+  that->running = TRUE;
+  that->stop = FALSE;
 
   DBG("::js_start()");
-  uv_mutex_init(&obj->emitlock);
-  uv_barrier_init(&obj->barrier, 2);
+  uv_mutex_init(&that->emitlock);
+  uv_barrier_init(&that->barrier, 2);
 
-  obj->hin = GetStdHandle(STD_INPUT_HANDLE);
-  obj->hout = GetStdHandle(STD_OUTPUT_HANDLE);
+  that->hin = GetStdHandle(STD_INPUT_HANDLE);
+  that->hout = GetStdHandle(STD_OUTPUT_HANDLE);
 
-  if (INVALID_HANDLE_VALUE == obj->hin || INVALID_HANDLE_VALUE == obj->hout) {
+  if (INVALID_HANDLE_VALUE == that->hin || INVALID_HANDLE_VALUE == that->hout) {
     NanThrowError("invalid std handles");
   }
 
-  GetConsoleMode(obj->hin, &(obj->old_mode));
-  DWORD new_mode = ((obj->old_mode | ENABLE_MOUSE_INPUT |
+  GetConsoleMode(that->hin, &(that->old_mode));
+  DWORD new_mode = ((that->old_mode | ENABLE_MOUSE_INPUT |
       ENABLE_EXTENDED_FLAGS | ENABLE_PROCESSED_INPUT | ENABLE_WINDOW_INPUT) &
       ~(ENABLE_QUICK_EDIT_MODE));
-  SetConsoleMode(obj->hin, new_mode);
+  that->worker = new ttyu_worker_c(that);
+  SetConsoleMode(that->hin, new_mode);
 
   DBG("  async queue start");
-  NanAsyncQueueWorker(&obj->worker);
+  NanAsyncQueueWorker(that->worker);
 
   DBG("  wait barrier");
-  uv_barrier_wait(&obj->barrier);
+  uv_barrier_wait(&that->barrier);
   DBG("  destroy barrier");
-  uv_barrier_destroy(&obj->barrier);
+  uv_barrier_destroy(&that->barrier);
   DBG("  destroyed barrier");
-  NanReturnUndefined();
-}
+})

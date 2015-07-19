@@ -23,7 +23,6 @@
  */
 #include <ttyu.h>
 
-NAN_METHOD(ttyu_js_c::js_mode) {
-  NanScope();
+JSFUNCTION(ttyu_js_c::js_mode, {
   NanReturnValue(NanNew<v8::Number>(MODE_CMD));
-}
+})

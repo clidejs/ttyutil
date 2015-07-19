@@ -23,9 +23,6 @@
  */
 #include <ttyu.h>
 
-NAN_METHOD(ttyu_js_c::js_colors) {
-  NanScope();
-  ttyu_js_c *obj = ObjectWrap::Unwrap<ttyu_js_c>(args.This());
-  // TODO(@bbuecherl)
-  NanReturnUndefined();
-}
+JSFUNCTION(ttyu_js_c::js_colors, {
+  NanReturnValue(NanNew<v8::Integer>(16));
+})

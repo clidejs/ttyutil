@@ -28,6 +28,7 @@
   v8::Local<v8::FunctionTemplate> t = NanNew<v8::FunctionTemplate>(cb);        \
   tpl->InstanceTemplate()->Set(NanNew<v8::String>(name),                       \
       t->GetFunction(), v8::ReadOnly);                                         \
+  ++_exports;                                                                  \
 } while (0)
 
 #define TTYU_TOSTRING(handle)                                                  \
@@ -39,19 +40,26 @@
   uv_mutex_unlock(mutex);                                                      \
 } while (0)
 
-#define JSFUNCTION(_0, ...) JSFUNCTION_(JSFUNCTION__STATIC(_0, __VA_ARGS__, 0),\
-  JSFUNCTION__PROTO(_0, __VA_ARGS__, 0), __VA_ARGS__)
-#define JSFUNCTION_(_2, _3, ...) JSFUNCTION__(__VA_ARGS__, _3, _2, 1, 0)
-#define JSFUNCTION__(_1, _2, _3, ...) _3
-#define JSFUNCTION__STATIC(name, body, ...) NAN_METHOD(name) {                 \
+#ifdef PLATFORM_WINDOWS
+# define JSFUNCTION(_0, ...) JSFUNCTION__CALL(JSFUNCTION_((__VA_ARGS__,        \
+  JSFUNCTION_PROTO, JSFUNCTION_STATIC, 0)), (_0, __VA_ARGS__))
+# define JSFUNCTION__CALL(fun, args) fun args
+# define JSFUNCTION_(args) JSFUNCTION__ args
+# define JSFUNCTION__(_1, _2, _3, ...) _3
+#else
+# define JSFUNCTION(_0, ...) JSFUNCTION_(__VA_ARGS__, JSFUNCTION_PROTO,        \
+  JSFUNCTION_STATIC, 0)(_0, __VA_ARGS__)
+# define JSFUNCTION_(_1, _2, _3, ...) _3
+#endif
+#define JSFUNCTION_STATIC(name, body) NAN_METHOD(name) {                       \
   NanScope();                                                                  \
-  if(1) body;                                                                  \
+  if(1) body                                                                   \
   NanReturnUndefined();                                                        \
 }
-#define JSFUNCTION__PROTO(clas, name, body, ...) NAN_METHOD(clas::name) {      \
+#define JSFUNCTION_PROTO(clas, name, body) NAN_METHOD(clas::name) {            \
   NanScope();                                                                  \
   clas *that = ObjectWrap::Unwrap<clas>(args.This());                          \
-  if(1) body;                                                                  \
+  if(1) body                                                                   \
   NanReturnUndefined();                                                        \
 }
 
@@ -105,7 +113,9 @@
   }                                                                            \
                                                                                \
   v8::Local<v8::Value> __args[] = { __obj };                                   \
+  DBG("  emit_event_object calling");                                          \
   cb->Call(1, __args);                                                         \
+  DBG("  emit_event_object called");                                           \
 } while (0)
 
 #if defined(__GNUC__) && !(defined(DEBUG) && DEBUG)

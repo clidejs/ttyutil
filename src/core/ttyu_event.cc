@@ -37,10 +37,10 @@ void ttyu_event_create_resize(ttyu_event_t *event) {
 
 void ttyu_event_create_key(ttyu_event_t *event, int ctrl, char *c,
     int code, int which) {
-  char *ch =
-      reinterpret_cast<char *>(std::malloc(sizeof(char) * (strlen(c) + 1)));
-  memcpy(ch, c, sizeof(char) * strlen(c));
-  ch[strlen(c)] = '\0';
+  size_t len = strlen(c);
+  char *ch = reinterpret_cast<char *>(std::malloc(sizeof(char) * (len + 1)));
+  memcpy(ch, c, sizeof(char) * len);
+  ch[len] = '\0';
 
   event->type = EVENT_KEY;
   event->key = reinterpret_cast<ttyu_key_t *>(std::malloc(sizeof(ttyu_key_t)));

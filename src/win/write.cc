@@ -23,9 +23,6 @@
  */
 #include <ttyu.h>
 
-NAN_METHOD(ttyu_js_c::js_write) {
-  NanScope();
-  DBG("::write");
+JSFUNCTION(ttyu_js_c::js_write, {
   printf("%s", TTYU_TOSTRING(args[0]));
-  NanReturnUndefined();
-}
+})

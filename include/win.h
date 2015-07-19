@@ -40,7 +40,8 @@ class ttyu_worker_c : public NanAsyncWorker {
     friend class ttyu_worker_c;
    public:
     void send(const ttyu_event_t *event) const {
-        that_->send_(event);
+      DBG("::send");
+      that_->send_(event);
     }
    private:
     explicit ttyu_progress_c(ttyu_worker_c *that) : that_(that) {}
@@ -63,22 +64,31 @@ class ttyu_worker_c : public NanAsyncWorker {
     async->data = this;
   }
   ~ttyu_worker_c() {
+    DBG("::~ttyu_worker_c");
     uv_mutex_destroy(async_lock);
     ttyu_event_destroy(asyncdata_);
-    free(asyncdata_);
+    if(asyncdata_)
+      free(asyncdata_);
+    DBG("::~ttyu_worker_c freed");
   }
 
   void progress() {
+    DBG("::process aquire lock");
     uv_mutex_lock(async_lock);
+    DBG("::process aquired lock");
     ttyu_event_t *event = asyncdata_;
     asyncdata_ = NULL;
     uv_mutex_unlock(async_lock);
+    DBG("::process released lock");
 
     if (event) {
       handle(event);
+      DBG("destroying event");
+      ttyu_event_destroy(event);
+      DBG("freeing event");
+      free(event);
+      DBG("freed event");
     }
-    ttyu_event_destroy(event);
-    free(event);
   }
 
   bool execute(const ttyu_progress_c& progress, ttyu_js_c *obj);
@@ -94,16 +104,22 @@ class ttyu_worker_c : public NanAsyncWorker {
 
  private:
   void send_(const ttyu_event_t *event) {
-    ttyu_event_t *new_event =
-        reinterpret_cast<ttyu_event_t *>(malloc(sizeof(event)));
-    memcpy(&new_event, &event, sizeof(event));
+    DBG("::send_");
+    size_t size = sizeof(*event);
+    ttyu_event_t *new_event = reinterpret_cast<ttyu_event_t *>(malloc(size));
+    memcpy(new_event, event, size);
+    DBG("::send_ aquire lock");
     uv_mutex_lock(async_lock);
+    DBG("::send_ aquired lock");
     ttyu_event_t *old_event = asyncdata_;
     asyncdata_ = new_event;
     uv_mutex_unlock(async_lock);
+    DBG("::send_ released lock");
 
     ttyu_event_destroy(old_event);
-    free(old_event);
+    if(old_event != NULL)
+      free(old_event);
+    DBG("  uv_async_send");
     uv_async_send(async);
   }
 
@@ -134,7 +150,7 @@ class ttyu_worker_c : public NanAsyncWorker {
   DWORD cury;                                                                  \
   uv_mutex_t emitlock;                                                         \
   uv_barrier_t barrier;                                                        \
-  ttyu_worker_c worker
+  ttyu_worker_c *worker
 
 bool ttyu_win_scr_update(ttyu_js_c *obj, bool initial);
 int ttyu_win_which(DWORD code);

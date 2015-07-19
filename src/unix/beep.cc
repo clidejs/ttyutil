@@ -23,7 +23,7 @@
  */
 #include <ttyu.h>
 
-JSFUNCTION(ttyu_js_c,js_beep, {
+JSFUNCTION(ttyu_js_c, js_beep, {
   THROW_IF_STOPPED(that);
   beep();
 })

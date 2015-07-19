@@ -23,12 +23,10 @@
  */
 #include <ttyu.h>
 
-NAN_METHOD(ttyu_js_c::js_emit) {
-  NanScope();
+JSFUNCTION(ttyu_js_c, js_emit, {
   DBG("::js_emit");
-  ttyu_js_c *obj = ObjectWrap::Unwrap<ttyu_js_c>(args.This());
-  THROW_IF_STOPPED(obj);
-  if (obj->running) {
+  THROW_IF_STOPPED(that);
+  if (that->running) {
     int ev = args[0]->Int32Value();
     INPUT_RECORD in[1];
     DWORD w;
@@ -72,7 +70,7 @@ NAN_METHOD(ttyu_js_c::js_emit) {
 
         in[0].EventType = MOUSE_EVENT;
         pos.X = static_cast<int16_t>(args[2]->Int32Value());
-        pos.Y = static_cast<int16_t>(args[3]->Int32Value() + obj->top);
+        pos.Y = static_cast<int16_t>(args[3]->Int32Value() + that->top);
         mev.dwControlKeyState = ttyu_win_state(args[4]->Int32Value());
 
         if (ev == EVENT_MOUSEUP) {
@@ -101,8 +99,7 @@ NAN_METHOD(ttyu_js_c::js_emit) {
     }
 
     if (in[0].EventType != 0) {
-      WriteConsoleInput(obj->hin, in, 1, &w);
+      WriteConsoleInput(that->hin, in, 1, &w);
     }
   }
-  NanReturnUndefined();
-}
+})

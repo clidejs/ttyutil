@@ -25,6 +25,7 @@
   },
   "homepage": "https://github.com/clidejs/ttyutil",
   "dependencies": {
+    "gethub": "^2.0.1",
     "nan": "1.8.4"
   },
   "engines": {

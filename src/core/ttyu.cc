@@ -35,8 +35,7 @@ JSFUNCTION(ttyu_js_c, js_running, {
 })
 
 // initialize node module
-void ttyu_js_c::init(v8::Handle<v8::Object> exports,
-    v8::Handle<v8::Object> module) {
+void ttyu_js_c::init(DATATYPE<v8::Object> exports, DATATYPE<v8::Object> module){
   int _exports = 0;
   v8::Local<v8::FunctionTemplate> tpl =
       NanNew<v8::FunctionTemplate>(js_new);

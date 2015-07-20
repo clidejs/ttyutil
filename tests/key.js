@@ -82,7 +82,7 @@ var unix_required = [
     ttyu.WHICH.F24,
     ttyu.WHICH.BROWSER_REFRESH
 ];
-console.log("\r\n[tests/key]\r");
+console.log("\r\ntest 'tests/key.js'\r");
 ttyu.start();
 
 (function check(i, cb) {
@@ -96,5 +96,5 @@ ttyu.start();
     ttyu.emit(ttyu.KeyEvent(unix_required[i], 0));
 })(unix_required.length - 1, function() {
     ttyu.stop();
-    console.log("[tests/key] passed\r");
+    console.log("test 'tests/key.js' passed\r");
 });

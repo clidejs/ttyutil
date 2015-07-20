@@ -117,8 +117,7 @@ class ttyu_js_c : public node::ObjectWrap {
   ttyu_js_c();
   ~ttyu_js_c();
 
-  static void init(v8::Handle<v8::Object> exports,
-      v8::Handle<v8::Object> module);
+  static void init(DATATYPE<v8::Object> exports, DATATYPE<v8::Object> module);
   static NAN_METHOD(js_new);
   static NAN_METHOD(js_start);
   static NAN_METHOD(js_stop);

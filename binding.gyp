@@ -15,9 +15,9 @@
       "actions": [
         {
           "action_name": "preinstall",
-          "inputs": [ "tools/build.js" ],
+          "inputs": [ "lib/const.js" ],
           "outputs": [ "include/generated.h" ],
-          "action": [ "node", "tools/build.js" ]
+          "action": [ "node", "installer/index.js" ]
         }
       ],
 
@@ -45,7 +45,7 @@
         }, { # "OS!='win"
           "include_dirs": [ "../deps/ncurses" ],
           "link_settings": {
-            "libraries": [ "-lncurses++", "-lncurses" ],
+            "libraries": [ "-lncurses" ],
             "library_dirs": [ "../deps/ncurses/lib/" ]
           },
           "sources": [

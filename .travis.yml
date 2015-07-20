@@ -2,7 +2,7 @@ language: node_js
 os:
   - linux
   - osx
-env: TTYU_NCURSES_REBUILD=true TTYU_BUILD_DEBUG=true
+env: TTYU_NCURSES_REBUILD=true TTYU_BUILD_DEBUG=true TTYU_CODE_DEBUG=true
 node_js:
   - "0.10"
   - "0.12"

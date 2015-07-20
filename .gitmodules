@@ -1,3 +1,0 @@
-[submodule "deps/ncurses"]
-	path = deps/ncurses
-	url = git://ncurses.scripts.mit.edu/ncurses.git

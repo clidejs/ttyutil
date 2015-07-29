@@ -1,155 +1,104 @@
-require("it-each")({ testPerIteration: true});
-var is = require("node-is");
-var Const = require("../const");
-
-var which = [];
-
-var keys = Object.keys(Const.Which);
-for(var i = 0; i < keys.length; ++i) {
-    c = Const.Which[keys[i]];
-    if(c != 19 && c != -1 && which.indexOf(c) === -1) {
-        which.push(c);
-    }
-}
+var ttyu = require("../index");
+var assert = require("assert");
 
 var unix_required = [
-    Const.Which.BACK,
-    Const.Which.TAB,
-    Const.Which.CLEAR,
-    Const.Which.ENTER,
-    Const.Which.SHIFT,
-    Const.Which.SPACE,
-    Const.Which.PRIOR,
-    Const.Which.NEXT,
-    Const.Which.END,
-    Const.Which.HOME,
-    Const.Which.LEFT,
-    Const.Which.UP,
-    Const.Which.RIGHT,
-    Const.Which.DOWN,
-    Const.Which.PRINT,
-    Const.Which.INSERT,
-    Const.Which.DELETE,
-    Const.Which.HELP,
-    Const.Which.CHAR0,
-    Const.Which.CHAR1,
-    Const.Which.CHAR2,
-    Const.Which.CHAR3,
-    Const.Which.CHAR4,
-    Const.Which.CHAR5,
-    Const.Which.CHAR6,
-    Const.Which.CHAR7,
-    Const.Which.CHAR8,
-    Const.Which.CHAR9,
-    Const.Which.CHARA,
-    Const.Which.CHARB,
-    Const.Which.CHARC,
-    Const.Which.CHARD,
-    Const.Which.CHARE,
-    Const.Which.CHARF,
-    Const.Which.CHARG,
-    Const.Which.CHARH,
-    Const.Which.CHARI,
-    Const.Which.CHARJ,
-    Const.Which.CHARK,
-    Const.Which.CHARL,
-    Const.Which.CHARM,
-    Const.Which.CHARN,
-    Const.Which.CHARO,
-    Const.Which.CHARP,
-    Const.Which.CHARQ,
-    Const.Which.CHARR,
-    Const.Which.CHARS,
-    Const.Which.CHART,
-    Const.Which.CHARU,
-    Const.Which.CHARV,
-    Const.Which.CHARW,
-    Const.Which.CHARX,
-    Const.Which.CHARY,
-    Const.Which.CHARZ,
-    Const.Which.F1,
-    Const.Which.F2,
-    Const.Which.F3,
-    Const.Which.F4,
-    Const.Which.F5,
-    Const.Which.F6,
-    Const.Which.F7,
-    Const.Which.F8,
-    Const.Which.F9,
-    Const.Which.F10,
-    Const.Which.F11,
-    Const.Which.F12,
-    Const.Which.F13,
-    Const.Which.F14,
-    Const.Which.F15,
-    Const.Which.F16,
-    Const.Which.F17,
-    Const.Which.F18,
-    Const.Which.F19,
-    Const.Which.F20,
-    Const.Which.F21,
-    Const.Which.F22,
-    Const.Which.F23,
-    Const.Which.F24,
-    Const.Which.BROWSER_REFRESH
+    ttyu.WHICH.BACK,
+    ttyu.WHICH.TAB,
+    ttyu.WHICH.CLEAR,
+    ttyu.WHICH.ENTER,
+    ttyu.WHICH.SHIFT,
+    ttyu.WHICH.SPACE,
+    ttyu.WHICH.PRIOR,
+    ttyu.WHICH.NEXT,
+    ttyu.WHICH.END,
+    ttyu.WHICH.HOME,
+    ttyu.WHICH.LEFT,
+    ttyu.WHICH.UP,
+    ttyu.WHICH.RIGHT,
+    ttyu.WHICH.DOWN,
+    ttyu.WHICH.PRINT,
+    ttyu.WHICH.INSERT,
+    ttyu.WHICH.DELETE,
+    ttyu.WHICH.HELP,
+    ttyu.WHICH.CHAR0,
+    ttyu.WHICH.CHAR1,
+    ttyu.WHICH.CHAR2,
+    ttyu.WHICH.CHAR3,
+    ttyu.WHICH.CHAR4,
+    ttyu.WHICH.CHAR5,
+    ttyu.WHICH.CHAR6,
+    ttyu.WHICH.CHAR7,
+    ttyu.WHICH.CHAR8,
+    ttyu.WHICH.CHAR9,
+    ttyu.WHICH.CHARA,
+    ttyu.WHICH.CHARB,
+    ttyu.WHICH.CHARC,
+    ttyu.WHICH.CHARD,
+    ttyu.WHICH.CHARE,
+    ttyu.WHICH.CHARF,
+    ttyu.WHICH.CHARG,
+    ttyu.WHICH.CHARH,
+    ttyu.WHICH.CHARI,
+    ttyu.WHICH.CHARJ,
+    ttyu.WHICH.CHARK,
+    ttyu.WHICH.CHARL,
+    ttyu.WHICH.CHARM,
+    ttyu.WHICH.CHARN,
+    ttyu.WHICH.CHARO,
+    ttyu.WHICH.CHARP,
+    ttyu.WHICH.CHARQ,
+    ttyu.WHICH.CHARR,
+    ttyu.WHICH.CHARS,
+    ttyu.WHICH.CHART,
+    ttyu.WHICH.CHARU,
+    ttyu.WHICH.CHARV,
+    ttyu.WHICH.CHARW,
+    ttyu.WHICH.CHARX,
+    ttyu.WHICH.CHARY,
+    ttyu.WHICH.CHARZ,
+    ttyu.WHICH.F1,
+    ttyu.WHICH.F2,
+    ttyu.WHICH.F3,
+    ttyu.WHICH.F4,
+    ttyu.WHICH.F5,
+    ttyu.WHICH.F6,
+    ttyu.WHICH.F7,
+    ttyu.WHICH.F8,
+    ttyu.WHICH.F9,
+    ttyu.WHICH.F10,
+    ttyu.WHICH.F11,
+    ttyu.WHICH.F12,
+    ttyu.WHICH.F13,
+    ttyu.WHICH.F14,
+    ttyu.WHICH.F15,
+    ttyu.WHICH.F16,
+    ttyu.WHICH.F17,
+    ttyu.WHICH.F18,
+    ttyu.WHICH.F19,
+    ttyu.WHICH.F20,
+    ttyu.WHICH.F21,
+    ttyu.WHICH.F22,
+    ttyu.WHICH.F23,
+    ttyu.WHICH.F24,
+    ttyu.WHICH.BROWSER_REFRESH
 ];
 
-var current = [];
+module.exports = function(cb) {
+    console.log("\r\ntest 'tests/key.js'\r");
+    ttyu.start();
 
-module.exports = function(TTYUtil, expect) {
-    describe("TTYUtil `key` event handling", function() {
-        describe(".which", function() {
-            var ttyu;
-
-            before(function() {
-                ttyu = new TTYUtil();
-                ttyu.start();
-            });
-
-            it.each(which, "should recognize character #%s", ['element'],
-                    function(element, next) {
-                this.timeout(100);
-                ttyu.on(TTYUtil.EVENT.KEY, createTest(element, next));
-                ttyu.emit(TTYUtil.KeyEvent(element, 0));
-            });
-
-            afterEach(function() {
-                var el;
-                while((el = current.pop())) {
-                    ttyu.removeListener(TTYUtil.EVENT.KEY, el);
-                }
-            })
-
-            after(function(done) {
-                var el;
-                while((el = current.pop())) {
-                    ttyu.removeListener(TTYUtil.EVENT.KEY, el);
-                }
-                setTimeout(function() {
-                    ttyu.destroy();
-                    done();
-                }, 100);
-            });
-
-            function createTest(element, callback) {
-                var test = function(ev) {
-                    is.expect.type.of(ev).to.be.equal("Object");
-
-                    if(process.platform !== "win32" &&
-                            unix_required.indexOf(element) === -1) {
-                        expect([element, Const.Which.UNKNOWN]).to.
-                                include(ev.which);
-                    } else {
-                        expect(ev.which).to.be.equal(element);
-                    }
-                    callback();
-                };
-                current.push(test);
-
-                return test;
-            }
-        });
-
-        // TODO (@bbuecherl) add tests for .ctrl
+    (function check(i, cb) {
+        var listener = function(ev) {
+            assert.equal(ev.which, unix_required[i], " which should be " +
+                unix_required[i]);
+            ttyu.off(ttyu.EVENT.KEY, listener);
+            if(i <= 0) cb(); else check(i - 1, cb);
+        };
+        ttyu.on(ttyu.EVENT.KEY, listener);
+        ttyu.emit(ttyu.KeyEvent(unix_required[i], 0));
+    })(unix_required.length - 1, function() {
+        ttyu.stop();
+        console.log("test 'tests/key.js' passed\r");
+        cb();
     });
 };

@@ -1,37 +1,72 @@
 {
-    "targets": [
+  "targets": [
+    {
+      "target_name": "ttyu",
+      "include_dirs" : [
+        "<!(node -e \"require('nan')\")",
+        "include/"
+      ],
+      "sources": [
+        "src/core/ttyu_event.cc",
+        "src/core/ttyu.cc"
+      ],
+
+      # pre install script
+      "actions": [
         {
-            "target_name": "ttyu",
-            "include_dirs" : [
-                "<!(node -e \"require('nan')\")",
-                "deps/ee/",
-                "include/"
-            ],
-            "sources": [
-                "deps/ee/ee.c",
-                "src/ttyu_event.cc",
-                "src/ttyu_worker.cc",
-                "src/ttyu_js.cc",
-                "src/ttyu.cc",
-                "src/util.cc"
-            ],
-            "conditions": [
-                ["OS=='win'", {
-                    "defines": [
-                        "PLATFORM_WINDOWS"
-                    ],
-                    "sources": [
-                        "src/win.cc"
-                    ]
-                }, { # "OS!='win"
-                    "libraries": [
-                        "-lcurses" # add curses compiler flag
-                    ],
-                    "sources": [
-                        "src/unix.cc"
-                    ]
-                }]
-            ]
+          "action_name": "preinstall",
+          "inputs": [ "lib/const.js" ],
+          "outputs": [ "include/generated.h" ],
+          "action": [ "node", "installer/index.js" ]
         }
-    ]
+      ],
+
+      "conditions": [
+        ["OS=='win'", {
+          "defines": [
+            "PLATFORM_WINDOWS"
+          ],
+          "sources": [
+            "src/win/beep.cc",
+            "src/win/clear.cc",
+            "src/win/cursor.cc",
+            "src/win/emit.cc",
+            "src/win/goto.cc",
+            "src/win/mode.cc",
+            "src/win/colors.cc",
+            "src/win/resize.cc",
+            "src/win/start.cc",
+            "src/win/stop.cc",
+            "src/win/write.cc",
+            "src/win/main.cc",
+            "src/win/utils.cc",
+            "src/win/worker.cc"
+          ]
+        }, { # "OS!='win"
+          "include_dirs": [ "../deps/ncurses" ],
+          "link_settings": {
+            "libraries": [ "-lncurses" ],
+            "library_dirs": [ "../deps/ncurses/lib/" ]
+          },
+          "sources": [
+            "src/unix/beep.cc",
+            "src/unix/clear.cc",
+            "src/unix/cursor.cc",
+            "src/unix/emit.cc",
+            "src/unix/goto.cc",
+            "src/unix/mode.cc",
+            "src/unix/colors.cc",
+            "src/unix/resize.cc",
+            "src/unix/start.cc",
+            "src/unix/stop.cc",
+            "src/unix/write.cc",
+            "src/unix/main.cc",
+            "src/unix/utils.cc",
+            "src/unix/curses.cc",
+            "src/unix/worker.cc"
+          ]
+        }]
+      ]
+    }
+  ]
 }

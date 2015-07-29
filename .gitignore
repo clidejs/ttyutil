@@ -1,6 +1,7 @@
 build/
 node_modules/
-npm-debug.log
 .DS_Store
+generated.h
 
-TODO.md
+*.log
+spec.js

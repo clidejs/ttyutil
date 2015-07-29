@@ -1,0 +1,55 @@
+/* ttyutil - unix/goto.cc
+ * https://github.com/clidejs/ttyutil
+ *
+ * Copyright Bernhard Bücherl <bernhard.buecherl@gmail.com>
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to
+ * deal in the Software without restriction, including without limitation the
+ * rights to use, copy, modify, merge, publish, distribute, sublicense, and/or
+ * sell copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in
+ * all copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
+ * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
+ * IN THE SOFTWARE.
+ */
+#include <ttyu.h>
+
+JSFUNCTION(ttyu_js_c, js_setx, {
+  THROW_IF_STOPPED(that);
+  that->x = args[0]->Int32Value();
+  REFRESH_POSITION(that);
+})
+
+JSFUNCTION(ttyu_js_c, js_getx, {
+  THROW_IF_STOPPED(that);
+  NanReturnValue(NanNew<v8::Number>(that->x));
+})
+
+JSFUNCTION(ttyu_js_c, js_sety, {
+  THROW_IF_STOPPED(that);
+  that->y = args[0]->Int32Value();
+  REFRESH_POSITION(that);
+})
+
+JSFUNCTION(ttyu_js_c, js_gety, {
+  THROW_IF_STOPPED(that);
+  NanReturnValue(NanNew<v8::Number>(that->y));
+})
+
+JSFUNCTION(ttyu_js_c, js_goto, {
+  THROW_IF_STOPPED(that);
+  if (args.Length() == 2) {
+    that->x = args[0]->Int32Value();
+    that->y = args[1]->Int32Value();
+    REFRESH_POSITION(that);
+  }
+})

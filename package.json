@@ -4,7 +4,7 @@
   "description": "cross-platform terminal utilities",
   "main": "index.js",
   "scripts": {
-    "test": "./node_modules/.bin/mocha tests/run"
+    "test": "node tests/index.js"
   },
   "repository": {
     "type": "git",
@@ -25,15 +25,8 @@
   },
   "homepage": "https://github.com/clidejs/ttyutil",
   "dependencies": {
-    "nan": "1.7.0"
-  },
-  "devDependencies": {
-    "node-gyp": "1.0.2",
-    "pangyp": "2.1.0",
-    "chai": "2.1.2",
-    "mocha": "2.2.1",
-    "node-is": "0.5.2",
-    "it-each": "0.3.1"
+    "gethub": "^2.0.1",
+    "nan": "1.8.4"
   },
   "engines": {
     "node": ">=0.8.0"

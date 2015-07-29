@@ -6,13 +6,11 @@
  - fullscreen detection
  - improve examples
  - add pixel rendering (e.g. for pngs) functions
- - rework goto/write functionality
  - add X11 implementations to remove curses where possible
+ - add 256 color support to windows (using pixel rendering)
 
 ## 0.2.0 (WIP)
 
- - added `.pause()` function
- - renamed `.stop()` to `.destroy()`
  - all functions will throw now when the object was not started or already
  destroyed
  - added `.emit()` function
@@ -20,10 +18,6 @@
  - small bug fixes
  - added `.type` property to event objects
  - iojs support
-
-### TODO
-
- - fix segfault on unix
 
 ## 0.1.2
 

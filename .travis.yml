@@ -2,12 +2,12 @@ language: node_js
 os:
   - linux
   - osx
+env: TTYU_NCURSES_REBUILD=true TTYU_BUILD_DEBUG=true TTYU_CODE_DEBUG=true
 node_js:
-  - "0.8"
   - "0.10"
   - "0.12"
-  - "iojs-v1.6.4"
+  - "iojs-v2.3.0"
 install:
-  - npm install
+  - npm install --verbose
 script:
   - npm test

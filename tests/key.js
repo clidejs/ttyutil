@@ -82,19 +82,23 @@ var unix_required = [
     ttyu.WHICH.F24,
     ttyu.WHICH.BROWSER_REFRESH
 ];
-console.log("\r\ntest 'tests/key.js'\r");
-ttyu.start();
 
-(function check(i, cb) {
-    var listener = function(ev) {
-        assert.equal(ev.which, unix_required[i], " which should be " +
-            unix_required[i]);
-        ttyu.off(ttyu.EVENT.KEY, listener);
-        if(i <= 0) cb(); else check(i - 1, cb);
-    };
-    ttyu.on(ttyu.EVENT.KEY, listener);
-    ttyu.emit(ttyu.KeyEvent(unix_required[i], 0));
-})(unix_required.length - 1, function() {
-    ttyu.stop();
-    console.log("test 'tests/key.js' passed\r");
-});
+module.exports = function(cb) {
+    console.log("\r\ntest 'tests/key.js'\r");
+    ttyu.start();
+
+    (function check(i, cb) {
+        var listener = function(ev) {
+            assert.equal(ev.which, unix_required[i], " which should be " +
+                unix_required[i]);
+            ttyu.off(ttyu.EVENT.KEY, listener);
+            if(i <= 0) cb(); else check(i - 1, cb);
+        };
+        ttyu.on(ttyu.EVENT.KEY, listener);
+        ttyu.emit(ttyu.KeyEvent(unix_required[i], 0));
+    })(unix_required.length - 1, function() {
+        ttyu.stop();
+        console.log("test 'tests/key.js' passed\r");
+        cb();
+    });
+};

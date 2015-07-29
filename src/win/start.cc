@@ -24,12 +24,13 @@
 #include <ttyu.h>
 
 JSFUNCTION(ttyu_js_c, js_start, {
+  if (that->running) NanReturnUndefined();
   that->running = TRUE;
   that->stop = FALSE;
 
   DBG("::js_start()");
-  uv_mutex_init(&that->emitlock);
-  uv_barrier_init(&that->barrier, 2);
+  that->barrier = ALLOC(uv_barrier_t, 1);
+  uv_barrier_init(that->barrier, 2);
 
   that->hin = GetStdHandle(STD_INPUT_HANDLE);
   that->hout = GetStdHandle(STD_OUTPUT_HANDLE);
@@ -48,9 +49,5 @@ JSFUNCTION(ttyu_js_c, js_start, {
   DBG("  async queue start");
   NanAsyncQueueWorker(that->worker);
 
-  DBG("  wait barrier");
-  uv_barrier_wait(&that->barrier);
-  DBG("  destroy barrier");
-  uv_barrier_destroy(&that->barrier);
-  DBG("  destroyed barrier");
+  BARRIER_WAITKILL(that->barrier);
 })

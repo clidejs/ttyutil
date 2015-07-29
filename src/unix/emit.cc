@@ -63,7 +63,7 @@ JSFUNCTION(ttyu_js_c, js_emit, {
   }
 
   if (event.type != EVENT_NONE) {
-    MUTEX_LOCK(&that->ungetlock, {
+    MUTEX_LOCK(that->ungetlock, {
       that->unget_stack.push(event);
     });
   }

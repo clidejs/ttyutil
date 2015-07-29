@@ -6,7 +6,7 @@ env: TTYU_NCURSES_REBUILD=true TTYU_BUILD_DEBUG=true TTYU_CODE_DEBUG=true
 node_js:
   - "0.10"
   - "0.12"
-  - "iojs-v2.2.0"
+  - "iojs-v2.3.0"
 install:
   - npm install --verbose
 script:

@@ -24,6 +24,7 @@
 #include <ttyu.h>
 
 JSFUNCTION(ttyu_js_c, js_start, {
+  if (that->running) NanReturnUndefined();
   that->running = TRUE;
   that->stop = FALSE;
   that->worker_run = TRUE;
@@ -31,13 +32,19 @@ JSFUNCTION(ttyu_js_c, js_start, {
   that->x = getcurx(that->win);
   that->y = getcury(that->win);
 
-  uv_barrier_init(&that->barrier, 3);
-  uv_mutex_init(&that->emitstacklock);
-  uv_mutex_init(&that->ungetlock);
-  uv_cond_init(&that->condition);
+  that->curses_thread = ALLOC(uv_thread_t, 1);
+  that->barrier = ALLOC(uv_barrier_t, 1);
+  that->emitstacklock = ALLOC(uv_mutex_t, 1);
+  that->ungetlock = ALLOC(uv_mutex_t, 1);
+  that->condition = ALLOC(uv_cond_t, 1);
 
-  uv_thread_create(&that->curses_thread, ttyu_js_c::curses_thread_func, that);
+  uv_barrier_init(that->barrier, 3);
+  uv_mutex_init(that->emitstacklock);
+  uv_mutex_init(that->ungetlock);
+  uv_cond_init(that->condition);
+
+  uv_thread_create(that->curses_thread, ttyu_js_c::curses_thread_func, that);
   that->check_queue();
 
-  uv_barrier_wait(&that->barrier);
+  uv_barrier_wait(that->barrier);
 })

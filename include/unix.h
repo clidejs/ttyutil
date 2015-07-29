@@ -126,12 +126,12 @@ class ttyu_worker_c : public NanAsyncWorker {
   static int curses_threaded_func_thread(WINDOW *win, void *that);             \
   static int curses_threaded_func(WINDOW *win, ttyu_js_c *obj);                \
                                                                                \
-  uv_thread_t curses_thread;                                                   \
+  uv_thread_t *curses_thread;                                                  \
   WINDOW *win;                                                                 \
-  uv_barrier_t barrier;                                                        \
-  uv_mutex_t emitstacklock;                                                    \
-  uv_mutex_t ungetlock;                                                        \
-  uv_cond_t condition;                                                         \
+  uv_barrier_t *barrier;                                                       \
+  uv_mutex_t *emitstacklock;                                                   \
+  uv_mutex_t *ungetlock;                                                       \
+  uv_cond_t *condition;                                                        \
   int mode;                                                                    \
   int x;                                                                       \
   int y;                                                                       \

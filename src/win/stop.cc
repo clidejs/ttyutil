@@ -24,7 +24,7 @@
 #include <ttyu.h>
 
 JSFUNCTION(ttyu_js_c, js_stop, {
-  if(that->running) {
+  if (that->running) {
       DBG("::stop stopping");
       INPUT_RECORD in[1];
       KEY_EVENT_RECORD kev;

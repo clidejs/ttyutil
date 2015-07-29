@@ -47,7 +47,7 @@ JSFUNCTION(ttyu_js_c, js_gety, {
 
 JSFUNCTION(ttyu_js_c, js_goto, {
   THROW_IF_STOPPED(that);
-  if(args.Length() == 2) {
+  if (args.Length() == 2) {
     that->x = args[0]->Int32Value();
     that->y = args[1]->Int32Value();
     REFRESH_POSITION(that);

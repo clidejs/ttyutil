@@ -37,17 +37,17 @@ ttyu_js_c::~ttyu_js_c() {
 TTYU_INLINE int ttyu_get_colors() {
   FILE *pipe = popen("tput colors", "r");
   int out = 0;
-  if(!pipe) return out;
+  if (!pipe) return out;
   char buffer[64];
   std::string result = "";
-  while(!feof(pipe)) {
-    if(fgets(buffer, 64, pipe) != NULL)
+  while (!feof(pipe)) {
+    if (fgets(buffer, 64, pipe) != NULL)
       result += buffer;
   }
   int len = static_cast<int>(result.size());
-  for(int i = len; i > 0; --i) {
+  for (int i = len; i > 0; --i) {
     char d = result[i-1];
-    if(d >= '0' && d <= '9') {
+    if (d >= '0' && d <= '9') {
       out += (d - '0') * pow(10, len - i - 1);
     }
   }

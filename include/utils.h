@@ -54,15 +54,17 @@
 #define JSFUNCTION__(_1, _2, _3, ...) _3
 #define JSFUNCTION_STATIC(name, body) NAN_METHOD(name) {                       \
   NanScope();                                                                  \
-  if(1) body                                                                   \
+  if (1) body                                                                  \
   NanReturnUndefined();                                                        \
 }
 #define JSFUNCTION_PROTO(clas, name, body) NAN_METHOD(clas::name) {            \
   NanScope();                                                                  \
   clas *that = ObjectWrap::Unwrap<clas>(args.This());                          \
-  if(1) body                                                                   \
+  if (1) body                                                                  \
   NanReturnUndefined();                                                        \
 }
+
+#define ALLOC(c, n) reinterpret_cast<c *>(std::malloc(sizeof(c) * (n)));
 
 #define EMIT_EVENT_OBJECT(event, cb) do {                                      \
   v8::Local<v8::Object> __obj = NanNew<v8::Object>();                          \

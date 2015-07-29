@@ -31,19 +31,26 @@ var util = module.exports = {
     });
   },
 
-  rmDirRFSync: function(p) {
+  rmRecursiveSync: function(p) {
     var files = [];
-    if( fs.existsSync(p) ) {
+    if(fs.existsSync(p)) {
       files = fs.readdirSync(p);
       for(var index = 0, file; index < files.length; ++index) {
         file = path.join(p, files[index]);
         if(fs.lstatSync(file).isDirectory()) { // recurse
-          util.rmDirRFSync(file);
+          util.rmRecursiveSync(file);
         } else { // delete file
           fs.unlinkSync(file);
         }
       }
       fs.rmdirSync(p);
+    }
+  },
+
+  mkdirRecursiveSync: function(p) {
+    if(!fs.existsSync(p)) {
+      util.mkdirRecursiveSync(path.join(p, ".."));
+      fs.mkdirSync(p);
     }
   }
 };

@@ -30,14 +30,14 @@ void ttyu_js_c::check_queue() {
 }
 
 void ttyu_worker_c::Execute() {
-  MUTEX_LOCK(&obj->emitstacklock,{
+  MUTEX_LOCK(obj->emitstacklock, {
     if (obj->worker_run) {
       obj->worker_run = FALSE;
-      uv_barrier_wait(&obj->barrier);
+      uv_barrier_wait(obj->barrier);
     }
 
     while (obj->emit_stack.size() == 0) {
-      uv_cond_wait(&obj->condition, &obj->emitstacklock);
+      uv_cond_wait(obj->condition, obj->emitstacklock);
     }
 
     SDBG("::Execute %zu", obj->emit_stack.size());

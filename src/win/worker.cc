@@ -32,7 +32,7 @@ bool ttyu_worker_c::execute(const ttyu_worker_c::ttyu_progress_c& progress,
   INPUT_RECORD ir[WIN_BUFFER_SIZE];
 
   ReadConsoleInput(obj->hin, ir, WIN_BUFFER_SIZE, &readed);
-  if (obj->stop) { return FALSE; } // exit
+  if (obj->stop) { return FALSE; }  // exit
   for (i = 0; i < readed; ++i) {
     if (MOUSE_EVENT == ir[i].EventType) {
       type = MOUSE_EVENT;
@@ -69,7 +69,7 @@ bool ttyu_worker_c::execute(const ttyu_worker_c::ttyu_progress_c& progress,
         }
         break;
       case KEY_EVENT: {
-        char *ch = reinterpret_cast<char *>(std::malloc(sizeof(char) * 3));
+        char *ch = ALLOC(char, 3);
         wcstombs(ch, &(ir[i].Event.KeyEvent.uChar.UnicodeChar),
           sizeof(char) * 2);
         ch[2] = '\0';
@@ -103,8 +103,10 @@ void ttyu_worker_c::handle(ttyu_event_t *event) {
 }
 
 void ttyu_worker_c::Execute() {
+  DBG("::Execute");
   ttyu_progress_c progress(this);
-  uv_barrier_wait(&obj_->barrier);
+  BARRIER_WAITKILL(obj_->barrier);
+  DBG("  barrier_waited");
   // loop execute until it returns false (error)
   while (execute(progress, obj_)) continue;
 }

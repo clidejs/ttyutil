@@ -38,12 +38,12 @@ void ttyu_event_create_resize(ttyu_event_t *event) {
 void ttyu_event_create_key(ttyu_event_t *event, int ctrl, char *c,
     int code, int which) {
   size_t len = strlen(c);
-  char *ch = reinterpret_cast<char *>(std::malloc(sizeof(char) * (len + 1)));
+  char *ch = ALLOC(char, len + 1);
   memcpy(ch, c, sizeof(char) * len);
   ch[len] = '\0';
 
   event->type = EVENT_KEY;
-  event->key = reinterpret_cast<ttyu_key_t *>(std::malloc(sizeof(ttyu_key_t)));
+  event->key = ALLOC(ttyu_key_t, 1);
   event->mouse = NULL;
 
   event->key->ctrl = ctrl;
@@ -56,8 +56,7 @@ void ttyu_event_create_mouse(ttyu_event_t *event, int type, int button, int x,
     int y, int ctrl) {
   event->type = type;
   event->key = NULL;
-  event->mouse =
-      reinterpret_cast<ttyu_mouse_t *>(std::malloc(sizeof(ttyu_mouse_t)));
+  event->mouse = ALLOC(ttyu_mouse_t, 1);
 
   event->mouse->button = button;
   event->mouse->x = x;

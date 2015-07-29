@@ -24,18 +24,22 @@
 #include <ttyu.h>
 
 JSFUNCTION(ttyu_js_c, js_stop, {
-  if(that->running) {
+  if (that->running) {
     that->running = FALSE;
     that->stop = TRUE;
 
-    uv_thread_join(&that->curses_thread);
-    uv_mutex_destroy(&that->emitstacklock);
-    uv_mutex_destroy(&that->ungetlock);
-    uv_cond_destroy(&that->condition);
-    uv_barrier_destroy(&that->barrier);
+    uv_thread_join(that->curses_thread);
+    uv_mutex_destroy(that->emitstacklock);
+    uv_mutex_destroy(that->ungetlock);
+    uv_cond_destroy(that->condition);
+    uv_barrier_destroy(that->barrier);
+    free(that->curses_thread);
+    free(that->emitstacklock);
+    free(that->ungetlock);
+    free(that->condition);
+    free(that->barrier);
+
     endwin();
     delwin(that->win);
-
-    DBG("window deleted");
   }
 })

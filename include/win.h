@@ -67,7 +67,7 @@ class ttyu_worker_c : public NanAsyncWorker {
     DBG("::~ttyu_worker_c");
     uv_mutex_destroy(async_lock);
     ttyu_event_destroy(asyncdata_);
-    if(asyncdata_)
+    if (asyncdata_)
       free(asyncdata_);
     DBG("::~ttyu_worker_c freed");
   }
@@ -117,7 +117,7 @@ class ttyu_worker_c : public NanAsyncWorker {
     DBG("::send_ released lock");
 
     ttyu_event_destroy(old_event);
-    if(old_event != NULL)
+    if (old_event != NULL)
       free(old_event);
     DBG("  uv_async_send");
     uv_async_send(async);
@@ -148,9 +148,13 @@ class ttyu_worker_c : public NanAsyncWorker {
   DWORD height;                                                                \
   DWORD curx;                                                                  \
   DWORD cury;                                                                  \
-  uv_mutex_t emitlock;                                                         \
-  uv_barrier_t barrier;                                                        \
+  uv_barrier_t *barrier;                                                       \
   ttyu_worker_c *worker
+
+#define BARRIER_WAITKILL(b) if (uv_barrier_wait(b) > 0) {                      \
+    uv_barrier_destroy(b);                                                     \
+    free(b);                                                                   \
+  }
 
 bool ttyu_win_scr_update(ttyu_js_c *obj, bool initial);
 int ttyu_win_which(DWORD code);

@@ -5,7 +5,7 @@ var util = require("../util");
 
 module.exports = function(ENV, download, cb) {
   if(download) {
-    util.rmDirRFSync(ENV.NCURSES_PATH);
+    util.rmRecursiveSync(ENV.NCURSES_PATH);
     console.log("    [preinstall/ncurses] cloning from " + ENV.NCURSES_URL);
     gethub("mirror", "ncurses", "master", ENV.NCURSES_PATH, function(err) {
       if(err) throw err;

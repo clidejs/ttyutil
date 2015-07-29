@@ -30,11 +30,11 @@ int ttyu_js_c::curses_threaded_func(WINDOW *win, ttyu_js_c *obj) {
   event.type = EVENT_NONE;
 
   if (c == ERR) {
-    uv_mutex_lock(&obj->ungetlock);
+    uv_mutex_lock(obj->ungetlock);
     if (!obj->unget_stack.empty()) {
       ttyu_event_t ev = obj->unget_stack.front();
       obj->unget_stack.pop();
-      uv_mutex_unlock(&obj->ungetlock);
+      uv_mutex_unlock(obj->ungetlock);
       switch (ev.type) {
         case EVENT_KEY:
           ungetch(ev.key->code);
@@ -96,7 +96,7 @@ int ttyu_js_c::curses_threaded_func(WINDOW *win, ttyu_js_c *obj) {
           break;
       }
     } else {
-      uv_mutex_unlock(&obj->ungetlock);
+      uv_mutex_unlock(obj->ungetlock);
     }
     return 0;
   } else if (c == KEY_RESIZE) {
@@ -192,9 +192,9 @@ int ttyu_js_c::curses_threaded_func(WINDOW *win, ttyu_js_c *obj) {
   }
 
   if (event.type != EVENT_NONE) {
-    MUTEX_LOCK(&obj->emitstacklock, {
+    MUTEX_LOCK(obj->emitstacklock, {
       obj->emit_stack.push_back(event);
-      uv_cond_signal(&obj->condition);
+      uv_cond_signal(obj->condition);
     });
   }
   return 0;
@@ -202,10 +202,10 @@ int ttyu_js_c::curses_threaded_func(WINDOW *win, ttyu_js_c *obj) {
 
 int ttyu_js_c::curses_threaded_func_thread(WINDOW *win, void *that) {
   ttyu_js_c *obj = static_cast<ttyu_js_c *>(that);
-  uv_barrier_wait(&obj->barrier);
-  while(curses_threaded_func(win, obj) == 0 && obj->running) usleep(100);
+  uv_barrier_wait(obj->barrier);
+  while (curses_threaded_func(win, obj) == 0 && obj->running) usleep(100);
   return 0;
-};
+}
 
 void ttyu_js_c::curses_thread_func(void *that) {
   ttyu_js_c *obj = static_cast<ttyu_js_c *>(that);
